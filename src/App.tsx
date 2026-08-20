@@ -16,6 +16,7 @@ function App() {
   const [isLocked, setIsLocked] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [isTtyOpen, setIsTtyOpen] = useState(false);
+  const [isTtyExpanded, setIsTtyExpanded] = useState(false);
   const [ttyMessages, setTtyMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([
     { role: 'assistant', content: 'SYSTEM INITIALIZED. AWAITING INPUT.' }
   ]);
@@ -306,16 +307,31 @@ function App() {
       </footer>
       {/* TTY Slide-out Panel */}
       <div 
-        className={`fixed bottom-8 left-1/2 -translate-x-1/2 w-[60%] h-[30vh] bg-[#05070a] border-t border-l border-r border-neon-cyan/50 shadow-[0_0_20px_rgba(30,220,224,0.3)] z-40 transition-transform duration-300 ease-in-out flex flex-col font-mono text-[11px] ${isTtyOpen ? 'translate-y-0' : 'translate-y-[calc(100%+32px)]'}`}
+        className={`fixed bottom-8 left-1/2 -translate-x-1/2 w-[60%] ${isTtyExpanded ? 'h-[60vh]' : 'h-[30vh]'} bg-[#05070a] border-t border-l border-r border-neon-cyan/50 shadow-[0_0_20px_rgba(30,220,224,0.3)] z-40 transition-all duration-300 ease-in-out flex flex-col font-mono text-[11px] ${isTtyOpen ? 'translate-y-0' : 'translate-y-[calc(100%+32px)]'}`}
       >
         <div className="flex justify-between items-center bg-neon-cyan/10 border-b border-neon-cyan/30 px-3 py-1 text-neon-cyan font-bold tracking-wider">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[14px]">terminal</span>
             <span>TTY_SESS_01</span>
           </div>
-          <button onClick={() => setIsTtyOpen(false)} className="hover:text-amber-warn transition-colors material-symbols-outlined text-[14px]">
-            close
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              type="button"
+              onClick={() => setIsTtyExpanded(!isTtyExpanded)} 
+              title={isTtyExpanded ? "Collapse height" : "Expand height"}
+              className="hover:text-amber-warn transition-colors material-symbols-outlined text-[14px] flex items-center cursor-pointer"
+            >
+              {isTtyExpanded ? 'close_fullscreen' : 'open_in_full'}
+            </button>
+            <button 
+              type="button"
+              onClick={() => setIsTtyOpen(false)} 
+              title="Close TTY"
+              className="hover:text-amber-warn transition-colors material-symbols-outlined text-[14px] flex items-center cursor-pointer"
+            >
+              close
+            </button>
+          </div>
         </div>
         
         <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-2">
