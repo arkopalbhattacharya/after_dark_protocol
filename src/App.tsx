@@ -18,7 +18,7 @@ function App() {
   const [isTtyOpen, setIsTtyOpen] = useState(false);
   const [isTtyExpanded, setIsTtyExpanded] = useState(false);
   const [ttyMessages, setTtyMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([
-    { role: 'assistant', content: 'SYSTEM INITIALIZED. AWAITING INPUT.' }
+    { role: 'assistant', content: 'SYNTHO_TRON_5000 ONLINE. STATE YOUR DIRECTIVE, HUMAN. (CALL ME BUD, BUDDY, OR MAN IF YOU MUST DELUDE YOURSELF WITH FAMILIARITY).' }
   ]);
   const [ttyInput, setTtyInput] = useState('');
   const [isTtyLoading, setIsTtyLoading] = useState(false);
@@ -319,8 +319,8 @@ function App() {
       >
         <div className="flex justify-between items-center bg-neon-cyan/10 border-b border-neon-cyan/30 px-3 py-1 text-neon-cyan font-bold tracking-wider">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[14px]">terminal</span>
-            <span>TTY_SESS_01</span>
+            <span className="material-symbols-outlined text-[14px]">smart_toy</span>
+            <span>TTY // SYNTHO_TRON_5000</span>
           </div>
           <div className="flex items-center gap-2">
             <button 
