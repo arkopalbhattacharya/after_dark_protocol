@@ -128,6 +128,10 @@ function App() {
             <span className="material-symbols-outlined text-[16px]">edit_document</span>
             FREEFORM
           </button>
+          <button onClick={() => setActiveCategory('DUTY_ROSTER')} className={`font-label-lg hover:text-neon-cyan hover:bg-surface-variant/20 transition-all px-2 py-1 flex items-center gap-2 ${activeCategory === 'DUTY_ROSTER' ? 'text-neon-cyan bg-surface-variant/20' : 'text-on-surface-variant'}`}>
+            <span className="material-symbols-outlined text-[16px]">task_alt</span>
+            DUTY_ROSTER
+          </button>
         </nav>
         <div className="flex items-center gap-4 text-neon-cyan">
           <span className="font-label-sm border border-neon-cyan/50 px-2 py-1 text-neon-cyan glow-text shadow-[0_0_10px_rgba(30,220,224,0.3)]">ONLINE // STANDALONE_NODE</span>
@@ -186,6 +190,10 @@ function App() {
                   onClick={() => setFilterCategory('FREEFORM_LOG')} 
                   className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'FREEFORM_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
                 >FREE</button>
+                <button 
+                  onClick={() => setFilterCategory('DUTY_ROSTER')} 
+                  className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'DUTY_ROSTER' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                >DUTY</button>
               </div>
               <div className="flex-1 p-0 overflow-y-auto">
                 <div className="divide-y divide-surface-container-high/50">

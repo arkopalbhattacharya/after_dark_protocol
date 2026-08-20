@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { CategoryType, AIExperimentPayload, CaffeineLogPayload, ActivityLogPayload, FreeformLogPayload } from '../types';
+import type { CategoryType, AIExperimentPayload, CaffeineLogPayload, ActivityLogPayload, FreeformLogPayload, DutyRosterPayload } from '../types';
 import settings from '../config/settings.json';
 
 interface FormsProps {
@@ -16,6 +16,9 @@ export function LogForms({ category, onSubmit }: FormsProps) {
   }
   if (category === 'ACTIVITY_LOG') {
     return <ActivityForm onSubmit={onSubmit} />;
+  }
+  if (category === 'DUTY_ROSTER') {
+    return <DutyRosterForm onSubmit={onSubmit} />;
   }
   return <FreeformForm onSubmit={onSubmit} />;
 }
@@ -165,6 +168,74 @@ function ActivityForm({ onSubmit }: { onSubmit: (data: ActivityLogPayload) => vo
         />
       </div>
       <button type="submit" className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 mt-4 hover:bg-primary-container glitch-hover">[ TRANSMIT_LOG // COMMIT ]</button>
+    </form>
+  );
+}
+
+function DutyRosterForm({ onSubmit }: { onSubmit: (data: DutyRosterPayload) => void }) {
+  const [data, setData] = useState<DutyRosterPayload>({
+    taskDescription: '',
+    status: 'IN_PROGRESS',
+    priority: 'HIGH',
+    assignedOfficer: 'OPERATOR_01',
+    deadlineEst: ''
+  });
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(data); }} className="space-y-4 font-body-md text-on-surface">
+      <div>
+        <label className="block text-neon-cyan mb-1 font-label-sm">TASK_DESCRIPTION</label>
+        <textarea 
+          required 
+          value={data.taskDescription} 
+          onChange={e => setData({...data, taskDescription: e.target.value})} 
+          className="w-full bg-surface-container-high border border-neon-cyan/30 text-neon-cyan p-2 outline-none focus:border-neon-cyan h-20"
+          placeholder="Describe operational duty or mission task..."
+        />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="relative z-30">
+          <label className="block text-neon-cyan mb-1 font-label-sm">STATUS</label>
+          <CustomSelect 
+            value={data.status} 
+            onChange={val => setData({...data, status: val})} 
+            options={settings.dutyStatuses} 
+          />
+        </div>
+        <div className="relative z-20">
+          <label className="block text-neon-cyan mb-1 font-label-sm">PRIORITY</label>
+          <CustomSelect 
+            value={data.priority} 
+            onChange={val => setData({...data, priority: val})} 
+            options={settings.dutyPriorities} 
+          />
+        </div>
+      </div>
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <label className="block text-neon-cyan mb-1 font-label-sm">ASSIGNED_OFFICER</label>
+          <input 
+            value={data.assignedOfficer} 
+            onChange={e => setData({...data, assignedOfficer: e.target.value})} 
+            type="text" 
+            className="w-full bg-surface-container-high border border-neon-cyan/30 text-neon-cyan p-2 outline-none focus:border-neon-cyan" 
+            placeholder="e.g. OPERATOR_01" 
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block text-neon-cyan mb-1 font-label-sm">DEADLINE_EST</label>
+          <input 
+            value={data.deadlineEst} 
+            onChange={e => setData({...data, deadlineEst: e.target.value})} 
+            type="text" 
+            className="w-full bg-surface-container-high border border-neon-cyan/30 text-neon-cyan p-2 outline-none focus:border-neon-cyan" 
+            placeholder="e.g. 04:00 HRS" 
+          />
+        </div>
+      </div>
+      <button type="submit" className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 mt-4 hover:bg-primary-container glitch-hover">
+        [ TRANSMIT_LOG // COMMIT ]
+      </button>
     </form>
   );
 }

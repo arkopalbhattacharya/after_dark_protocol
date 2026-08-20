@@ -1,4 +1,4 @@
-export type CategoryType = 'AI_EXPERIMENT' | 'CAFFEINE_LOG' | 'ACTIVITY_LOG' | 'FREEFORM_LOG';
+export type CategoryType = 'AI_EXPERIMENT' | 'CAFFEINE_LOG' | 'ACTIVITY_LOG' | 'FREEFORM_LOG' | 'DUTY_ROSTER';
 
 export interface ProtocolLogEntry {
   id: string;
@@ -33,4 +33,12 @@ export interface ActivityLogPayload {
 
 export interface FreeformLogPayload {
   rawContent: string;
+}
+
+export interface DutyRosterPayload {
+  taskDescription: string;
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'STANDBY' | string;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | string;
+  assignedOfficer?: string;
+  deadlineEst?: string;
 }

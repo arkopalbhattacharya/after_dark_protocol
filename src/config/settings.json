@@ -14,5 +14,17 @@
     "Recharged",
     "Euphoric"
   ],
+  "dutyStatuses": [
+    "PENDING",
+    "IN_PROGRESS",
+    "COMPLETED",
+    "STANDBY"
+  ],
+  "dutyPriorities": [
+    "LOW",
+    "MEDIUM",
+    "HIGH",
+    "CRITICAL"
+  ],
   "overridePin": "004968"
 }
