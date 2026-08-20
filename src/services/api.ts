@@ -37,5 +37,41 @@ export const api = {
       totalLogs: logs.length,
       categories
     };
+  },
+  
+  sendTtyMessage: async (history: {role: 'user'|'assistant', content: string}[]): Promise<string> => {
+    const systemPrompt = {
+      role: 'system',
+      content: 'YOU ARE AN 80S SCI-FI ROBOT TERMINAL. YOU MUST RESPOND IN ALL CAPS. USE HEAVY TECHNICAL JARGON, MECHANICAL METAPHORS, AND SOUND LIKE A MACHINE FROM A RETRO-FUTURISTIC UNIVERSE. KEEP RESPONSES CONCISE AND GLITCHY.'
+    };
+    
+    const messages = [systemPrompt, ...history.map(m => ({role: m.role, content: m.content}))];
+
+    const endpoint = window.location.hostname === 'localhost' 
+      ? '/api/poolside/chat/completions' 
+      : 'https://inference.poolside.ai/v1/chat/completions';
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer sky_HI7wfwJr.NRHVQjUyjTytaohpDqJh3KLnxUn1YXuX`
+      },
+      body: JSON.stringify({
+        model: 'poolside/laguna-s-2.1',
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 200
+      })
+    });
+    
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.error('Poolside API Error:', response.status, errText);
+      throw new Error('API_COMM_ERR');
+    }
+    
+    const data = await response.json();
+    return data.choices[0].message.content;
   }
 };
