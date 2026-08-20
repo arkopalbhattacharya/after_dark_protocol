@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Journal Portal Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline": "#859494",
+                      "on-error": "#690005",
+                      "on-surface-variant": "#bac9c9",
+                      "on-secondary-container": "#694600",
+                      "primary-fixed": "#52f9fc",
+                      "surface": "#10141a",
+                      "surface-container": "#1c2026",
+                      "surface-dim": "#10141a",
+                      "obsidian-surface": "#1a1f26",
+                      "error": "#ffb4ab",
+                      "on-primary": "#003738",
+                      "on-tertiary-container": "#aa0017",
+                      "on-primary-fixed": "#002021",
+                      "background": "#10141a",
+                      "neon-cyan": "#1edce0",
+                      "on-tertiary-fixed": "#410004",
+                      "on-background": "#dfe2eb",
+                      "inverse-on-surface": "#2d3137",
+                      "on-error-container": "#ffdad6",
+                      "terminal-green": "#33ff00",
+                      "tertiary-fixed": "#ffdad7",
+                      "on-surface": "#dfe2eb",
+                      "tertiary-fixed-dim": "#ffb3ad",
+                      "primary-fixed-dim": "#1ddce0",
+                      "surface-variant": "#31353c",
+                      "on-tertiary": "#68000a",
+                      "primary": "#52f9fd",
+                      "surface-container-lowest": "#0a0e14",
+                      "inverse-primary": "#00696b",
+                      "amber-warn": "#fdaf00",
+                      "obsidian-elevated": "#12171f",
+                      "tertiary-container": "#ffb4ae",
+                      "surface-container-high": "#262a31",
+                      "error-container": "#93000a",
+                      "outline-variant": "#3b494a",
+                      "secondary-fixed": "#ffddaf",
+                      "on-tertiary-fixed-variant": "#930013",
+                      "primary-container": "#1edce0",
+                      "secondary-container": "#fdaf00",
+                      "tertiary": "#ffdbd7",
+                      "surface-container-low": "#181c22",
+                      "on-secondary-fixed-variant": "#614000",
+                      "obsidian-base": "#0a0e14",
+                      "on-primary-fixed-variant": "#004f51",
+                      "on-secondary": "#432c00",
+                      "on-primary-container": "#005c5e",
+                      "on-secondary-fixed": "#281800",
+                      "surface-tint": "#1ddce0",
+                      "inverse-surface": "#dfe2eb",
+                      "surface-container-highest": "#31353c",
+                      "surface-bright": "#353940",
+                      "secondary-fixed-dim": "#ffba41",
+                      "secondary": "#ffd392"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "panel-padding": "20px",
+                      "unit": "4px",
+                      "stack-sm": "8px",
+                      "margin": "24px",
+                      "gutter": "16px",
+                      "stack-md": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Space Grotesk"
+                      ],
+                      "headline-md": [
+                              "Space Grotesk"
+                      ],
+                      "label-lg": [
+                              "Space Mono"
+                      ],
+                      "label-sm": [
+                              "Space Mono"
+                      ],
+                      "body-lg": [
+                              "Space Mono"
+                      ],
+                      "headline-sm": [
+                              "Space Grotesk"
+                      ],
+                      "body-md": [
+                              "Space Mono"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "42px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "28px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-lg": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.15em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-sm": [
+                              "10px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+      </script>
+<style>
+        body {
+            background-color: #05070a;
+            color: #dfe2eb;
+            overflow-x: hidden;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .terminal-panel {
+            background-color: #12171f;
+            border: 1px solid rgba(30, 220, 224, 0.2);
+            box-shadow: 0 0 10px rgba(30, 220, 224, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .terminal-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(30, 220, 224, 0.03) 2px,
+                rgba(30, 220, 224, 0.03) 4px
+            );
+            pointer-events: none;
+        }
+
+        .terminal-panel-active {
+            border: 1px solid rgba(30, 220, 224, 0.5);
+            box-shadow: 0 0 15px rgba(30, 220, 224, 0.2);
+        }
+
+        .terminal-header {
+            background-color: #0a0e14;
+            border-bottom: 1px solid rgba(30, 220, 224, 0.2);
+            padding: 4px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .blinking-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1em;
+            background-color: #1edce0;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .glitch-hover:hover {
+            transform: translate(2px, 0);
+            box-shadow: 0 0 15px #1edce0;
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 5px rgba(30, 220, 224, 0.5);
+        }
+        
+        .amber-text {
+            color: #fdaf00;
+            text-shadow: 0 0 5px rgba(253, 175, 0, 0.5);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0e14;
+            border-left: 1px solid rgba(30, 220, 224, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(30, 220, 224, 0.3);
+            border-radius: 0;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(30, 220, 224, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-obsidian-base font-body-md text-body-md text-on-surface antialiased h-screen overflow-hidden flex flex-col">
+<div class="scanlines"></div>
+<!-- TopAppBar -->
+<header class="bg-surface-container-low border-b border-outline-variant shadow-[0_0_12px_rgba(30,220,224,0.15)] flex justify-between items-center w-full px-margin py-2 h-16 shrink-0 z-30 relative">
+<div class="font-headline-sm text-headline-sm font-bold text-neon-cyan tracking-tighter glow-text flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">terminal</span>
+            JOURNAL_PORTAL_v1.0
+        </div>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant font-label-lg hover:text-neon-cyan hover:bg-surface-variant/20 transition-all px-2 py-1 flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[16px]">science</span>
+                AI Experiment
+            </a>
+<a class="text-on-surface-variant font-label-lg hover:text-neon-cyan hover:bg-surface-variant/20 transition-all px-2 py-1 flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[16px]">local_cafe</span>
+                Coffee Brew
+            </a>
+<a class="text-on-surface-variant font-label-lg hover:text-neon-cyan hover:bg-surface-variant/20 transition-all px-2 py-1 flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-[16px]">list_alt</span>
+                Activity Log
+            </a>
+</nav>
+<div class="flex items-center gap-4 text-neon-cyan">
+<button class="hover:text-neon-cyan hover:bg-surface-variant/20 transition-all p-1">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="hover:text-neon-cyan hover:bg-surface-variant/20 transition-all p-1">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative z-20">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col items-center bg-surface-container-lowest border-r border-outline-variant w-20 py-gutter shrink-0 h-full">
+<div class="mb-8 flex flex-col items-center gap-1 group relative">
+<div class="w-10 h-10 border border-neon-cyan flex items-center justify-center bg-surface-container-high text-neon-cyan">
+<span class="material-symbols-outlined">account_circle</span>
+</div>
+<!-- Tooltip -->
+<div class="absolute left-14 bg-obsidian-elevated border border-neon-cyan/30 px-2 py-1 font-label-sm text-neon-cyan opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                    ADM_USR_01
+                </div>
+</div>
+<nav class="flex-1 flex flex-col gap-4 w-full items-center">
+<a class="w-full flex justify-center py-3 bg-primary-container/10 text-neon-cyan border-r-2 border-neon-cyan relative group" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<div class="absolute left-14 bg-obsidian-elevated border border-neon-cyan/30 px-2 py-1 font-label-sm text-neon-cyan opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                        Dashboard
+                    </div>
+</a>
+<a class="w-full flex justify-center py-3 text-outline hover:text-primary-fixed-dim hover:bg-surface-container-high transition-colors relative group" href="#">
+<span class="material-symbols-outlined">description</span>
+<div class="absolute left-14 bg-obsidian-elevated border border-neon-cyan/30 px-2 py-1 font-label-sm text-neon-cyan opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                        Logs
+                    </div>
+</a>
+<a class="w-full flex justify-center py-3 text-outline hover:text-primary-fixed-dim hover:bg-surface-container-high transition-colors relative group" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<div class="absolute left-14 bg-obsidian-elevated border border-neon-cyan/30 px-2 py-1 font-label-sm text-neon-cyan opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                        Command
+                    </div>
+</a>
+<a class="w-full flex justify-center py-3 text-outline hover:text-primary-fixed-dim hover:bg-surface-container-high transition-colors relative group" href="#">
+<span class="material-symbols-outlined">lan</span>
+<div class="absolute left-14 bg-obsidian-elevated border border-neon-cyan/30 px-2 py-1 font-label-sm text-neon-cyan opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                        Network
+                    </div>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-4 w-full items-center">
+<button class="w-10 h-10 bg-neon-cyan text-obsidian-base flex items-center justify-center glitch-hover transition-all">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+<a class="w-full flex justify-center py-3 text-outline hover:text-primary-fixed-dim hover:bg-surface-container-high transition-colors relative group" href="#">
+<span class="material-symbols-outlined">power_settings_new</span>
+<div class="absolute left-14 bg-obsidian-elevated border border-neon-cyan/30 px-2 py-1 font-label-sm text-neon-cyan opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                        Logout
+                    </div>
+</a>
+</div>
+</aside>
+<!-- Main Content Area (Bento Grid) -->
+<main class="flex-1 overflow-y-auto p-gutter md:p-margin">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-[minmax(150px,auto)] h-full">
+<!-- Primary Data Entry Terminal (Spans 2 cols, 2 rows) -->
+<div class="terminal-panel terminal-panel-active md:col-span-2 md:row-span-2 flex flex-col">
+<div class="terminal-header font-label-sm text-label-sm text-neon-cyan">
+<span>[SYS_CMD_IN] // ROOT</span>
+<span>PID: 4402</span>
+</div>
+<div class="flex-1 p-panel-padding flex flex-col font-body-md text-on-surface">
+<div class="flex-1 overflow-y-auto space-y-2 mb-4">
+<p><span class="text-outline">14:00:10</span> <span class="text-neon-cyan">&gt;</span> INITIALIZING JOURNAL PROTOCOL...</p>
+<p><span class="text-outline">14:00:11</span> <span class="text-neon-cyan">&gt;</span> MODULES LOADED: 4/4</p>
+<p><span class="text-outline">14:00:12</span> <span class="text-neon-cyan">&gt;</span> WAITING FOR INPUT...</p>
+<p class="amber-text"><span class="text-outline">14:00:15</span> <span class="text-neon-cyan">&gt;</span> WARN: CAFFEINE LEVELS SUB-OPTIMAL</p>
+</div>
+<div class="mt-auto border-t border-neon-cyan/20 pt-2 flex items-center">
+<span class="text-neon-cyan mr-2 font-bold">[SYS_CMD_IN]&gt;</span>
+<input autofocus="" class="bg-transparent border-none outline-none focus:ring-0 text-neon-cyan flex-1 font-body-md p-0" placeholder="ENTER LOG ENTRY..." type="text"/>
+<span class="blinking-cursor"></span>
+</div>
+</div>
+<div class="bg-obsidian-elevated border-t border-neon-cyan/20 px-2 py-1 flex justify-between items-center font-label-sm text-label-sm text-outline">
+<span>TX/RX: 104Kbps</span>
+<div class="flex gap-1">
+<div class="w-1 h-2 bg-neon-cyan"></div>
+<div class="w-1 h-2 bg-neon-cyan"></div>
+<div class="w-1 h-2 bg-neon-cyan/30"></div>
+</div>
+</div>
+</div>
+<!-- Recent Logs (Spans 1 col, 2 rows) -->
+<div class="terminal-panel lg:col-span-1 md:row-span-2 flex flex-col">
+<div class="terminal-header font-label-sm text-label-sm text-outline">
+<span>REC_LOGS</span>
+<span>DB_SYNC: OK</span>
+</div>
+<div class="flex-1 p-0 overflow-y-auto">
+<div class="divide-y divide-surface-container-high/50">
+<div class="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group">
+<div class="font-label-sm text-label-sm text-neon-cyan mb-1 group-hover:glow-text">SYS_MAINTENANCE</div>
+<div class="text-sm truncate text-on-surface-variant">Cleared cache buffers.</div>
+<div class="text-[10px] text-outline mt-1 text-right">10m ago</div>
+</div>
+<div class="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group bg-surface-container-lowest/50">
+<div class="font-label-sm text-label-sm text-neon-cyan mb-1 group-hover:glow-text">AI_MODEL_UPDATE</div>
+<div class="text-sm truncate text-on-surface-variant">Weights adjusted (+0.4)</div>
+<div class="text-[10px] text-outline mt-1 text-right">1h ago</div>
+</div>
+<div class="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group">
+<div class="font-label-sm text-label-sm text-neon-cyan mb-1 group-hover:glow-text">COFFEE_PROCUREMENT</div>
+<div class="text-sm truncate text-on-surface-variant">V60 extraction successful.</div>
+<div class="text-[10px] text-outline mt-1 text-right">3h ago</div>
+</div>
+<div class="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group bg-surface-container-lowest/50">
+<div class="font-label-sm text-label-sm text-neon-cyan mb-1 group-hover:glow-text">PROJECT_X_DRAFT</div>
+<div class="text-sm truncate text-on-surface-variant">Initial schemas defined.</div>
+<div class="text-[10px] text-outline mt-1 text-right">Yesterday</div>
+</div>
+</div>
+</div>
+</div>
+<!-- System Stats (Spans 1 col, 1 row) -->
+<div class="terminal-panel lg:col-span-1 flex flex-col">
+<div class="terminal-header font-label-sm text-label-sm text-outline">
+<span>SYS_RESOURCES</span>
+<span>MEM: 44%</span>
+</div>
+<div class="flex-1 p-panel-padding flex flex-col justify-center gap-4">
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span>CPU_LOAD</span>
+<span class="text-neon-cyan">72%</span>
+</div>
+<div class="h-2 w-full bg-surface-container flex gap-[2px]">
+<div class="h-full bg-neon-cyan w-[10%]"></div>
+<div class="h-full bg-neon-cyan w-[10%]"></div>
+<div class="h-full bg-neon-cyan w-[10%]"></div>
+<div class="h-full bg-neon-cyan w-[10%]"></div>
+<div class="h-full bg-neon-cyan w-[10%]"></div>
+<div class="h-full bg-neon-cyan w-[10%]"></div>
+<div class="h-full bg-neon-cyan w-[10%]"></div>
+<div class="h-full bg-surface-container-high w-[10%]"></div>
+<div class="h-full bg-surface-container-high w-[10%]"></div>
+<div class="h-full bg-surface-container-high w-[10%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span>NET_UPLINK</span>
+<span class="amber-text">98%</span>
+</div>
+<div class="h-2 w-full bg-surface-container flex gap-[2px]">
+<div class="h-full bg-amber-warn w-[10%] shadow-[0_0_5px_#fdaf00]"></div>
+<div class="h-full bg-amber-warn w-[10%] shadow-[0_0_5px_#fdaf00]"></div>
+<div class="h-full bg-amber-warn w-[10%] shadow-[0_0_5px_#fdaf00]"></div>
+<div class="h-full bg-amber-warn w-[10%] shadow-[0_0_5px_#fdaf00]"></div>
+<div class="h-full bg-amber-warn w-[10%] shadow-[0_0_5px_#fdaf00]"></div>
+<div class="h-full bg-amber-warn w-[10%] shadow-[0_0_5px_#fdaf00]"></div>
+<div class="h-full bg-amber-warn w-[10%] shadow-[0_0_5px_#fdaf00]"></div>
+<div class="h-full bg-amber-warn w-[10%] shadow-[0_0_5px_#fdaf00]"></div>
+<div class="h-full bg-amber-warn w-[10%] shadow-[0_0_5px_#fdaf00]"></div>
+<div class="h-full bg-surface-container-high w-[10%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions (Spans 1 col, 1 row) -->
+<div class="terminal-panel lg:col-span-1 flex flex-col">
+<div class="terminal-header font-label-sm text-label-sm text-outline">
+<span>CMD_LINKS</span>
+<span>EXEC</span>
+</div>
+<div class="flex-1 p-panel-padding grid grid-cols-2 gap-2">
+<button class="border border-neon-cyan/30 text-neon-cyan font-label-sm hover:bg-neon-cyan/10 transition-colors flex flex-col items-center justify-center gap-1 p-2">
+<span class="material-symbols-outlined text-[20px]">save</span>
+                            DUMP_DATA
+                        </button>
+<button class="border border-neon-cyan/30 text-neon-cyan font-label-sm hover:bg-neon-cyan/10 transition-colors flex flex-col items-center justify-center gap-1 p-2">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+                            SYNC_NODE
+                        </button>
+<button class="border border-neon-cyan/30 text-neon-cyan font-label-sm hover:bg-neon-cyan/10 transition-colors flex flex-col items-center justify-center gap-1 p-2">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+                            NEW_TTY
+                        </button>
+<button class="bg-neon-cyan text-obsidian-base font-label-sm font-bold glitch-hover transition-all flex flex-col items-center justify-center gap-1 p-2">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+                            PANIC
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-outline-variant fixed bottom-0 left-0 w-full px-margin py-1 flex justify-between items-center z-50 h-8 font-label-sm text-label-sm shrink-0">
+<div class="text-on-surface-variant flex items-center gap-2">
+<span class="w-2 h-2 rounded-none bg-terminal-green animate-pulse"></span>
+            © 2024 PORTAL_OS // LATENCY: 24ms // TIMESTAMP: 14:00:22
+        </div>
+<div class="flex gap-4">
+<a class="text-outline hover:text-neon-cyan transition-opacity hover:animate-pulse" href="#">Uptime</a>
+<a class="text-outline hover:text-neon-cyan transition-opacity hover:animate-pulse" href="#">Protocol</a>
+<a class="text-outline hover:text-neon-cyan transition-opacity hover:animate-pulse" href="#">Security</a>
+</div>
+</footer>
+<script>
+        // Simple script to keep the cursor blinking active when input is focused
+        const cmdInput = document.querySelector('input[type="text"]');
+        const cursor = document.querySelector('.blinking-cursor');
+        
+        cmdInput.addEventListener('focus', () => {
+            cursor.style.animation = 'blink 1s step-end infinite';
+        });
+        
+        // Update timestamp slightly to feel alive
+        setInterval(() => {
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+            const footerText = document.querySelector('footer div:first-child');
+            if(footerText) {
+                 footerText.innerHTML = `<span class="w-2 h-2 rounded-none bg-terminal-green animate-pulse"></span> &copy; 2024 PORTAL_OS // LATENCY: ${Math.floor(Math.random() * 30 + 10)}ms // TIMESTAMP: ${timeStr}`;
+            }
+        }, 1000);
+    </script>
+</body></html>

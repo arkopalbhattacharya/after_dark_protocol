@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Experiment Log // TERMINAL</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Space Grotesk & Space Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#859494",
+                        "on-error": "#690005",
+                        "on-surface-variant": "#bac9c9",
+                        "on-secondary-container": "#694600",
+                        "primary-fixed": "#52f9fc",
+                        "surface": "#10141a",
+                        "surface-container": "#1c2026",
+                        "surface-dim": "#10141a",
+                        "obsidian-surface": "#1a1f26",
+                        "error": "#ffb4ab",
+                        "on-primary": "#003738",
+                        "on-tertiary-container": "#aa0017",
+                        "on-primary-fixed": "#002021",
+                        "background": "#10141a",
+                        "neon-cyan": "#1edce0",
+                        "on-tertiary-fixed": "#410004",
+                        "on-background": "#dfe2eb",
+                        "inverse-on-surface": "#2d3137",
+                        "on-error-container": "#ffdad6",
+                        "terminal-green": "#33ff00",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-surface": "#dfe2eb",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "primary-fixed-dim": "#1ddce0",
+                        "surface-variant": "#31353c",
+                        "on-tertiary": "#68000a",
+                        "primary": "#52f9fd",
+                        "surface-container-lowest": "#0a0e14",
+                        "inverse-primary": "#00696b",
+                        "amber-warn": "#fdaf00",
+                        "obsidian-elevated": "#12171f",
+                        "tertiary-container": "#ffb4ae",
+                        "surface-container-high": "#262a31",
+                        "error-container": "#93000a",
+                        "outline-variant": "#3b494a",
+                        "secondary-fixed": "#ffddaf",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "primary-container": "#1edce0",
+                        "secondary-container": "#fdaf00",
+                        "tertiary": "#ffdbd7",
+                        "surface-container-low": "#181c22",
+                        "on-secondary-fixed-variant": "#614000",
+                        "obsidian-base": "#0a0e14",
+                        "on-primary-fixed-variant": "#004f51",
+                        "on-secondary": "#432c00",
+                        "on-primary-container": "#005c5e",
+                        "on-secondary-fixed": "#281800",
+                        "surface-tint": "#1ddce0",
+                        "inverse-surface": "#dfe2eb",
+                        "surface-container-highest": "#31353c",
+                        "surface-bright": "#353940",
+                        "secondary-fixed-dim": "#ffba41",
+                        "secondary": "#ffd392"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "panel-padding": "20px",
+                        "unit": "4px",
+                        "stack-sm": "8px",
+                        "margin": "24px",
+                        "gutter": "16px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Space Grotesk"],
+                        "headline-md": ["Space Grotesk"],
+                        "label-lg": ["Space Mono"],
+                        "label-sm": ["Space Mono"],
+                        "body-lg": ["Space Mono"],
+                        "headline-sm": ["Space Grotesk"],
+                        "body-md": ["Space Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["42px", { "lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["28px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["12px", { "lineHeight": "1", "letterSpacing": "0.15em", "fontWeight": "700" }],
+                        "label-sm": ["10px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Global Reset & Typography Enforcements */
+        body {
+            background-color: theme('colors.obsidian-base');
+            color: theme('colors.on-surface');
+        }
+        
+        /* Scanline Overlay */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.5;
+        }
+
+        /* CRT Flicker & Vignette */
+        .crt-vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(10,14,20,0.8) 100%);
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        /* Emissive Glows */
+        .glow-text { text-shadow: 0 0 8px theme('colors.neon-cyan'); }
+        .glow-border { box-shadow: 0 0 10px rgba(30,220,224,0.3); }
+        .glow-border-active { box-shadow: 0 0 15px rgba(30,220,224,0.6), inset 0 0 5px rgba(30,220,224,0.2); }
+
+        /* Blinking Cursor */
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background-color: theme('colors.neon-cyan');
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Segmented Progress Pulse */
+        .progress-segment {
+            animation: dataPulse 2s infinite alternate;
+        }
+        .progress-segment:nth-child(even) { animation-delay: 0.5s; }
+        @keyframes dataPulse { 0% { opacity: 0.6; } 100% { opacity: 1; box-shadow: 0 0 5px theme('colors.neon-cyan'); } }
+
+        /* Custom Scrollbar for Terminal */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: theme('colors.obsidian-base'); border-left: 1px solid theme('colors.outline-variant'); }
+        ::-webkit-scrollbar-thumb { background: theme('colors.outline-variant'); }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.neon-cyan'); }
+    </style>
+</head>
+<body class="overflow-hidden selection:bg-neon-cyan/20 selection:text-neon-cyan">
+<!-- Screen Overlays -->
+<div class="scanlines"></div>
+<div class="crt-vignette"></div>
+<!-- TopAppBar -->
+<header class="bg-surface-container-low border-b border-outline-variant shadow-[0_0_12px_rgba(30,220,224,0.15)] flex justify-between items-center w-full px-margin py-2 h-16 fixed top-0 left-0 z-50">
+<div class="flex items-center gap-margin">
+<div class="font-headline-sm text-headline-sm font-bold text-neon-cyan tracking-tighter glow-text flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">terminal</span>
+                JOURNAL_PORTAL_v1.0
+            </div>
+<nav class="hidden md:flex gap-gutter items-center ml-margin">
+<a class="text-primary-fixed-dim font-bold border-b-2 border-primary-fixed-dim pb-1 font-label-lg text-label-lg glow-text" href="#">AI Experiment</a>
+<a class="text-on-surface-variant font-label-lg text-label-lg hover:text-neon-cyan hover:bg-surface-variant/20 transition-all px-2 py-1" href="#">Coffee Brew</a>
+<a class="text-on-surface-variant font-label-lg text-label-lg hover:text-neon-cyan hover:bg-surface-variant/20 transition-all px-2 py-1" href="#">Activity Log</a>
+</nav>
+</div>
+<div class="flex items-center gap-stack-md text-neon-cyan">
+<button class="hover:text-neon-cyan hover:bg-surface-variant/20 transition-all p-1 active:scale-95 duration-75">
+<span class="material-symbols-outlined">terminal</span>
+</button>
+<button class="hover:text-neon-cyan hover:bg-surface-variant/20 transition-all p-1 active:scale-95 duration-75">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="hover:text-neon-cyan hover:bg-surface-variant/20 transition-all p-1 active:scale-95 duration-75">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="bg-surface-container-lowest border-r border-outline-variant fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col items-center py-gutter z-40">
+<div class="flex flex-col items-center gap-unit mb-margin text-center">
+<div class="w-10 h-10 bg-surface-variant border border-outline flex items-center justify-center mb-1 overflow-hidden" data-alt="Cyberpunk stylized avatar of an administrator, glowing wireframe face, dark background, terminal green accents, low res aesthetic.">
+<span class="material-symbols-outlined text-outline">account_circle</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant max-w-[64px] truncate">ADM_USR</span>
+</div>
+<button class="w-12 h-12 bg-neon-cyan text-obsidian-base font-bold flex items-center justify-center mb-margin hover:translate-x-[2px] transition-transform glow-border-active" title="NEW_ENTRY">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+</button>
+<nav class="flex flex-col w-full gap-2">
+<a class="w-full flex flex-col items-center justify-center py-2 text-outline hover:text-primary-fixed-dim hover:bg-surface-container-high transition-colors font-label-sm text-label-sm gap-1 group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">grid_view</span>
+<span>Dash</span>
+</a>
+<!-- Active Tab -->
+<a class="w-full flex flex-col items-center justify-center py-2 bg-primary-container/10 text-neon-cyan border-r-2 border-neon-cyan font-label-sm text-label-sm gap-1 animate-pulse" href="#">
+<span class="material-symbols-outlined glow-text" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="glow-text">Logs</span>
+</a>
+<a class="w-full flex flex-col items-center justify-center py-2 text-outline hover:text-primary-fixed-dim hover:bg-surface-container-high transition-colors font-label-sm text-label-sm gap-1 group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">terminal</span>
+<span>Cmd</span>
+</a>
+<a class="w-full flex flex-col items-center justify-center py-2 text-outline hover:text-primary-fixed-dim hover:bg-surface-container-high transition-colors font-label-sm text-label-sm gap-1 group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">lan</span>
+<span>Net</span>
+</a>
+<a class="w-full flex flex-col items-center justify-center py-2 text-outline hover:text-primary-fixed-dim hover:bg-surface-container-high transition-colors font-label-sm text-label-sm gap-1 group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">settings</span>
+<span>Sys</span>
+</a>
+</nav>
+<div class="mt-auto w-full flex justify-center">
+<a class="text-outline hover:text-error transition-colors p-2" href="#" title="Logout">
+<span class="material-symbols-outlined">power_settings_new</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas (Cockpit Layout) -->
+<main class="ml-20 mt-16 mb-8 h-[calc(100vh-96px)] p-gutter flex gap-gutter overflow-hidden bg-obsidian-base">
+<!-- Panel 1: Run History (Left Blade) -->
+<section class="flex-1 min-w-[250px] flex flex-col border border-primary/20 bg-surface-container-lowest">
+<header class="bg-obsidian-elevated px-3 py-2 border-b border-primary/20 flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">RUN_HISTORY [SYS_LOGS]</span>
+<span class="font-label-sm text-label-sm text-outline">PID: 4402</span>
+</header>
+<div class="flex-1 overflow-y-auto p-2 flex flex-col gap-1 font-body-md text-body-md">
+<!-- Data List Items (Zebra Striped via CSS classes) -->
+<div class="bg-obsidian-elevated p-2 border-l-2 border-terminal-green flex justify-between items-center cursor-pointer hover:bg-surface-variant/50 transition-colors">
+<div class="flex flex-col">
+<span class="text-on-surface">EXP_ALPHA_09</span>
+<span class="font-label-sm text-label-sm text-outline">00:42:15 ELAPSED</span>
+</div>
+<span class="text-terminal-green text-xs">[SUCCESS]</span>
+</div>
+<div class="p-2 border-l-2 border-error flex justify-between items-center cursor-pointer hover:bg-surface-variant/50 transition-colors">
+<div class="flex flex-col">
+<span class="text-on-surface">EXP_BETA_12</span>
+<span class="font-label-sm text-label-sm text-outline">OOM_ERROR_0x4F</span>
+</div>
+<span class="text-error text-xs">[FAILED]</span>
+</div>
+<div class="bg-obsidian-elevated p-2 border-l-2 border-amber-warn flex justify-between items-center cursor-pointer hover:bg-surface-variant/50 transition-colors">
+<div class="flex flex-col">
+<span class="text-on-surface">EXP_GAMMA_01</span>
+<span class="font-label-sm text-label-sm text-outline">USER_ABORT</span>
+</div>
+<span class="text-amber-warn text-xs">[HALTED]</span>
+</div>
+<div class="p-2 border-l-2 border-terminal-green flex justify-between items-center cursor-pointer hover:bg-surface-variant/50 transition-colors">
+<div class="flex flex-col">
+<span class="text-on-surface">DATA_PREP_NIGHTLY</span>
+<span class="font-label-sm text-label-sm text-outline">BATCH_COMPLETE</span>
+</div>
+<span class="text-terminal-green text-xs">[SUCCESS]</span>
+</div>
+<div class="bg-obsidian-elevated p-2 border-l-2 border-terminal-green flex justify-between items-center cursor-pointer hover:bg-surface-variant/50 transition-colors">
+<div class="flex flex-col">
+<span class="text-on-surface">EXP_ALPHA_08</span>
+<span class="font-label-sm text-label-sm text-outline">01:12:05 ELAPSED</span>
+</div>
+<span class="text-terminal-green text-xs">[SUCCESS]</span>
+</div>
+</div>
+<footer class="bg-obsidian-elevated h-6 border-t border-primary/20 flex items-center px-2">
+<span class="font-label-sm text-label-sm text-outline">TOTAL RUNS: 1,024</span>
+</footer>
+</section>
+<!-- Panel 2: Code Editor Pane (Center Main Blade) -->
+<section class="flex-[2] min-w-[400px] flex flex-col border border-primary/20 bg-surface-dim relative glow-border">
+<header class="bg-obsidian-elevated px-3 py-2 border-b border-primary/20 flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-neon-cyan glow-text">EXPERIMENT_PROTOCOL [EDITOR]</span>
+<div class="flex gap-2">
+<button class="border border-neon-cyan/30 text-neon-cyan font-label-sm text-label-sm px-2 py-1 hover:bg-neon-cyan/10 transition-colors">SAVE</button>
+<button class="bg-neon-cyan text-obsidian-base font-bold font-label-sm text-label-sm px-3 py-1 hover:translate-x-[1px] hover:-translate-y-[1px] glow-border-active transition-transform">EXECUTE</button>
+</div>
+</header>
+<!-- Code Area -->
+<div class="flex-1 p-4 font-body-md text-body-md overflow-y-auto font-mono leading-relaxed select-text">
+<div class="flex">
+<div class="text-outline-variant pr-4 select-none text-right border-r border-outline-variant/30 mr-4">
+                        1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9<br/>10<br/>11<br/>12
+                    </div>
+<div class="text-on-surface">
+<span class="text-amber-warn">import</span> torch<br/>
+<span class="text-amber-warn">import</span> neural_core <span class="text-amber-warn">as</span> nc<br/>
+<br/>
+<span class="text-outline"># Initialize cybernetic architecture</span><br/>
+                        model <span class="text-primary-fixed-dim">=</span> nc.ObsidianTransformer(<br/>
+                            layers<span class="text-primary-fixed-dim">=</span><span class="text-error">128</span>,<br/>
+                            attention_heads<span class="text-primary-fixed-dim">=</span><span class="text-error">64</span>,<br/>
+                            activation<span class="text-primary-fixed-dim">=</span><span class="text-terminal-green">'gelu_quantum'</span><br/>
+                        ).to(<span class="text-terminal-green">'cuda:0'</span>)<br/>
+<br/>
+<span class="text-outline"># Initiate training loop sequence</span><br/>
+<span class="text-amber-warn">def</span> <span class="text-neon-cyan">execute_run</span>():<br/>
+                            sys.stdout.write(<span class="text-terminal-green">"INITIALIZING QUANTUM CORE...\n"</span>)
+                    </div>
+</div>
+</div>
+<!-- Terminal Input -->
+<div class="border-t border-primary/30 bg-obsidian-elevated p-2 font-body-md text-body-md flex items-center">
+<span class="text-outline mr-2 select-none">[SYS_CMD_IN]&gt;</span>
+<span class="text-neon-cyan">tail -f /var/log/neural_training.log</span>
+<span class="cursor-blink"></span>
+</div>
+</section>
+<!-- Panel 3: Hardware Telemetry (Right Blade) -->
+<section class="flex-1 min-w-[250px] flex flex-col border border-primary/20 bg-surface-container-lowest">
+<header class="bg-obsidian-elevated px-3 py-2 border-b border-primary/20 flex justify-between items-center">
+<span class="font-label-lg text-label-lg text-on-surface">SYS_TELEMETRY</span>
+<span class="material-symbols-outlined text-outline text-sm">memory</span>
+</header>
+<div class="p-4 flex flex-col gap-6 flex-1 overflow-y-auto">
+<!-- Metric Block 1 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-outline">GPU_0 [RTX_ADA_6000]</span>
+<span class="text-neon-cyan glow-text">98%</span>
+</div>
+<!-- Segmented Progress -->
+<div class="flex h-4 gap-[2px]">
+<div class="flex-1 bg-neon-cyan progress-segment"></div>
+<div class="flex-1 bg-neon-cyan progress-segment"></div>
+<div class="flex-1 bg-neon-cyan progress-segment"></div>
+<div class="flex-1 bg-neon-cyan progress-segment"></div>
+<div class="flex-1 bg-neon-cyan progress-segment"></div>
+<div class="flex-1 bg-neon-cyan progress-segment"></div>
+<div class="flex-1 bg-neon-cyan progress-segment"></div>
+<div class="flex-1 bg-neon-cyan progress-segment"></div>
+<div class="flex-1 bg-neon-cyan progress-segment"></div>
+<div class="flex-1 bg-surface-variant"></div>
+</div>
+</div>
+<!-- Metric Block 2 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-outline">VRAM_ALLOCATION</span>
+<span class="text-amber-warn">45.2 / 48.0 GB</span>
+</div>
+<!-- Segmented Progress -->
+<div class="flex h-4 gap-[2px]">
+<div class="flex-1 bg-amber-warn progress-segment"></div>
+<div class="flex-1 bg-amber-warn progress-segment"></div>
+<div class="flex-1 bg-amber-warn progress-segment"></div>
+<div class="flex-1 bg-amber-warn progress-segment"></div>
+<div class="flex-1 bg-amber-warn progress-segment"></div>
+<div class="flex-1 bg-amber-warn progress-segment"></div>
+<div class="flex-1 bg-amber-warn progress-segment"></div>
+<div class="flex-1 bg-amber-warn progress-segment"></div>
+<div class="flex-1 bg-amber-warn progress-segment"></div>
+<div class="flex-1 bg-surface-variant"></div>
+</div>
+</div>
+<!-- Text Metrics -->
+<div class="mt-4 flex flex-col gap-1 border-t border-outline-variant/30 pt-4">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-outline">CORE_TEMP:</span>
+<span class="text-error">82°C [WARN]</span>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-outline">PWR_DRAW:</span>
+<span class="text-on-surface">285 W</span>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-outline">FAN_SPEED:</span>
+<span class="text-on-surface">3200 RPM</span>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-outline">BUS_BANDWIDTH:</span>
+<span class="text-terminal-green">512 GB/s</span>
+</div>
+</div>
+</div>
+<footer class="bg-obsidian-elevated h-6 border-t border-primary/20 flex items-center px-2 justify-between">
+<span class="font-label-sm text-label-sm text-outline">STATUS:</span>
+<span class="font-label-sm text-label-sm text-terminal-green animate-pulse">NOMINAL</span>
+</footer>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-outline-variant fixed bottom-0 left-0 w-full px-margin py-1 flex justify-between items-center z-50 h-8">
+<span class="font-label-sm text-label-sm text-outline">© 2024 PORTAL_OS // LATENCY: 24ms // TIMESTAMP: 14:00:22</span>
+<div class="flex gap-4">
+<a class="font-label-sm text-label-sm text-outline hover:text-neon-cyan transition-opacity hover:animate-[flicker_0.5s_infinite]" href="#">Uptime</a>
+<a class="font-label-sm text-label-sm text-outline hover:text-neon-cyan transition-opacity hover:animate-[flicker_0.5s_infinite]" href="#">Protocol</a>
+<a class="font-label-sm text-label-sm text-outline hover:text-neon-cyan transition-opacity hover:animate-[flicker_0.5s_infinite]" href="#">Security</a>
+</div>
+</footer>
+</body></html>

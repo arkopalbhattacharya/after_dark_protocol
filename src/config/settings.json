@@ -1,0 +1,17 @@
+{
+  "brewMethods": [
+    "V60 Pour-Over",
+    "Aeropress",
+    "Espresso",
+    "French Press",
+    "Electric Drip",
+    "South Indian Filter",
+    "Nanopresso"
+  ],
+  "postMoodStates": [
+    "Drained",
+    "Centered",
+    "Recharged",
+    "Euphoric"
+  ]
+}

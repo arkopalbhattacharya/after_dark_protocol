@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Activity Log - Obsidian Protocol</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Space+Mono:wght@400;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@100..900&family=Space+Mono:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#31353c",
+                        "on-secondary": "#432c00",
+                        "inverse-on-surface": "#2d3137",
+                        "primary-fixed-dim": "#1ddce0",
+                        "neon-cyan": "#1edce0",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "secondary-fixed": "#ffddaf",
+                        "outline": "#859494",
+                        "on-background": "#dfe2eb",
+                        "surface-container-high": "#262a31",
+                        "on-secondary-fixed-variant": "#614000",
+                        "background": "#10141a",
+                        "on-surface-variant": "#bac9c9",
+                        "surface-bright": "#353940",
+                        "surface-dim": "#10141a",
+                        "on-primary-container": "#005c5e",
+                        "inverse-surface": "#dfe2eb",
+                        "on-tertiary-container": "#aa0017",
+                        "surface-tint": "#1ddce0",
+                        "primary-fixed": "#52f9fc",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#281800",
+                        "error": "#ffb4ab",
+                        "on-secondary-container": "#694600",
+                        "terminal-green": "#33ff00",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-primary": "#003738",
+                        "primary": "#52f9fd",
+                        "amber-warn": "#fdaf00",
+                        "on-tertiary": "#68000a",
+                        "surface-container-lowest": "#0a0e14",
+                        "on-tertiary-fixed": "#410004",
+                        "obsidian-base": "#0a0e14",
+                        "outline-variant": "#3b494a",
+                        "on-primary-fixed-variant": "#004f51",
+                        "tertiary-container": "#ffb4ae",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#181c22",
+                        "surface-variant": "#31353c",
+                        "secondary-container": "#fdaf00",
+                        "obsidian-surface": "#1a1f26",
+                        "surface": "#10141a",
+                        "secondary": "#ffd392",
+                        "on-surface": "#dfe2eb",
+                        "tertiary": "#ffdbd7",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "error-container": "#93000a",
+                        "obsidian-elevated": "#12171f",
+                        "secondary-fixed-dim": "#ffba41",
+                        "primary-container": "#1edce0",
+                        "on-primary-fixed": "#002021",
+                        "surface-container": "#1c2026",
+                        "inverse-primary": "#00696b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin": "24px",
+                        "panel-padding": "20px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Space Mono"],
+                        "headline-lg": ["Space Grotesk"],
+                        "label-lg": ["Space Mono"],
+                        "body-md": ["Space Mono"],
+                        "body-lg": ["Space Mono"],
+                        "headline-sm": ["Space Grotesk"],
+                        "headline-md": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["10px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "400" }],
+                        "headline-lg": ["42px", { "lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "label-lg": ["12px", { "lineHeight": "1", "letterSpacing": "0.15em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "headline-md": ["28px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .scanlines {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+        .neon-glow {
+            text-shadow: 0 0 5px theme('colors.neon-cyan'), 0 0 10px theme('colors.neon-cyan');
+        }
+        .neon-border-glow {
+            box-shadow: 0 0 8px theme('colors.neon-cyan');
+        }
+        .blinking-cursor::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, rgba(30, 220, 224, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(30, 220, 224, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-obsidian-base text-on-background font-body-md h-screen w-screen overflow-hidden flex flex-col relative">
+<!-- Global Scanlines -->
+<div class="fixed inset-0 scanlines opacity-50"></div>
+<!-- TopNavBar -->
+<header class="bg-obsidian-base flex justify-between items-center w-full px-6 h-16 z-50 border-b border-outline-variant shrink-0">
+<div class="font-headline-sm text-headline-sm text-neon-cyan uppercase tracking-tighter">
+            [SYS_CORE_v2.0]
+        </div>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="text-outline hover:text-neon-cyan transition-colors font-label-lg text-label-lg" href="#">LOGS</a>
+<a class="text-neon-cyan border-b-2 border-neon-cyan pb-1 font-label-lg text-label-lg" href="#">ARCHIVE</a>
+<a class="text-outline hover:text-neon-cyan transition-colors font-label-lg text-label-lg" href="#">ENCRYPTION</a>
+<a class="text-outline hover:text-neon-cyan transition-colors font-label-lg text-label-lg" href="#">NETWORK</a>
+</nav>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-neon-cyan cursor-pointer hover:bg-surface-container-high transition-all duration-200 p-1 rounded">settings</span>
+<span class="material-symbols-outlined text-neon-cyan cursor-pointer hover:bg-surface-container-high transition-all duration-200 p-1 rounded">power_settings_new</span>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative z-10">
+<!-- SideNavBar -->
+<nav class="bg-obsidian-surface fixed left-0 top-16 bottom-0 flex flex-col z-40 border-r border-outline-variant w-64 hidden md:flex shrink-0">
+<div class="p-6 border-b border-outline-variant/30 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high border border-neon-cyan/30 flex items-center justify-center overflow-hidden">
+<img alt="Authorized User" class="w-full h-full object-cover grayscale opacity-80 mix-blend-screen" data-alt="A stylized, low-poly cyberpunk avatar portrait of an operator wearing glowing tactical visor gear. The color palette uses deep obsidian blacks, muted cyans, and stark contrast lighting typical of a high-tech dystopia. Retro digital scanlines overlay the image slightly." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQudvGhuF_8i1P7HXAz9rxiBGL9G8eetV2AVe7NoaowOvEgJ4nvwMlVZt9OxrZ1NbimsY02Hjii9wK3fj9inat5yOCe_0TeKK0e0qLkKRk-2cs07VGsQT1DxCHcD0QBNMN_7hukahAh2ENw8gRFa4jsM8PCp_TOqrsSgnmcV9Z_C34ChQFjcQu8ovKjkU0JVxW56GTEzcnOAhCM3DCWXTGDRpVn3tw3mZDOWJW9QD42g-i8k0GEx9e3g"/>
+</div>
+<div>
+<div class="font-label-lg text-label-lg text-neon-cyan">OPERATOR_01</div>
+<div class="font-label-sm text-label-sm text-amber-warn mt-1">STATUS: ENCRYPTED</div>
+</div>
+</div>
+<div class="flex-1 py-4 flex flex-col gap-2 px-2 overflow-y-auto">
+<button class="w-full bg-neon-cyan/10 border border-neon-cyan text-neon-cyan font-label-lg text-label-lg py-3 mb-4 hover:bg-neon-cyan/20 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    NEW_ENTRY
+                </button>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-neon-cyan transition-all duration-150 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined">terminal</span>
+                    TERMINAL
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm bg-primary-container text-on-primary-fixed font-bold border-l-4 border-neon-cyan font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined">database</span>
+                    DATA_STREAM
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-neon-cyan transition-all duration-150 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined">hub</span>
+                    NODE_MAP
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-neon-cyan transition-all duration-150 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined">fingerprint</span>
+                    USER_AUTH
+                </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-neon-cyan transition-all duration-150 ease-in-out font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+                    SYSTEM_STAT
+                </a>
+</div>
+<div class="p-4 border-t border-outline-variant/30 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-2 rounded-sm text-on-surface-variant hover:text-neon-cyan transition-colors font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+                    HELP
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-sm text-error hover:text-error/80 transition-colors font-label-lg text-label-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+                    LOGOUT
+                </a>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="flex-1 flex flex-col md:ml-64 p-gutter md:p-margin gap-margin overflow-y-auto relative h-full">
+<div class="flex items-center justify-between border-b border-neon-cyan/20 pb-4 mb-4">
+<h1 class="font-headline-md text-headline-md text-on-background tracking-tight">JOURNAL_PORTAL_v1.0</h1>
+<div class="font-label-sm text-label-sm text-neon-cyan animate-pulse">SYS_SYNC: ACTIVE</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-margin flex-1 min-h-0">
+<!-- Pane 1: Activity Tracker -->
+<section class="md:col-span-4 bg-obsidian-elevated border border-neon-cyan/20 flex flex-col relative grid-bg">
+<div class="bg-obsidian-surface p-2 border-b border-neon-cyan/20 flex items-center justify-between shrink-0">
+<span class="font-label-lg text-label-lg text-neon-cyan neon-glow">ACTIVITY_TRACKER // TERMINAL</span>
+<span class="font-label-sm text-label-sm text-outline">PID: 4402</span>
+</div>
+<div class="p-panel-padding flex-1 overflow-y-auto flex flex-col gap-stack-md">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-outline uppercase">Duration [MM:SS]</label>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-neon-cyan/50 font-label-sm text-label-sm">[SYS_CMD_IN]></span>
+<input class="w-full bg-obsidian-surface border-b border-neon-cyan/30 focus:border-neon-cyan text-neon-cyan font-label-lg text-label-lg pl-24 py-2 outline-none blinking-cursor placeholder:text-neon-cyan/20 transition-colors" placeholder="00:00" type="text" value="45:20"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-outline uppercase">Route Vector</label>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-neon-cyan/50 font-label-sm text-label-sm">[SYS_CMD_IN]></span>
+<input class="w-full bg-obsidian-surface border-b border-neon-cyan/30 focus:border-neon-cyan text-neon-cyan font-label-lg text-label-lg pl-24 py-2 outline-none placeholder:text-neon-cyan/20 transition-colors" placeholder="SEC-01" type="text" value="SEC-04_ALPHA"/>
+</div>
+</div>
+<div class="flex flex-col gap-2 mt-2">
+<label class="font-label-sm text-label-sm text-outline uppercase flex justify-between">
+<span>Mood Calibration</span>
+<span class="text-amber-warn">OPT: NOMINAL</span>
+</label>
+<input class="w-full h-1 bg-surface-container-highest appearance-none cursor-pointer accent-neon-cyan" max="100" min="1" type="range" value="75"/>
+</div>
+<button class="mt-4 w-full bg-neon-cyan text-obsidian-base font-label-lg text-label-lg py-3 uppercase hover:neon-border-glow hover:-translate-y-px transition-all duration-150 flex items-center justify-center gap-2">
+                            COMMIT_LOG
+                            <span class="material-symbols-outlined text-[16px]">terminal</span>
+</button>
+<div class="mt-auto pt-4 border-t border-neon-cyan/10">
+<div class="font-label-sm text-label-sm text-outline mb-2">LIVE_TELEMETRY</div>
+<div class="h-32 w-full bg-surface-container-highest relative overflow-hidden border border-neon-cyan/10">
+<div class="w-full h-full bg-cover bg-center opacity-70 mix-blend-screen" data-alt="A stylized vector map of a futuristic city grid overlaid with a glowing neon cyan line indicating a route. The background is extremely dark obsidian blue. Subtle grid lines and digital coordinate markers accent the composition, reminiscent of a cyberpunk heads-up display. High contrast." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBMGqQ70Ft2YBNkdBwepJgbB2wnl6M2FySFx1b2GlIcvdpTD70qfp0-FfoQJON2Eni1QqCK5i3BDVElvyAsHw4xYbFEit4AMqQvNmA1VfxkP-pXbi23wDCajJsQYfm__pSRvjoS0NZMalPWiLhfaGwWd5kbAEEqSFwYZTdBq_PL8p02jH2Ir0NyDIY83pOb5oYuVdw_LXR9fH8p_90kWJBTdVRiGIB7FPYA0BUvqFUeo_GO65GRGQq1Vw')"></div>
+<div class="absolute inset-0 border border-neon-cyan/30 pointer-events-none"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Pane 2: Recent Walks -->
+<section class="md:col-span-4 bg-obsidian-elevated border border-neon-cyan/20 flex flex-col relative grid-bg">
+<div class="bg-obsidian-surface p-2 border-b border-neon-cyan/20 flex items-center justify-between shrink-0">
+<span class="font-label-lg text-label-lg text-neon-cyan">RECENT_WALKS // DATA</span>
+<span class="font-label-sm text-label-sm text-outline">COORD: 40.7/74.0</span>
+</div>
+<div class="p-0 flex-1 overflow-y-auto">
+<!-- List Items (Zebra Striped visually by borders) -->
+<div class="flex flex-col">
+<div class="p-4 border-b border-neon-cyan/10 hover:bg-surface-container-highest transition-colors cursor-pointer group flex items-start gap-3">
+<span class="material-symbols-outlined text-neon-cyan/50 group-hover:text-neon-cyan mt-1">directions_walk</span>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-lg text-label-lg text-on-surface">Morning Commute</span>
+<span class="font-label-sm text-label-sm text-outline">T-MINUS 04:00</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-sm text-label-sm text-neon-cyan">DUR: 22:15</span>
+<span class="font-label-sm text-label-sm text-amber-warn border border-amber-warn/30 px-1 rounded-sm">ALERT</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-[#12171f] border-b border-neon-cyan/10 hover:bg-surface-container-highest transition-colors cursor-pointer group flex items-start gap-3">
+<span class="material-symbols-outlined text-neon-cyan/50 group-hover:text-neon-cyan mt-1">directions_walk</span>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-lg text-label-lg text-on-surface">Post-Work Decompression</span>
+<span class="font-label-sm text-label-sm text-outline">T-MINUS 24:00</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-sm text-label-sm text-neon-cyan">DUR: 45:00</span>
+<span class="font-label-sm text-label-sm text-terminal-green border border-terminal-green/30 px-1 rounded-sm">STABLE</span>
+</div>
+</div>
+</div>
+<div class="p-4 border-b border-neon-cyan/10 hover:bg-surface-container-highest transition-colors cursor-pointer group flex items-start gap-3">
+<span class="material-symbols-outlined text-neon-cyan/50 group-hover:text-neon-cyan mt-1">directions_walk</span>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-lg text-label-lg text-outline group-hover:text-on-surface transition-colors">Sector 7 Perimeter</span>
+<span class="font-label-sm text-label-sm text-outline">T-MINUS 48:00</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-sm text-label-sm text-neon-cyan/50">DUR: 12:30</span>
+<span class="font-label-sm text-label-sm text-terminal-green border border-terminal-green/30 px-1 rounded-sm opacity-50">STABLE</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Pane 3: Mood Trend -->
+<section class="md:col-span-4 bg-obsidian-elevated border border-neon-cyan/20 flex flex-col relative grid-bg">
+<div class="bg-obsidian-surface p-2 border-b border-neon-cyan/20 flex items-center justify-between shrink-0">
+<span class="font-label-lg text-label-lg text-neon-cyan">MOOD_TREND // ANALYSIS</span>
+<span class="font-label-sm text-label-sm text-outline">SEQ: 099A</span>
+</div>
+<div class="p-panel-padding flex-1 flex flex-col gap-margin">
+<!-- Pseudo Bar Chart -->
+<div class="flex-1 flex items-end gap-2 h-40 border-b border-neon-cyan/30 pb-2 relative">
+<div class="absolute top-0 left-0 w-full border-t border-dashed border-outline-variant/30 font-label-sm text-label-sm text-outline-variant -mt-2">MAX</div>
+<div class="absolute top-1/2 left-0 w-full border-t border-dashed border-outline-variant/30"></div>
+<!-- Bars -->
+<div class="w-1/5 bg-neon-cyan/20 h-1/3 hover:bg-neon-cyan/40 transition-colors border-t border-neon-cyan relative group cursor-crosshair">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-neon-cyan font-label-sm hidden group-hover:block bg-obsidian-base px-1 border border-neon-cyan/30 z-10">33</span>
+</div>
+<div class="w-1/5 bg-neon-cyan/40 h-2/3 hover:bg-neon-cyan/60 transition-colors border-t border-neon-cyan relative group cursor-crosshair">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-neon-cyan font-label-sm hidden group-hover:block bg-obsidian-base px-1 border border-neon-cyan/30 z-10">66</span>
+</div>
+<div class="w-1/5 bg-amber-warn/40 h-1/4 hover:bg-amber-warn/60 transition-colors border-t border-amber-warn relative group cursor-crosshair">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-amber-warn font-label-sm hidden group-hover:block bg-obsidian-base px-1 border border-amber-warn/30 z-10">25</span>
+</div>
+<div class="w-1/5 bg-neon-cyan/60 h-[90%] hover:bg-neon-cyan/80 transition-colors border-t border-neon-cyan relative group cursor-crosshair">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-neon-cyan font-label-sm hidden group-hover:block bg-obsidian-base px-1 border border-neon-cyan/30 z-10">90</span>
+</div>
+<div class="w-1/5 bg-neon-cyan/80 h-full hover:bg-neon-cyan transition-colors border-t border-neon-cyan relative group cursor-crosshair neon-border-glow">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-neon-cyan font-label-sm hidden group-hover:block bg-obsidian-base px-1 border border-neon-cyan/30 z-10">100</span>
+</div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-outline uppercase px-1">
+<span>M</span><span>T</span><span>W</span><span>T</span><span>F</span>
+</div>
+<!-- System Diagnostics -->
+<div class="mt-auto grid grid-cols-2 gap-4 border-t border-neon-cyan/10 pt-4">
+<div class="bg-obsidian-surface p-3 border border-neon-cyan/20">
+<div class="font-label-sm text-label-sm text-outline mb-1">Avg Duration</div>
+<div class="font-label-lg text-label-lg text-neon-cyan">32:45</div>
+</div>
+<div class="bg-obsidian-surface p-3 border border-neon-cyan/20">
+<div class="font-label-sm text-label-sm text-outline mb-1">Total Logs</div>
+<div class="font-label-lg text-label-lg text-neon-cyan">1,024</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>

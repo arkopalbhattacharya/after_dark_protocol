@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Coffee Brew Log - Obsidian Protocol</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline": "#859494",
+                        "on-error": "#690005",
+                        "on-surface-variant": "#bac9c9",
+                        "on-secondary-container": "#694600",
+                        "primary-fixed": "#52f9fc",
+                        "surface": "#10141a",
+                        "surface-container": "#1c2026",
+                        "surface-dim": "#10141a",
+                        "obsidian-surface": "#1a1f26",
+                        "error": "#ffb4ab",
+                        "on-primary": "#003738",
+                        "on-tertiary-container": "#aa0017",
+                        "on-primary-fixed": "#002021",
+                        "background": "#10141a",
+                        "neon-cyan": "#1edce0",
+                        "on-tertiary-fixed": "#410004",
+                        "on-background": "#dfe2eb",
+                        "inverse-on-surface": "#2d3137",
+                        "on-error-container": "#ffdad6",
+                        "terminal-green": "#33ff00",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-surface": "#dfe2eb",
+                        "tertiary-fixed-dim": "#ffb3ad",
+                        "primary-fixed-dim": "#1ddce0",
+                        "surface-variant": "#31353c",
+                        "on-tertiary": "#68000a",
+                        "primary": "#52f9fd",
+                        "surface-container-lowest": "#0a0e14",
+                        "inverse-primary": "#00696b",
+                        "amber-warn": "#fdaf00",
+                        "obsidian-elevated": "#12171f",
+                        "tertiary-container": "#ffb4ae",
+                        "surface-container-high": "#262a31",
+                        "error-container": "#93000a",
+                        "outline-variant": "#3b494a",
+                        "secondary-fixed": "#ffddaf",
+                        "on-tertiary-fixed-variant": "#930013",
+                        "primary-container": "#1edce0",
+                        "secondary-container": "#fdaf00",
+                        "tertiary": "#ffdbd7",
+                        "surface-container-low": "#181c22",
+                        "on-secondary-fixed-variant": "#614000",
+                        "obsidian-base": "#0a0e14",
+                        "on-primary-fixed-variant": "#004f51",
+                        "on-secondary": "#432c00",
+                        "on-primary-container": "#005c5e",
+                        "on-secondary-fixed": "#281800",
+                        "surface-tint": "#1ddce0",
+                        "inverse-surface": "#dfe2eb",
+                        "surface-container-highest": "#31353c",
+                        "surface-bright": "#353940",
+                        "secondary-fixed-dim": "#ffba41",
+                        "secondary": "#ffd392"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "panel-padding": "20px",
+                        "unit": "4px",
+                        "stack-sm": "8px",
+                        "margin": "24px",
+                        "gutter": "16px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Space Grotesk"],
+                        "headline-md": ["Space Grotesk"],
+                        "label-lg": ["Space Mono"],
+                        "label-sm": ["Space Mono"],
+                        "body-lg": ["Space Mono"],
+                        "headline-sm": ["Space Grotesk"],
+                        "body-md": ["Space Mono"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["42px", { "lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "headline-md": ["28px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["12px", { "lineHeight": "1", "letterSpacing": "0.15em", "fontWeight": "700" }],
+                        "label-sm": ["10px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0a0e14;
+            color: #dfe2eb;
+            overflow-x: hidden;
+        }
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+        }
+        @keyframes flicker {
+            0% { opacity: 0.95; }
+            100% { opacity: 1; }
+        }
+        .neon-border {
+            border: 1px solid rgba(253, 175, 0, 0.4);
+            box-shadow: 0 0 8px rgba(253, 175, 0, 0.2);
+        }
+        .neon-text {
+            text-shadow: 0 0 5px rgba(253, 175, 0, 0.5);
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0e14; }
+        ::-webkit-scrollbar-thumb { background: #31353c; }
+        ::-webkit-scrollbar-thumb:hover { background: #fdaf00; }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased min-h-screen flex flex-col crt-flicker">
+<div class="scanlines"></div>
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin py-2 h-16 bg-surface-container-low dark:bg-surface-container-low docked full-width top-0 border-b border-outline-variant shadow-[0_0_12px_rgba(30,220,224,0.15)] z-50 fixed">
+<div class="font-headline-sm text-headline-sm font-bold text-neon-cyan tracking-tighter">
+            JOURNAL_PORTAL_v1.0
+        </div>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant font-label-lg hover:text-neon-cyan hover:bg-surface-variant/20 transition-all px-2 py-1" href="#">AI Experiment</a>
+<a class="text-primary-fixed-dim font-bold border-b-2 border-primary-fixed-dim pb-1 font-label-lg px-2 py-1" href="#">Coffee Brew</a>
+<a class="text-on-surface-variant font-label-lg hover:text-neon-cyan hover:bg-surface-variant/20 transition-all px-2 py-1" href="#">Activity Log</a>
+</nav>
+<div class="flex gap-4 text-neon-cyan dark:text-neon-cyan">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary-fixed-dim transition-colors" data-icon="terminal">terminal</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary-fixed-dim transition-colors" data-icon="settings">settings</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary-fixed-dim transition-colors" data-icon="help">help</span>
+</div>
+</header>
+<!-- SideNavBar & Main Content -->
+<div class="flex pt-16 flex-1 h-screen overflow-hidden">
+<!-- Main Canvas -->
+<main class="flex-1 overflow-y-auto p-margin pl-24 md:pl-margin bg-obsidian-base">
+<div class="max-w-7xl mx-auto space-y-gutter">
+<header class="mb-8">
+<h1 class="font-headline-lg text-headline-lg text-amber-warn neon-text mb-2">[SYS_CMD_IN]&gt; BREW_LOG.EXE</h1>
+<p class="font-body-md text-on-surface-variant">ANALYZING EXTRACTION METRICS // STATUS: ACTIVE</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Entry Form Panel -->
+<section class="lg:col-span-2 bg-obsidian-elevated neon-border p-panel-padding flex flex-col gap-stack-md">
+<div class="border-b border-amber-warn/20 pb-2 mb-4 flex justify-between items-end">
+<h2 class="font-headline-sm text-headline-sm text-amber-warn">NEW EXTRACTION DATA</h2>
+<span class="font-label-sm text-label-sm text-outline">PID: 8402</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-amber-warn/70">BEAN ORIGIN</label>
+<input class="bg-obsidian-base border-b border-amber-warn/30 focus:border-amber-warn text-on-surface font-body-md p-2 outline-none focus:ring-0 w-full transition-colors" placeholder="e.g. Colombia Supremo" type="text" value="Ethiopia Yirgacheffe"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-amber-warn/70">ROASTER</label>
+<input class="bg-obsidian-base border-b border-amber-warn/30 focus:border-amber-warn text-on-surface font-body-md p-2 outline-none focus:ring-0 w-full transition-colors" placeholder="Roaster Name" type="text" value="Onyx Coffee Lab"/>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-amber-warn/70">DOSE (g)</label>
+<input class="bg-obsidian-base border-b border-amber-warn/30 focus:border-amber-warn text-terminal-green font-body-md p-2 outline-none focus:ring-0 w-full text-right" placeholder="0.0" type="number" value="18.5"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-amber-warn/70">YIELD (g)</label>
+<input class="bg-obsidian-base border-b border-amber-warn/30 focus:border-amber-warn text-terminal-green font-body-md p-2 outline-none focus:ring-0 w-full text-right" placeholder="0.0" type="number" value="38.0"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-amber-warn/70">TIME (s)</label>
+<input class="bg-obsidian-base border-b border-amber-warn/30 focus:border-amber-warn text-terminal-green font-body-md p-2 outline-none focus:ring-0 w-full text-right" placeholder="0" type="number" value="28"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-amber-warn/70">TEMP (°C)</label>
+<input class="bg-obsidian-base border-b border-amber-warn/30 focus:border-amber-warn text-terminal-green font-body-md p-2 outline-none focus:ring-0 w-full text-right" placeholder="0" type="number" value="93"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-amber-warn/70">TASTING NOTES</label>
+<textarea class="bg-obsidian-base border border-amber-warn/30 focus:border-amber-warn text-on-surface font-body-md p-2 outline-none focus:ring-0 w-full resize-none transition-colors" placeholder="Enter sensorary data..." rows="3"></textarea>
+</div>
+<div class="flex justify-between items-center mt-4">
+<div class="flex gap-4 items-center">
+<span class="font-label-sm text-label-sm text-amber-warn/70">EVALUATION:</span>
+<button class="flex items-center gap-2 text-terminal-green hover:bg-surface-container-high p-2 transition-colors border border-terminal-green/30">
+<span class="material-symbols-outlined" data-icon="thumb_up">thumb_up</span>
+<span class="font-label-lg text-label-lg">NOMINAL</span>
+</button>
+<button class="flex items-center gap-2 text-on-error hover:bg-surface-container-high p-2 transition-colors border border-on-error/30 opacity-50">
+<span class="material-symbols-outlined" data-icon="thumb_down">thumb_down</span>
+<span class="font-label-lg text-label-lg">REJECT</span>
+</button>
+</div>
+<button class="bg-amber-warn text-obsidian-base font-label-lg text-label-lg px-6 py-2 hover:shadow-[0_0_15px_rgba(253,175,0,0.8)] hover:translate-x-[2px] transition-all">
+                                COMMIT_DATA
+                            </button>
+</div>
+</section>
+<!-- Metrics Panel -->
+<aside class="bg-obsidian-elevated neon-border p-panel-padding flex flex-col gap-stack-md">
+<div class="border-b border-amber-warn/20 pb-2 mb-4">
+<h2 class="font-headline-sm text-headline-sm text-amber-warn">METRICS.DAT</h2>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between font-label-sm text-label-sm text-outline mb-1">
+<span>EXTRACTION YIELD</span>
+<span class="text-terminal-green">20.5%</span>
+</div>
+<div class="h-2 bg-obsidian-base flex gap-1">
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green/20"></div>
+<div class="h-full w-1/10 bg-terminal-green/20"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-sm text-label-sm text-outline mb-1">
+<span>TDS</span>
+<span class="text-terminal-green">1.35%</span>
+</div>
+<div class="h-2 bg-obsidian-base flex gap-1">
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green"></div>
+<div class="h-full w-1/10 bg-terminal-green/20"></div>
+<div class="h-full w-1/10 bg-terminal-green/20"></div>
+<div class="h-full w-1/10 bg-terminal-green/20"></div>
+<div class="h-full w-1/10 bg-terminal-green/20"></div>
+<div class="h-full w-1/10 bg-terminal-green/20"></div>
+<div class="h-full w-1/10 bg-terminal-green/20"></div>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-amber-warn/20">
+<div class="text-label-sm font-label-sm text-outline flex justify-between">
+<span>RATIO: 1:2.05</span>
+<span>DIAG: OPTIMAL</span>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full px-margin py-1 flex justify-between items-center z-50 h-8 bg-surface-container-low dark:bg-surface-container-low docked full-width bottom-0 border-t border-outline-variant">
+<div class="font-label-sm text-label-sm text-on-surface-variant dark:text-on-surface-variant">
+            © 2024 PORTAL_OS // LATENCY: 24ms // TIMESTAMP: 14:00:22
+        </div>
+<nav class="flex gap-4">
+<a class="font-label-sm text-label-sm text-outline hover:text-neon-cyan transition-opacity" href="#">Uptime</a>
+<a class="font-label-sm text-label-sm text-outline hover:text-neon-cyan transition-opacity" href="#">Protocol</a>
+<a class="font-label-sm text-label-sm text-outline hover:text-neon-cyan transition-opacity" href="#">Security</a>
+</nav>
+</footer>
+</body></html>
