@@ -1,0 +1,41 @@
+name: Deploy Develop to Surge.sh
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: surge-deploy-develop
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & Deploy to Surge
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Configure Single Page App (200.html fallback for Surge)
+        run: cp dist/index.html dist/200.html
+
+      - name: Deploy to Surge.sh
+        run: npx --yes surge ./dist after-dark-protocol.surge.sh --token ${{ secrets.SURGE_TOKEN }}
+        env:
+          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}

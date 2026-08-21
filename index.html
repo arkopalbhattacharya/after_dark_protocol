@@ -3,11 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AFTER_DARK_PROTOCOL_V1.0</title>
+    <title>AFTER_DARK_PROTOCOL // v 0.050</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+      try {
+        const flicker = localStorage.getItem('after_dark_flicker_enabled');
+        if (flicker !== null) {
+          document.documentElement.setAttribute('data-flicker', flicker);
+        }
+        const theme = localStorage.getItem('after_dark_theme');
+        if (theme) {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body class="bg-obsidian-base font-body-md text-body-md text-on-surface antialiased h-screen overflow-hidden flex flex-col">
     <div id="root" class="h-full w-full flex flex-col"></div>

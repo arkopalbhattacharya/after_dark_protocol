@@ -1,0 +1,39 @@
+name: Deploy Develop to Surge
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛰️ Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install Clean Dependencies
+        run: npm ci
+
+      - name: 🛠️ Build Application (Dev Supabase & Surge SPA Configuration)
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL_DEV || secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY_DEV || secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL_DEV || 'https://after-dark-protocol.surge.sh' }}
+        run: |
+          npm run build
+          cp dist/index.html dist/200.html
+
+      - name: 🚀 Publish Build to Surge
+        env:
+          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+        run: |
+          npx --yes surge ./dist after-dark-protocol.surge.sh --token ${{ secrets.SURGE_TOKEN }}
