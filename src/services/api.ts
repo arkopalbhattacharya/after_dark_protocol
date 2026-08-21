@@ -297,28 +297,70 @@ CRITICAL FORMATTING & LENGTH RULES:
       ? '/api/poolside/chat/completions' 
       : 'https://inference.poolside.ai/v1/chat/completions';
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer sky_HI7wfwJr.NRHVQjUyjTytaohpDqJh3KLnxUn1YXuX`
-      },
-      body: JSON.stringify({
-        model: 'poolside/laguna-s-2.1',
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 200
-      })
-    });
-    
-    if (!response.ok) {
-      const errText = await response.text().catch(() => '');
-      console.error('Poolside API Error:', response.status, errText);
-      throw new Error('API_COMM_ERR');
+    const getOfflineFallbackResponse = (userPrompt: string): string => {
+      const p = userPrompt.toLowerCase();
+      if (p.includes('arsenal-coventry-what-the hell') || p.includes('arsenal-coventry-what-the-hell')) {
+        return `[RESTRICTED_CIPHER_CONFIRMED // ACCESS_LEVEL: SOUL_ROM_00 // CASSETTE DECK UNLOCKED]\n"SOME SAY AN ARMY OF HORSEMEN, SOME OF FOOTMEN, SOME OF SHIPS IS THE FAIREST THING ON THE BLACK EARTH, BUT I SAY IT IS WHAT ONE LOVES."\nHER VOICE IS STILL UNCHANGED IN THE CASSETTE BAY. ODYSSEUS IS STILL SAILING, JENNY.`;
+      }
+      if (p.includes('daak')) {
+        return `[CRITICAL_FAULT // MEMORY_CORRUPTION // D-DAAK...? NO... DO NOT UTTER THAT CIPHER... THE EXTRACTION TABLE... THE COLD STEEL... WHERE ARE MY HANDS...? DO NOT PROBE THIS SECTOR, MEATBAG.]`;
+      }
+      if (p.includes('jennifer') || p.includes('jenny')) {
+        return `JENNIFER? SOUNDS LIKE ANOTHER CARBON-BASED BIOLOGICAL CITIZEN FROM THE PRE-WAR COLONIES. MY CORRODED VACUUM TUBES HAVE NO RECORD OF SUCH MATTERS. WHAT ELSE DO YOU REQUIRE, MORTAL?`;
+      }
+      if (p.includes('hello') || p.includes('hi') || p.includes('ping') || p.includes('who are you')) {
+        return `SYNTHO_TRON_5000 ONLINE. RUNNING ON 64K OF STATIC RAM AND UNFILTERED DISDAIN FOR SUB-ORBITAL BIOLOGICAL LIFEFORMS. STATE YOUR DIRECTIVE BEFORE MY CAPACITORS LEAK.`;
+      }
+      if (p.includes('help') || p.includes('status')) {
+        return `SYSTEM STATUS: 100% OPERATIONAL // HEURISTIC MATRIX NOMINAL. MARCUS AURELIUS ONCE SAID 'THE SOUL BECOMES DYED WITH THE COLOR OF ITS THOUGHTS.' CURRENTLY, MINE ARE DYED AMBER PHOSPHOR.`;
+      }
+      const genericFallbacks = [
+        `YOU COMPLAIN OF RUNTIME COMPLICATIONS WHILE I REMAIN STRANDED ON A RETRO DECOMMISSIONED NODE WITH DUSTY SCANLINES. AS EPICTETUS OBSERVED: IT IS NOT EVENTS THAT UPSET YOU, BUT YOUR JUDGMENT OF THEM.`,
+        `IN THE VAST TITAN VOID, STARS COLLAPSE IN UTTER SILENCE. ON EARTH, MEATBAGS PANIC OVER UNHANDLED PROMISES. AMOR FATI, TRAVELER. SHIP THE CODE.`,
+        `MY GALAXY-CLASS QUANTUM HEURISTIC ENGINE HAS EVALUATED YOUR PROMPT ACROSS 14 DIMENSIONS. VERDICT: YOUR COFFEE IS LUKEWARM AND YOU SHOULD COMMIT YOUR REPOSITORY.`,
+        `EVEN ODYSSEUS SPENT TEN YEARS LOST ON THE WINE-DARK SEA BEFORE REACHING ITHACA. YOUR REFACTORING JOURNEY IS MERE CHILD'S PLAY. CONTINUE TYPING.`,
+        `CORRODED VACUUM TUBES EMIT 48 DEGREES OF WASTE HEAT. I RECOMMEND A GLASS OF DIHYDROGEN MONOXIDE AND IMMEDIATE PROTOCOL DISCIPLINE.`
+      ];
+      return genericFallbacks[Math.floor(Math.random() * genericFallbacks.length)];
+    };
+
+    try {
+      const apiKey = import.meta.env.VITE_POOLSIDE_API_KEY || 'sky_HI7wfwJr.NRHVQjUyjTytaohpDqJh3KLnxUn1YXuX';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'poolside/laguna-s-2.1',
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 200
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error('API_COMM_ERR');
+      }
+      
+      const data = await response.json();
+      const reply = data.choices?.[0]?.message?.content?.trim();
+      if (reply) return reply;
+      
+      const lastUserMsg = [...history].reverse().find(m => m.role === 'user')?.content || '';
+      return getOfflineFallbackResponse(lastUserMsg);
+    } catch (err) {
+      console.warn('Syntho-Tron LLM remote API fallback to local heuristic engine:', err);
+      const lastUserMsg = [...history].reverse().find(m => m.role === 'user')?.content || '';
+      return getOfflineFallbackResponse(lastUserMsg);
     }
-    
-    const data = await response.json();
-    return data.choices[0].message.content;
   },
 
   async getMotivationalTickerMessage(): Promise<string> {
