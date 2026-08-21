@@ -14,6 +14,7 @@ class TapeAudioEffects {
   private gainNode: GainNode | null = null;
   private humNode: OscillatorNode | null = null;
   private humGain: GainNode | null = null;
+  private isRunning = false;
 
   public initContext() {
     if (!this.ctx) {
@@ -78,12 +79,11 @@ class TapeAudioEffects {
   }
 
   start() {
+    if (this.isRunning) return;
     try {
       const ctx = this.initContext();
       if (!ctx) return;
-
-      // Ensure any previous noise is cleaned up
-      this.stop();
+      this.isRunning = true;
 
       // Generate pink tape noise buffer
       const bufferSize = ctx.sampleRate * 2;
@@ -98,7 +98,7 @@ class TapeAudioEffects {
         b3 = 0.86650 * b3 + white * 0.3104856;
         b4 = 0.55000 * b4 + white * 0.5329522;
         b5 = -0.7616 * b5 - white * 0.0168980;
-        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.045;
+        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.035;
         b6 = white * 0.115926;
       }
 
@@ -114,7 +114,7 @@ class TapeAudioEffects {
 
       this.gainNode = ctx.createGain();
       this.gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
-      this.gainNode.gain.exponentialRampToValueAtTime(0.035, ctx.currentTime + 0.15);
+      this.gainNode.gain.exponentialRampToValueAtTime(0.025, ctx.currentTime + 0.15);
 
       whiteNoise.connect(bandpass);
       bandpass.connect(this.gainNode);
@@ -127,7 +127,7 @@ class TapeAudioEffects {
       this.humNode.type = 'sine';
       this.humNode.frequency.setValueAtTime(52, ctx.currentTime);
       this.humGain = ctx.createGain();
-      this.humGain.gain.setValueAtTime(0.006, ctx.currentTime);
+      this.humGain.gain.setValueAtTime(0.004, ctx.currentTime);
       this.humNode.connect(this.humGain);
       this.humGain.connect(ctx.destination);
       this.humNode.start(0);
@@ -135,6 +135,8 @@ class TapeAudioEffects {
   }
 
   stop() {
+    if (!this.isRunning) return;
+    this.isRunning = false;
     try {
       if (this.gainNode && this.ctx) {
         this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, this.ctx.currentTime);
@@ -155,7 +157,7 @@ class TapeAudioEffects {
           this.humNode.disconnect();
           this.humNode = null;
         }
-      }, 100);
+      }, 90);
     } catch { }
   }
 }
@@ -184,7 +186,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
   const currentEpisode: TapeEpisode = currentSeason.episodes[activeEpisodeIndex] || currentSeason.episodes[0];
   const totalDuration = exactDuration || currentEpisode.durationSecs || 60;
 
-  // Stop audio and speech on unmount or close
+  // Cleanup on modal close or unmount
   useEffect(() => {
     if (!isOpen) {
       setIsPlaying(false);
@@ -204,81 +206,33 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     }
   }, [isOpen]);
 
-  // Audio Element Setup for Real Audio Tracks (e.g. SIDE_A)
+  // Sync isPlaying state with the actual HTML5 audio element
   useEffect(() => {
     if (!isOpen) return;
 
-    if (currentEpisode.audioSrc) {
-      if (!audioRef.current) {
-        audioRef.current = new Audio(currentEpisode.audioSrc);
-      } else {
-        audioRef.current.src = currentEpisode.audioSrc;
+    if (isPlaying) {
+      setReelWindMode('PLAYING');
+      tapeAudioEngine.start();
+      if (currentEpisode.audioSrc && audioRef.current) {
+        audioRef.current.play().catch((err) => {
+          console.warn('Audio play request error:', err);
+        });
       }
-
-      const audio = audioRef.current;
-      audio.preload = 'auto';
-
-      const handleLoadedMetadata = () => {
-        if (audio.duration && !isNaN(audio.duration)) {
-          setExactDuration(Math.round(audio.duration));
-        }
-      };
-
-      const handleTimeUpdate = () => {
-        setPlaybackSeconds(Math.floor(audio.currentTime));
-        setTapeCounter((prev) => (prev + 1) % 999);
-
-        // Sync typewriter dialogue lines with real audio playback progress
-        if (currentEpisode.dialogues.length > 0 && audio.duration) {
-          const ratio = audio.currentTime / audio.duration;
-          const targetLine = Math.min(
-            currentEpisode.dialogues.length,
-            Math.max(1, Math.ceil(ratio * currentEpisode.dialogues.length))
-          );
-          setRevealedLineIndex(targetLine);
-        }
-      };
-
-      const handleEnded = () => {
-        if (activeEpisodeIndex < currentSeason.episodes.length - 1) {
-          setActiveEpisodeIndex(activeEpisodeIndex + 1);
-          setRevealedLineIndex(0);
-          setActiveWordCount(0);
-          setPlaybackSeconds(0);
-        } else {
-          setIsPlaying(false);
-          setReelWindMode('IDLE');
-          tapeAudioEngine.stop();
-          if (onSynthoReact) {
-            onSynthoReact(`${currentSeason.seasonTitle} - ${currentEpisode.title}`);
-          }
-        }
-      };
-
-      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.addEventListener('timeupdate', handleTimeUpdate);
-      audio.addEventListener('ended', handleEnded);
-
-      return () => {
-        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        audio.removeEventListener('timeupdate', handleTimeUpdate);
-        audio.removeEventListener('ended', handleEnded);
-      };
     } else {
-      setExactDuration(currentEpisode.durationSecs);
+      setReelWindMode('IDLE');
+      tapeAudioEngine.stop();
       if (audioRef.current) {
         audioRef.current.pause();
       }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
     }
-  }, [isOpen, activeSeasonIndex, activeEpisodeIndex, currentEpisode, currentSeason, onSynthoReact]);
+  }, [isOpen, isPlaying, currentEpisode.audioSrc]);
 
-  // Audio Playback & Spectrum Analyzer Animation Loop
+  // Real-time Audio Spectrum Visualizer Animation Loop (Bounces organically during playback)
   useEffect(() => {
     if (!isOpen || !isPlaying) {
-      tapeAudioEngine.stop();
-      if (audioRef.current && currentEpisode.audioSrc) {
-        audioRef.current.pause();
-      }
       if (animFrameRef.current) {
         cancelAnimationFrame(animFrameRef.current);
       }
@@ -286,38 +240,30 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       return;
     }
 
-    setReelWindMode('PLAYING');
-    tapeAudioEngine.start();
-
-    if (currentEpisode.audioSrc && audioRef.current) {
-      audioRef.current.play().catch(() => {});
-    }
-
-    // Real-time animated audio VU meter & frequency spectrum generator
     let phase = 0;
-    const updateSpectrum = () => {
-      phase += 0.15;
-      const newLevels = Array.from({ length: 16 }, (_, i) => {
-        const bass = Math.sin(phase * 1.8 + i * 0.4) * 35;
-        const mid = Math.cos(phase * 2.4 - i * 0.6) * 25;
-        const jitter = Math.random() * 28;
-        const raw = 30 + bass + mid + jitter;
-        return Math.max(8, Math.min(98, Math.round(raw)));
+    const animateVisualizer = () => {
+      phase += 0.12;
+      const levels = Array.from({ length: 16 }, (_, i) => {
+        const primary = Math.sin(phase * 2.2 + i * 0.45) * 38;
+        const secondary = Math.cos(phase * 3.1 - i * 0.7) * 25;
+        const flutter = (Math.random() * 2 - 1) * 15;
+        const combined = 42 + primary + secondary + flutter;
+        return Math.max(10, Math.min(96, Math.round(combined)));
       });
-      setAudioFrequencies(newLevels);
-      animFrameRef.current = requestAnimationFrame(updateSpectrum);
+      setAudioFrequencies(levels);
+      animFrameRef.current = requestAnimationFrame(animateVisualizer);
     };
 
-    animFrameRef.current = requestAnimationFrame(updateSpectrum);
+    animFrameRef.current = requestAnimationFrame(animateVisualizer);
 
     return () => {
       if (animFrameRef.current) {
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [isOpen, isPlaying, currentEpisode]);
+  }, [isOpen, isPlaying]);
 
-  // Secondary playback timer for speech-synthesized episodes (without MP3)
+  // Secondary playback timer for speech-synthesized episodes (when audioSrc is not an MP3)
   useEffect(() => {
     if (!isOpen || !isPlaying || currentEpisode.audioSrc) return;
 
@@ -325,14 +271,12 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       setPlaybackSeconds((prev) => {
         if (prev >= totalDuration) {
           if (activeEpisodeIndex < currentSeason.episodes.length - 1) {
-            setActiveEpisodeIndex(activeEpisodeIndex + 1);
+            setActiveEpisodeIndex((prevEp) => prevEp + 1);
             setRevealedLineIndex(0);
             setActiveWordCount(0);
             return 0;
           } else {
             setIsPlaying(false);
-            setReelWindMode('IDLE');
-            tapeAudioEngine.stop();
             if (onSynthoReact) {
               onSynthoReact(`${currentSeason.seasonTitle} - ${currentEpisode.title}`);
             }
@@ -346,7 +290,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isOpen, isPlaying, activeSeasonIndex, activeEpisodeIndex, currentSeason, currentEpisode, totalDuration, onSynthoReact]);
+  }, [isOpen, isPlaying, activeEpisodeIndex, currentSeason, currentEpisode, totalDuration, onSynthoReact]);
 
   // Line progression pacing for Speech-synthesized episodes
   useEffect(() => {
@@ -359,12 +303,12 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
         }
         return prev;
       });
-    }, Math.max(1800, Math.floor((totalDuration * 1000) / currentEpisode.dialogues.length)));
+    }, Math.max(1800, Math.floor((totalDuration * 1000) / Math.max(1, currentEpisode.dialogues.length))));
 
     return () => clearInterval(lineInterval);
   }, [isPlaying, currentEpisode, totalDuration]);
 
-  // Real-time word-by-word streaming typewriter effect
+  // Real-time word-by-word typewriter effect for current speaking line
   useEffect(() => {
     if (!isPlaying || revealedLineIndex === 0) return;
     const currentLine = currentEpisode.dialogues[revealedLineIndex - 1];
@@ -381,7 +325,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
         clearInterval(wordInterval);
         return prev;
       });
-    }, Math.max(80, Math.floor(1600 / Math.max(1, totalWords))));
+    }, Math.max(70, Math.floor(1400 / Math.max(1, totalWords))));
 
     return () => clearInterval(wordInterval);
   }, [isPlaying, revealedLineIndex, currentEpisode]);
@@ -393,7 +337,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     }
   }, [revealedLineIndex, activeWordCount]);
 
-  // Dual-voice natural human narration (only for non-MP3 synthesized episodes):
+  // Dual-voice synthetic TTS narration for non-MP3 episodes
   useEffect(() => {
     if (!isOpen || !isPlaying || currentEpisode.audioSrc || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
@@ -508,26 +452,13 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     }, 600);
   };
 
-  // Play handler (instant with click sound)
+  // Play / Pause Toggle
   const handlePlayToggle = () => {
     tapeAudioEngine.playMechanicalButtonClick();
     if (isPlaying) {
       setIsPlaying(false);
-      setReelWindMode('IDLE');
-      tapeAudioEngine.stop();
-      if (audioRef.current && currentEpisode.audioSrc) {
-        audioRef.current.pause();
-      }
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
     } else {
       setIsPlaying(true);
-      setReelWindMode('PLAYING');
-      tapeAudioEngine.start();
-      if (audioRef.current && currentEpisode.audioSrc) {
-        audioRef.current.play().catch(() => {});
-      }
       if (revealedLineIndex === 0) {
         setRevealedLineIndex(1);
         setActiveWordCount(0);
@@ -535,21 +466,16 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     }
   };
 
-  // Stop handler (instant with click sound)
+  // Stop handler
   const handleStop = () => {
     tapeAudioEngine.playMechanicalButtonClick();
     setIsPlaying(false);
-    setReelWindMode('IDLE');
-    tapeAudioEngine.stop();
     setPlaybackSeconds(0);
     setRevealedLineIndex(0);
     setActiveWordCount(0);
-    if (audioRef.current && currentEpisode.audioSrc) {
-      audioRef.current.pause();
+    if (audioRef.current) {
       audioRef.current.currentTime = 0;
-    }
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      audioRef.current.pause();
     }
   };
 
@@ -599,6 +525,47 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/92 backdrop-blur-lg animate-fade-in font-mono select-none">
+      {/* Hidden Native Audio Element Managed by React */}
+      <audio
+        ref={audioRef}
+        src={currentEpisode.audioSrc || undefined}
+        preload="auto"
+        onLoadedMetadata={(e) => {
+          const d = (e.target as HTMLAudioElement).duration;
+          if (d && !isNaN(d)) {
+            setExactDuration(Math.round(d));
+          }
+        }}
+        onTimeUpdate={(e) => {
+          const a = e.target as HTMLAudioElement;
+          const curr = Math.floor(a.currentTime);
+          setPlaybackSeconds(curr);
+          setTapeCounter((prev) => (prev + 1) % 999);
+
+          if (currentEpisode.dialogues.length > 0 && a.duration) {
+            const ratio = a.currentTime / a.duration;
+            const targetLine = Math.min(
+              currentEpisode.dialogues.length,
+              Math.max(1, Math.ceil(ratio * currentEpisode.dialogues.length))
+            );
+            setRevealedLineIndex(targetLine);
+          }
+        }}
+        onEnded={() => {
+          if (activeEpisodeIndex < currentSeason.episodes.length - 1) {
+            setActiveEpisodeIndex((prev) => prev + 1);
+            setRevealedLineIndex(0);
+            setActiveWordCount(0);
+            setPlaybackSeconds(0);
+          } else {
+            setIsPlaying(false);
+            if (onSynthoReact) {
+              onSynthoReact(`${currentSeason.seasonTitle} - ${currentEpisode.title}`);
+            }
+          }
+        }}
+      />
+
       {/* Master Sky Blue Cyberpunk Cassette Console Frame */}
       <div 
         className="w-full max-w-6xl h-[94vh] bg-[#020617] border-2 border-[#38bdf8] shadow-[0_0_50px_rgba(56,189,248,0.45),inset_0_0_30px_rgba(0,0,0,0.95)] p-3 md:p-5 relative flex flex-col gap-3 text-xs overflow-hidden"
@@ -720,7 +687,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                     {currentEpisode.location}
                   </span>
                   <span className="text-[8px] text-[#7dd3fc] mt-1 font-mono tracking-wider">
-                    {reelWindMode === 'REWINDING' ? '◀◀ REWINDING TAPE...' : reelWindMode === 'FAST_FORWARDING' ? 'FAST FORWARDING ▶▶' : reelWindMode === 'PLAYING' ? (currentEpisode.audioSrc ? '● ANALOG REEL RUNNING 4.75 CM/S' : '● TAPE RUNNING 4.75 CM/S') : 'DECK IDLE'}
+                    {reelWindMode === 'REWINDING' ? '◀◀ REWINDING TAPE...' : reelWindMode === 'FAST_FORWARDING' ? 'FAST FORWARDING ▶▶' : reelWindMode === 'PLAYING' ? (currentEpisode.audioSrc ? '● ANALOG MASTER RUNNING 4.75 CM/S' : '● TAPE RUNNING 4.75 CM/S') : 'DECK IDLE'}
                   </span>
                 </div>
 
@@ -753,7 +720,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                     <span className="font-bold">SPECTRUM_ANALYZER // 16-BAND_EQ</span>
                   </span>
                   <span className="text-[8.5px] text-[#bae6fd]/80 font-mono">
-                    {isPlaying ? (currentEpisode.audioSrc ? '♫ CrO2_ANALOG_PLAYBACK' : '♫ SYNTH_AUDIO_VOX') : '0.0 dB // IDLE'}
+                    {isPlaying ? (currentEpisode.audioSrc ? '♫ CrO2_ANALOG_MASTER' : '♫ SYNTH_AUDIO_VOX') : '0.0 dB // IDLE'}
                   </span>
                 </div>
 
@@ -861,7 +828,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
 
                 <div className="flex items-center gap-1.5 text-[9px] text-[#7dd3fc]">
                   <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-[#38bdf8] animate-ping' : 'bg-white/20'}`}></span>
-                  <span>{isPlaying ? (currentEpisode.audioSrc ? 'ANALOG_AUDIO' : 'SYNTH_AUDIO') : 'MUTED'}</span>
+                  <span>{isPlaying ? (currentEpisode.audioSrc ? 'ANALOG_MASTER' : 'SYNTH_VOX') : 'MUTED'}</span>
                 </div>
               </div>
             </div>
@@ -886,8 +853,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                         setRevealedLineIndex(1);
                         setActiveWordCount(0);
                         setIsPlaying(true);
-                        setReelWindMode('PLAYING');
-                        tapeAudioEngine.start();
                       }}
                       className={`p-1.5 border transition-all cursor-pointer flex flex-col justify-between ${
                         isCurrent
