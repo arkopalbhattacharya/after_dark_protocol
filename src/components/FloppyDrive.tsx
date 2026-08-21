@@ -145,7 +145,7 @@ export function FloppyDrive({
             </div>
 
             {/* Inner Cassette Tape SVG Asset Graphic */}
-            <div className="relative w-11 h-12 flex items-center justify-center p-0.5 z-10">
+            <div className="relative w-11 h-12 flex items-center justify-center p-0.5 z-10 -translate-y-[15px]">
               <img 
                 src={cassetteTapeSvg} 
                 alt="Classified Cassette Tape" 
