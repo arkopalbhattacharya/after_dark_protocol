@@ -1,3 +1,5 @@
+import sideAJenAudio from '../assets/tapes/FOR MY TRON - 1988 ETERNAL/side_a_jen.mp3';
+
 export interface TapeDialogue {
   speaker: 'JENNIFER' | 'DAAK' | 'SYNTHO_TRON' | 'SYS' | 'OTHER';
   text: string;
@@ -11,6 +13,7 @@ export interface TapeEpisode {
   location: string;
   recordedDate: string;
   durationSecs: number;
+  audioSrc?: string;
   dialogues: TapeDialogue[];
 }
 
@@ -24,25 +27,26 @@ export interface TapeSeason {
 export const JENNIFER_SEASONS_DATA: TapeSeason[] = [
   {
     seasonNumber: 1,
-    seasonTitle: 'SEASON 01: THE MEETING',
-    subtitle: 'Aethelgard-4 Orbital Relay // 1984-1985',
+    seasonTitle: 'DECK_1: FOR MY TRON // 1988 ETERNAL',
+    subtitle: 'Aethelgard-4 Orbital Relay // 1988 ETERNAL',
     episodes: [
       {
-        id: 's01_e01',
+        id: 'deck1_side_a',
         seasonNumber: 1,
         episodeNumber: 1,
-        title: 'THE HEXADECIMAL COFFEE',
+        title: 'SIDE_A // FOR MY TRON // 1988 ETERNAL',
         location: 'Sector 4 Observation Lounge, 03:14 UTC',
-        recordedDate: 'OCTOBER 1984',
-        durationSecs: 45,
+        recordedDate: '1988 ETERNAL',
+        durationSecs: 96,
+        audioSrc: sideAJenAudio,
         dialogues: [
-          { speaker: 'SYS', text: '[TAPE HISS // 4.75 CM/S // CASSETTE REEL ENGAGED]' },
-          { speaker: 'JENNIFER', text: 'You know, staring at that telemetry monitor won\'t make the solar wind arrive any faster, engineer.' },
-          { speaker: 'DAAK', text: 'In atmospheric physics, doctor, patience is an error-correction buffer. And your caffeine dispenser is vibrating at 47 hertz.' },
-          { speaker: 'JENNIFER', text: 'I\'m Jennifer. Planetary Astrophysics. And this machine keeps twelve postgraduates alive in orbit.' },
-          { speaker: 'DAAK', text: 'Daak. Telemetry and signals. Why is an astrophysicist reading Marcus Aurelius at three in the morning?' },
-          { speaker: 'JENNIFER', text: 'Because Roman emperors had better insight into cosmic chaos than our station director.' },
-          { speaker: 'DAAK', text: 'Sit down, Jennifer. Let us see if your philosophy survives real engineering.' }
+          { speaker: 'SYS', text: '[TAPE HISS // 4.75 CM/S // MAGNETIC HEAD ENGAGED // CrO2 STEREO]' },
+          { speaker: 'JENNIFER', text: '[clears throat] Testing... testing... is this thing on? [chuckles] Ah, the little red light is glowing. Okay. This is Doctor Jennifer Ruiz, officially cataloging for the archives that Chief Engineer Daak is eighty percent cold tungsten... and twenty percent sentimental fool.' },
+          { speaker: 'SYS', text: '[short pause, smiling warmly]' },
+          { speaker: 'JENNIFER', text: '[chuckles] I know you\'re going to roll your eyes when you hear this, Daak. You’ll probably say analog tape has too much harmonic distortion. [soft teasing laugh] But you also said it has warmth. That it remembers the soul of the microphone. So... [gentle whisper] I’m leaving a piece of my soul in here for you.' },
+          { speaker: 'JENNIFER', text: '[intimate whisper, very close] Entry 42. It’s three in the morning, and the station is completely quiet. You think I’m recording stellar spectral data on the terminal. But really, I’m just holding the microphone near your chest while you sleep. Listen...' },
+          { speaker: 'JENNIFER', text: '[soft exhale]...that’s you, Daak. That\'s the hearth of this entire station. You frown when you\'re awake, always calculating orbital decay. But when you sleep, that stubborn crease between your brows disappears, and I see the boy who used to stare at Saturn through a cardboard telescope in London. [voice tightens with quiet tenderness] Never stop looking at the stars with me. I love you with every byte of my consciousness.' },
+          { speaker: 'JENNIFER', text: '[forcing a bright, energetic tone, smiling through lingering sadness] Remember Seville, Daak? The rain in the Cathedral courtyard? [giggles softly] You looked so ridiculous in that soaked uniform, trying to explain that the sunset was just atmospheric refraction. But your hands were so warm when you took mine. Let\'s promise. When this tour ends next year, we are leaving the telemetry bays. We are going to New Arcadia. We’ll build the greenhouse. I’ll plant the rosemary, and you can spend all your credits on obsolete Tektronix oscilloscopes. [tender chuckle] I won\'t even yell at you. Well... maybe a little. But then I\'ll just kiss you until you stop arguing.' }
         ]
       },
       {
@@ -184,7 +188,7 @@ export const JENNIFER_SEASONS_DATA: TapeSeason[] = [
   },
   {
     seasonNumber: 2,
-    seasonTitle: 'SEASON 02: THE ROMANCE',
+    seasonTitle: 'DECK_2: THE ROMANCE',
     subtitle: 'Seville, London & Stargazing // 1985-1986',
     episodes: [
       {
@@ -327,7 +331,7 @@ export const JENNIFER_SEASONS_DATA: TapeSeason[] = [
   },
   {
     seasonNumber: 3,
-    seasonTitle: 'SEASON 03: THE PASSION & PILLOW TALKS',
+    seasonTitle: 'DECK_3: THE PASSION & PILLOW TALKS',
     subtitle: 'Intimacy, Scars & The First Anomaly // 1986-1987',
     episodes: [
       {
@@ -474,7 +478,7 @@ export const JENNIFER_SEASONS_DATA: TapeSeason[] = [
   },
   {
     seasonNumber: 4,
-    seasonTitle: 'SEASON 04: THE MARRIAGE & FACING REALITY',
+    seasonTitle: 'DECK_4: THE MARRIAGE & FACING REALITY',
     subtitle: 'The Wedding, The Signal & The Crimson Envelope // 1987-1988',
     episodes: [
       {
@@ -620,7 +624,7 @@ export const JENNIFER_SEASONS_DATA: TapeSeason[] = [
   },
   {
     seasonNumber: 5,
-    seasonTitle: 'SEASON 05: THE CALL TO DUTY & THE SILENCE',
+    seasonTitle: 'DECK_5: THE CALL TO DUTY & THE SILENCE',
     subtitle: 'The Harvest, The Extraction & The Fading Wave // 1988-1989',
     episodes: [
       {

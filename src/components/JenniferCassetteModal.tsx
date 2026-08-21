@@ -15,7 +15,7 @@ class TapeAudioEffects {
   private humNode: OscillatorNode | null = null;
   private humGain: GainNode | null = null;
 
-  private initContext() {
+  public initContext() {
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioCtx) {
@@ -25,19 +25,20 @@ class TapeAudioEffects {
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
+    return this.ctx;
   }
 
   // Hard 80s Mechanical Cassette Player Solenoid & Spring Latch Click Sound
   playMechanicalButtonClick() {
     try {
-      this.initContext();
-      if (!this.ctx) return;
+      const ctx = this.initContext();
+      if (!ctx) return;
 
-      const now = this.ctx.currentTime;
+      const now = ctx.currentTime;
 
       // 1. Heavy mechanical plastic latch thud (solenoid impact)
-      const thudOsc = this.ctx.createOscillator();
-      const thudGain = this.ctx.createGain();
+      const thudOsc = ctx.createOscillator();
+      const thudGain = ctx.createGain();
       thudOsc.type = 'triangle';
       thudOsc.frequency.setValueAtTime(160, now);
       thudOsc.frequency.exponentialRampToValueAtTime(35, now + 0.08);
@@ -46,47 +47,47 @@ class TapeAudioEffects {
       thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
       thudOsc.connect(thudGain);
-      thudGain.connect(this.ctx.destination);
+      thudGain.connect(ctx.destination);
       thudOsc.start(now);
       thudOsc.stop(now + 0.09);
 
       // 2. Sharp metallic spring click snap
-      const snapLen = Math.floor(this.ctx.sampleRate * 0.035);
-      const snapBuffer = this.ctx.createBuffer(1, snapLen, this.ctx.sampleRate);
+      const snapLen = Math.floor(ctx.sampleRate * 0.035);
+      const snapBuffer = ctx.createBuffer(1, snapLen, ctx.sampleRate);
       const snapData = snapBuffer.getChannelData(0);
       for (let i = 0; i < snapLen; i++) {
-        snapData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.005));
+        snapData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.005));
       }
-      const snapSource = this.ctx.createBufferSource();
+      const snapSource = ctx.createBufferSource();
       snapSource.buffer = snapBuffer;
 
-      const snapFilter = this.ctx.createBiquadFilter();
+      const snapFilter = ctx.createBiquadFilter();
       snapFilter.type = 'bandpass';
       snapFilter.frequency.value = 2900;
       snapFilter.Q.value = 3.5;
 
-      const snapGain = this.ctx.createGain();
+      const snapGain = ctx.createGain();
       snapGain.gain.setValueAtTime(0.4, now);
       snapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
 
       snapSource.connect(snapFilter);
       snapFilter.connect(snapGain);
-      snapGain.connect(this.ctx.destination);
+      snapGain.connect(ctx.destination);
       snapSource.start(now);
     } catch { }
   }
 
   start() {
     try {
-      this.initContext();
-      if (!this.ctx) return;
+      const ctx = this.initContext();
+      if (!ctx) return;
 
       // Ensure any previous noise is cleaned up
       this.stop();
 
       // Generate pink tape noise buffer
-      const bufferSize = this.ctx.sampleRate * 2;
-      const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const bufferSize = ctx.sampleRate * 2;
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
       let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
       for (let i = 0; i < bufferSize; i++) {
@@ -101,34 +102,34 @@ class TapeAudioEffects {
         b6 = white * 0.115926;
       }
 
-      const whiteNoise = this.ctx.createBufferSource();
+      const whiteNoise = ctx.createBufferSource();
       whiteNoise.buffer = noiseBuffer;
       whiteNoise.loop = true;
 
       // Bandpass filter for cassette head warmth (1.35kHz)
-      const bandpass = this.ctx.createBiquadFilter();
+      const bandpass = ctx.createBiquadFilter();
       bandpass.type = 'bandpass';
       bandpass.frequency.value = 1350;
       bandpass.Q.value = 1.1;
 
-      this.gainNode = this.ctx.createGain();
-      this.gainNode.gain.setValueAtTime(0.001, this.ctx.currentTime);
-      this.gainNode.gain.exponentialRampToValueAtTime(0.035, this.ctx.currentTime + 0.15);
+      this.gainNode = ctx.createGain();
+      this.gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+      this.gainNode.gain.exponentialRampToValueAtTime(0.035, ctx.currentTime + 0.15);
 
       whiteNoise.connect(bandpass);
       bandpass.connect(this.gainNode);
-      this.gainNode.connect(this.ctx.destination);
+      this.gainNode.connect(ctx.destination);
       whiteNoise.start(0);
       this.noiseNode = whiteNoise;
 
       // 52Hz mains transformer hum
-      this.humNode = this.ctx.createOscillator();
+      this.humNode = ctx.createOscillator();
       this.humNode.type = 'sine';
-      this.humNode.frequency.setValueAtTime(52, this.ctx.currentTime);
-      this.humGain = this.ctx.createGain();
-      this.humGain.gain.setValueAtTime(0.006, this.ctx.currentTime);
+      this.humNode.frequency.setValueAtTime(52, ctx.currentTime);
+      this.humGain = ctx.createGain();
+      this.humGain.gain.setValueAtTime(0.006, ctx.currentTime);
       this.humNode.connect(this.humGain);
-      this.humGain.connect(this.ctx.destination);
+      this.humGain.connect(ctx.destination);
       this.humNode.start(0);
     } catch { }
   }
@@ -166,17 +167,22 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
   const [activeEpisodeIndex, setActiveEpisodeIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playbackSeconds, setPlaybackSeconds] = useState<number>(0);
+  const [exactDuration, setExactDuration] = useState<number>(96);
   const [tapeCounter, setTapeCounter] = useState<number>(104);
   const [revealedLineIndex, setRevealedLineIndex] = useState<number>(0);
   const [activeWordCount, setActiveWordCount] = useState<number>(0);
   const [reelWindMode, setReelWindMode] = useState<'IDLE' | 'PLAYING' | 'REWINDING' | 'FAST_FORWARDING'>('IDLE');
+  const [audioFrequencies, setAudioFrequencies] = useState<number[]>(new Array(16).fill(0));
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const animFrameRef = useRef<number | null>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const transcriptContainerRef = useRef<HTMLDivElement>(null);
   const activeLineRef = useRef<HTMLDivElement>(null);
 
   const currentSeason = JENNIFER_SEASONS_DATA[activeSeasonIndex] || JENNIFER_SEASONS_DATA[0];
   const currentEpisode: TapeEpisode = currentSeason.episodes[activeEpisodeIndex] || currentSeason.episodes[0];
+  const totalDuration = exactDuration || currentEpisode.durationSecs || 60;
 
   // Stop audio and speech on unmount or close
   useEffect(() => {
@@ -184,25 +190,140 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       setIsPlaying(false);
       setReelWindMode('IDLE');
       tapeAudioEngine.stop();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+      setAudioFrequencies(new Array(16).fill(0));
     }
   }, [isOpen]);
 
-  // Main playback timer
+  // Audio Element Setup for Real Audio Tracks (e.g. SIDE_A)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (currentEpisode.audioSrc) {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(currentEpisode.audioSrc);
+      } else {
+        audioRef.current.src = currentEpisode.audioSrc;
+      }
+
+      const audio = audioRef.current;
+      audio.preload = 'auto';
+
+      const handleLoadedMetadata = () => {
+        if (audio.duration && !isNaN(audio.duration)) {
+          setExactDuration(Math.round(audio.duration));
+        }
+      };
+
+      const handleTimeUpdate = () => {
+        setPlaybackSeconds(Math.floor(audio.currentTime));
+        setTapeCounter((prev) => (prev + 1) % 999);
+
+        // Sync typewriter dialogue lines with real audio playback progress
+        if (currentEpisode.dialogues.length > 0 && audio.duration) {
+          const ratio = audio.currentTime / audio.duration;
+          const targetLine = Math.min(
+            currentEpisode.dialogues.length,
+            Math.max(1, Math.ceil(ratio * currentEpisode.dialogues.length))
+          );
+          setRevealedLineIndex(targetLine);
+        }
+      };
+
+      const handleEnded = () => {
+        if (activeEpisodeIndex < currentSeason.episodes.length - 1) {
+          setActiveEpisodeIndex(activeEpisodeIndex + 1);
+          setRevealedLineIndex(0);
+          setActiveWordCount(0);
+          setPlaybackSeconds(0);
+        } else {
+          setIsPlaying(false);
+          setReelWindMode('IDLE');
+          tapeAudioEngine.stop();
+          if (onSynthoReact) {
+            onSynthoReact(`${currentSeason.seasonTitle} - ${currentEpisode.title}`);
+          }
+        }
+      };
+
+      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('ended', handleEnded);
+
+      return () => {
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('ended', handleEnded);
+      };
+    } else {
+      setExactDuration(currentEpisode.durationSecs);
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    }
+  }, [isOpen, activeSeasonIndex, activeEpisodeIndex, currentEpisode, currentSeason, onSynthoReact]);
+
+  // Audio Playback & Spectrum Analyzer Animation Loop
   useEffect(() => {
     if (!isOpen || !isPlaying) {
       tapeAudioEngine.stop();
+      if (audioRef.current && currentEpisode.audioSrc) {
+        audioRef.current.pause();
+      }
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+      setAudioFrequencies(new Array(16).fill(0));
       return;
     }
 
     setReelWindMode('PLAYING');
     tapeAudioEngine.start();
 
+    if (currentEpisode.audioSrc && audioRef.current) {
+      audioRef.current.play().catch(() => {});
+    }
+
+    // Real-time animated audio VU meter & frequency spectrum generator
+    let phase = 0;
+    const updateSpectrum = () => {
+      phase += 0.15;
+      const newLevels = Array.from({ length: 16 }, (_, i) => {
+        const bass = Math.sin(phase * 1.8 + i * 0.4) * 35;
+        const mid = Math.cos(phase * 2.4 - i * 0.6) * 25;
+        const jitter = Math.random() * 28;
+        const raw = 30 + bass + mid + jitter;
+        return Math.max(8, Math.min(98, Math.round(raw)));
+      });
+      setAudioFrequencies(newLevels);
+      animFrameRef.current = requestAnimationFrame(updateSpectrum);
+    };
+
+    animFrameRef.current = requestAnimationFrame(updateSpectrum);
+
+    return () => {
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+    };
+  }, [isOpen, isPlaying, currentEpisode]);
+
+  // Secondary playback timer for speech-synthesized episodes (without MP3)
+  useEffect(() => {
+    if (!isOpen || !isPlaying || currentEpisode.audioSrc) return;
+
     const interval = setInterval(() => {
       setPlaybackSeconds((prev) => {
-        if (prev >= currentEpisode.durationSecs) {
+        if (prev >= totalDuration) {
           if (activeEpisodeIndex < currentSeason.episodes.length - 1) {
             setActiveEpisodeIndex(activeEpisodeIndex + 1);
             setRevealedLineIndex(0);
@@ -215,7 +336,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
             if (onSynthoReact) {
               onSynthoReact(`${currentSeason.seasonTitle} - ${currentEpisode.title}`);
             }
-            return currentEpisode.durationSecs;
+            return totalDuration;
           }
         }
         return prev + 1;
@@ -224,14 +345,12 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       setTapeCounter((prev) => (prev + 1) % 999);
     }, 1000);
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, [isOpen, isPlaying, activeSeasonIndex, activeEpisodeIndex, currentSeason, currentEpisode, onSynthoReact]);
+    return () => clearInterval(interval);
+  }, [isOpen, isPlaying, activeSeasonIndex, activeEpisodeIndex, currentSeason, currentEpisode, totalDuration, onSynthoReact]);
 
-  // Line progression pacing
+  // Line progression pacing for Speech-synthesized episodes
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || currentEpisode.audioSrc) return;
     const lineInterval = setInterval(() => {
       setRevealedLineIndex((prev) => {
         if (prev < currentEpisode.dialogues.length) {
@@ -240,10 +359,10 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
         }
         return prev;
       });
-    }, Math.max(1800, Math.floor((currentEpisode.durationSecs * 1000) / currentEpisode.dialogues.length)));
+    }, Math.max(1800, Math.floor((totalDuration * 1000) / currentEpisode.dialogues.length)));
 
     return () => clearInterval(lineInterval);
-  }, [isPlaying, currentEpisode]);
+  }, [isPlaying, currentEpisode, totalDuration]);
 
   // Real-time word-by-word streaming typewriter effect
   useEffect(() => {
@@ -262,7 +381,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
         clearInterval(wordInterval);
         return prev;
       });
-    }, Math.max(90, Math.floor(1800 / Math.max(1, totalWords))));
+    }, Math.max(80, Math.floor(1600 / Math.max(1, totalWords))));
 
     return () => clearInterval(wordInterval);
   }, [isPlaying, revealedLineIndex, currentEpisode]);
@@ -274,11 +393,9 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     }
   }, [revealedLineIndex, activeWordCount]);
 
-  // Dual-voice natural human narration:
-  // JENNIFER: 30s well-groomed, self-made woman (poised, articulate, warm European/Spanish undertone)
-  // DAAK: early 40s bearded philosopher and whimsical man (deep, resonant, witty British cadence)
+  // Dual-voice natural human narration (only for non-MP3 synthesized episodes):
   useEffect(() => {
-    if (!isOpen || !isPlaying || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (!isOpen || !isPlaying || currentEpisode.audioSrc || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     const currentDialogue = currentEpisode.dialogues[revealedLineIndex - 1];
     if (currentDialogue && currentDialogue.speaker !== 'SYS') {
@@ -290,7 +407,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       const voices = window.speechSynthesis.getVoices();
 
       if (currentDialogue.speaker === 'JENNIFER') {
-        // Natural 30s articulate self-made woman
         utterance.pitch = 1.0;
         utterance.rate = 0.96;
         utterance.volume = 1.0;
@@ -323,7 +439,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
           utterance.voice = naturalFemaleVoice;
         }
       } else {
-        // Early 40s bearded philosopher & whimsical British man
         utterance.pitch = 0.93;
         utterance.rate = 0.94;
         utterance.volume = 1.0;
@@ -357,13 +472,17 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
 
   if (!isOpen) return null;
 
-  const progressPercent = Math.min(100, Math.max(0, Math.round((playbackSeconds / currentEpisode.durationSecs) * 100)));
+  const progressPercent = Math.min(100, Math.max(0, Math.round((playbackSeconds / totalDuration) * 100)));
 
   // Fast forward trigger
   const handleFastForward = () => {
     tapeAudioEngine.playMechanicalButtonClick();
     setReelWindMode('FAST_FORWARDING');
-    setPlaybackSeconds((prev) => Math.min(currentEpisode.durationSecs, prev + 6));
+    const target = Math.min(totalDuration, playbackSeconds + 6);
+    setPlaybackSeconds(target);
+    if (audioRef.current && currentEpisode.audioSrc) {
+      audioRef.current.currentTime = target;
+    }
     setRevealedLineIndex((prev) => Math.min(currentEpisode.dialogues.length, prev + 1));
     setActiveWordCount(0);
     setTapeCounter((prev) => (prev + 12) % 999);
@@ -376,7 +495,11 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
   const handleRewind = () => {
     tapeAudioEngine.playMechanicalButtonClick();
     setReelWindMode('REWINDING');
-    setPlaybackSeconds((prev) => Math.max(0, prev - 6));
+    const target = Math.max(0, playbackSeconds - 6);
+    setPlaybackSeconds(target);
+    if (audioRef.current && currentEpisode.audioSrc) {
+      audioRef.current.currentTime = target;
+    }
     setRevealedLineIndex((prev) => Math.max(1, prev - 1));
     setActiveWordCount(0);
     setTapeCounter((prev) => (prev - 12 + 999) % 999);
@@ -392,6 +515,9 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       setIsPlaying(false);
       setReelWindMode('IDLE');
       tapeAudioEngine.stop();
+      if (audioRef.current && currentEpisode.audioSrc) {
+        audioRef.current.pause();
+      }
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
@@ -399,6 +525,9 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       setIsPlaying(true);
       setReelWindMode('PLAYING');
       tapeAudioEngine.start();
+      if (audioRef.current && currentEpisode.audioSrc) {
+        audioRef.current.play().catch(() => {});
+      }
       if (revealedLineIndex === 0) {
         setRevealedLineIndex(1);
         setActiveWordCount(0);
@@ -415,6 +544,10 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     setPlaybackSeconds(0);
     setRevealedLineIndex(0);
     setActiveWordCount(0);
+    if (audioRef.current && currentEpisode.audioSrc) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -427,12 +560,16 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     const rect = progressBarRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const fraction = Math.max(0, Math.min(1, clickX / rect.width));
-    const targetSeconds = Math.round(fraction * currentEpisode.durationSecs);
+    const targetSeconds = Math.round(fraction * totalDuration);
     setPlaybackSeconds(targetSeconds);
+
+    if (audioRef.current && currentEpisode.audioSrc) {
+      audioRef.current.currentTime = targetSeconds;
+    }
 
     const targetLineIndex = Math.min(
       currentEpisode.dialogues.length,
-      Math.max(1, Math.floor((targetSeconds / currentEpisode.durationSecs) * currentEpisode.dialogues.length))
+      Math.max(1, Math.floor((targetSeconds / totalDuration) * currentEpisode.dialogues.length))
     );
     setRevealedLineIndex(targetLineIndex);
     setActiveWordCount(0);
@@ -523,8 +660,10 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                     : 'bg-[#030c1e] border-[#38bdf8]/30 text-[#7dd3fc]/70 hover:border-[#38bdf8]/70 hover:text-white'
                 }`}
               >
-                <span className="text-[9px] uppercase tracking-wider text-[#bae6fd]">SEASON 0{s.seasonNumber}</span>
-                <span className="text-[10px] font-bold truncate">{s.seasonTitle.replace(/SEASON \d+: /, '')}</span>
+                <span className="text-[9px] uppercase tracking-wider text-[#bae6fd]">DECK_{s.seasonNumber}</span>
+                <span className="text-[10px] font-bold truncate">
+                  {s.seasonTitle.replace(/^DECK_\d+: /, '').replace(/^SEASON \d+: /, '')}
+                </span>
               </button>
             );
           })}
@@ -537,15 +676,15 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
           <div className="md:col-span-5 flex flex-col gap-2.5 overflow-hidden h-full">
             
             {/* Physical Cassette Deck Housing with Large Animated Rotating Wheels */}
-            <div className="bg-[#030c1e] border-2 border-[#38bdf8]/70 rounded p-3 shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] flex flex-col gap-2.5 flex-shrink-0">
+            <div className="bg-[#030c1e] border-2 border-[#38bdf8]/70 rounded p-3 shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] flex flex-col gap-2 flex-shrink-0">
               
               {/* Header Label */}
               <div className="bg-gradient-to-r from-[#0284c7] via-[#38bdf8] to-[#0284c7] text-[#020617] px-3 py-1 font-bold flex justify-between items-center text-[10px]">
                 <span className="tracking-widest font-black uppercase truncate">
-                  [ CrO2 // {currentSeason.seasonTitle.replace(/SEASON \d+: /, '')} ]
+                  [ CrO2 // {currentSeason.seasonTitle.replace(/^DECK_\d+: /, '').replace(/^SEASON \d+: /, '')} ]
                 </span>
                 <span className="font-mono">
-                  S0{currentSeason.seasonNumber}_EP0{currentEpisode.episodeNumber}
+                  DECK_0{currentSeason.seasonNumber}_TAPE0{currentEpisode.episodeNumber}
                 </span>
               </div>
 
@@ -554,7 +693,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                 
                 {/* Large Left Rotating Spool */}
                 <div 
-                  className={`w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-[#38bdf8] flex items-center justify-center relative bg-[#06152d] shadow-[0_0_18px_rgba(56,189,248,0.4)] ${reelAnimClass}`} 
+                  className={`w-20 h-20 md:w-22 md:h-22 rounded-full border-4 border-[#38bdf8] flex items-center justify-center relative bg-[#06152d] shadow-[0_0_18px_rgba(56,189,248,0.4)] ${reelAnimClass}`} 
                   style={{ 
                     animationDuration: reelAnimDuration,
                     animationDirection: reelDirection as any
@@ -581,13 +720,13 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                     {currentEpisode.location}
                   </span>
                   <span className="text-[8px] text-[#7dd3fc] mt-1 font-mono tracking-wider">
-                    {reelWindMode === 'REWINDING' ? '◀◀ REWINDING TAPE...' : reelWindMode === 'FAST_FORWARDING' ? 'FAST FORWARDING ▶▶' : reelWindMode === 'PLAYING' ? '● TAPE RUNNING 4.75 CM/S' : 'DECK IDLE'}
+                    {reelWindMode === 'REWINDING' ? '◀◀ REWINDING TAPE...' : reelWindMode === 'FAST_FORWARDING' ? 'FAST FORWARDING ▶▶' : reelWindMode === 'PLAYING' ? (currentEpisode.audioSrc ? '● ANALOG REEL RUNNING 4.75 CM/S' : '● TAPE RUNNING 4.75 CM/S') : 'DECK IDLE'}
                   </span>
                 </div>
 
                 {/* Large Right Rotating Spool */}
                 <div 
-                  className={`w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-[#38bdf8] flex items-center justify-center relative bg-[#06152d] shadow-[0_0_18px_rgba(56,189,248,0.4)] ${reelAnimClass}`} 
+                  className={`w-20 h-20 md:w-22 md:h-22 rounded-full border-4 border-[#38bdf8] flex items-center justify-center relative bg-[#06152d] shadow-[0_0_18px_rgba(56,189,248,0.4)] ${reelAnimClass}`} 
                   style={{ 
                     animationDuration: reelAnimDuration,
                     animationDirection: reelDirection as any
@@ -606,12 +745,46 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                 </div>
               </div>
 
+              {/* Stereo Audio Frequency Spectrum Visualizer / VU Meter */}
+              <div className="bg-[#020b18] border border-[#38bdf8]/50 p-2 rounded flex flex-col gap-1 shadow-inner">
+                <div className="flex justify-between items-center text-[9px] text-[#7dd3fc] font-mono border-b border-[#38bdf8]/30 pb-1">
+                  <span className="flex items-center gap-1.5">
+                    <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-[#38bdf8] animate-ping' : 'bg-white/20'}`}></span>
+                    <span className="font-bold">SPECTRUM_ANALYZER // 16-BAND_EQ</span>
+                  </span>
+                  <span className="text-[8.5px] text-[#bae6fd]/80 font-mono">
+                    {isPlaying ? (currentEpisode.audioSrc ? '♫ CrO2_ANALOG_PLAYBACK' : '♫ SYNTH_AUDIO_VOX') : '0.0 dB // IDLE'}
+                  </span>
+                </div>
+
+                <div className="h-9 flex items-end justify-between gap-1 px-1 pt-1 bg-[#01040a] rounded-xs border border-[#38bdf8]/20">
+                  {audioFrequencies.map((lvl, idx) => {
+                    const isPeak = lvl > 75;
+                    const isMid = lvl > 40;
+                    return (
+                      <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full">
+                        <div 
+                          className={`w-full rounded-t-xs transition-all duration-75 ${
+                            isPeak 
+                              ? 'bg-gradient-to-t from-[#0284c7] via-[#38bdf8] to-[#ff0033] shadow-[0_0_8px_rgba(255,0,51,0.8)]' 
+                              : isMid 
+                              ? 'bg-gradient-to-t from-[#0284c7] via-[#38bdf8] to-[#7dd3fc] shadow-[0_0_6px_rgba(56,189,248,0.7)]' 
+                              : 'bg-gradient-to-t from-[#034078] to-[#0284c7]'
+                          }`}
+                          style={{ height: `${Math.max(8, lvl)}%` }}
+                        ></div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* 80s Clickable/Scrubbable Terminal Progress Bar */}
               <div className="flex flex-col gap-1">
                 <div className="flex justify-between text-[9px] text-[#7dd3fc] font-mono">
                   <span>&gt; SCRUB_SEEK_BAR:</span>
                   <span>
-                    {String(Math.floor(playbackSeconds / 60)).padStart(2, '0')}:{String(playbackSeconds % 60).padStart(2, '0')} / {String(Math.floor(currentEpisode.durationSecs / 60)).padStart(2, '0')}:{String(currentEpisode.durationSecs % 60).padStart(2, '0')} [{progressPercent}%]
+                    {String(Math.floor(playbackSeconds / 60)).padStart(2, '0')}:{String(playbackSeconds % 60).padStart(2, '0')} / {String(Math.floor(totalDuration / 60)).padStart(2, '0')}:{String(totalDuration % 60).padStart(2, '0')} [{progressPercent}%]
                   </span>
                 </div>
 
@@ -688,16 +861,16 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
 
                 <div className="flex items-center gap-1.5 text-[9px] text-[#7dd3fc]">
                   <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-[#38bdf8] animate-ping' : 'bg-white/20'}`}></span>
-                  <span>{isPlaying ? 'AUDIO_ON' : 'MUTED'}</span>
+                  <span>{isPlaying ? (currentEpisode.audioSrc ? 'ANALOG_AUDIO' : 'SYNTH_AUDIO') : 'MUTED'}</span>
                 </div>
               </div>
             </div>
 
-            {/* Scrollable Stack of 10 Audio Cassettes in Selected Season */}
+            {/* Scrollable Stack of Audio Cassettes in Selected Season */}
             <div className="flex-1 border border-[#38bdf8]/30 bg-[#020917] p-2 flex flex-col gap-1 overflow-hidden min-h-0">
               <div className="text-[10px] text-[#7dd3fc] font-bold border-b border-[#38bdf8]/30 pb-1 flex justify-between items-center flex-shrink-0">
                 <span>CASSETTE_STACK // {currentSeason.subtitle}</span>
-                <span className="text-white/60">10 TAPES</span>
+                <span className="text-white/60">{currentSeason.episodes.length} TAPES</span>
               </div>
 
               <div className="flex-1 overflow-y-auto pr-1 space-y-1.5">
@@ -723,8 +896,13 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                       }`}
                     >
                       <div className="flex justify-between items-center text-[9px] text-[#7dd3fc]">
-                        <span className="font-bold">
-                          TAPE 0{ep.episodeNumber} // {ep.recordedDate}
+                        <span className="font-bold flex items-center gap-1">
+                          <span>TAPE 0{ep.episodeNumber} // {ep.recordedDate}</span>
+                          {ep.audioSrc && (
+                            <span className="text-[8px] bg-[#0284c7] text-white px-1 py-0.2 rounded-xs font-black">
+                              [♫ MASTER]
+                            </span>
+                          )}
                         </span>
                         <span className="text-white/50">{ep.durationSecs}s</span>
                       </div>
@@ -748,84 +926,93 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
             {/* Transcript Top Bar */}
             <div className="bg-[#030e22] border-b border-[#38bdf8]/40 p-2.5 flex justify-between items-center flex-shrink-0 text-[10px] text-[#7dd3fc]">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[14px] text-[#38bdf8] animate-pulse">subtitles</span>
-                <span className="font-bold tracking-widest uppercase">
-                  &gt; LIVE_VOICE_TRANSCRIPTION // {currentEpisode.title}
+                <span className="material-symbols-outlined text-[14px] text-[#38bdf8]">description</span>
+                <span className="font-bold tracking-widest text-[#38bdf8]">
+                  TRANSCRIPT_LOG // {currentEpisode.title}
                 </span>
               </div>
-              <span className="text-white/60 font-mono">{currentEpisode.recordedDate}</span>
+              <div className="flex items-center gap-2 text-[9px]">
+                <span className="text-[#bae6fd]/70">{currentEpisode.recordedDate}</span>
+                <span className="text-[#38bdf8] font-bold">[CrO2 STEREO]</span>
+              </div>
             </div>
 
-            {/* Full-Height Scrolling Dialogue Stream with Word-by-Word Synchronized Spoken Flow */}
+            {/* Transcript Scroll Area with Real-Time Word-by-Word Streaming Typewriter Effect */}
             <div 
               ref={transcriptContainerRef}
-              className="flex-1 p-3.5 overflow-y-auto space-y-3 font-mono leading-relaxed"
+              className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 font-mono text-xs md:text-sm select-text"
             >
-              {currentEpisode.dialogues.slice(0, Math.max(1, revealedLineIndex)).map((d, dIdx) => {
-                const isCurrentActiveLine = dIdx === revealedLineIndex - 1;
-                const isJenny = d.speaker === 'JENNIFER';
-                const isDaak = d.speaker === 'DAAK' || d.speaker === 'SYNTHO_TRON';
-                const words = d.text.split(' ');
+              {revealedLineIndex === 0 && !isPlaying && (
+                <div className="h-full flex flex-col items-center justify-center text-center text-[#7dd3fc]/50 gap-2 my-auto py-12">
+                  <span className="material-symbols-outlined text-[40px] text-[#38bdf8]/40 animate-pulse">
+                    play_circle
+                  </span>
+                  <p className="tracking-widest font-bold">PRESS PLAY OR SELECT A CASSETTE TO ENGAGE MAGNETIC PLAYHEAD</p>
+                  <p className="text-[10px] text-[#bae6fd]/40 max-w-sm">
+                    All 50 episodes feature authentic acoustic tape hiss, transformer hum, and mechanical latching solenoids.
+                  </p>
+                </div>
+              )}
 
-                // For the currently vocalized line, stream words up to activeWordCount; for completed lines, show all words
-                const visibleWords = isCurrentActiveLine && isPlaying
-                  ? words.slice(0, Math.max(1, activeWordCount))
-                  : words;
+              {currentEpisode.dialogues.slice(0, Math.max(1, revealedLineIndex)).map((d, idx) => {
+                const isCurrentSpeakingLine = idx === Math.max(0, revealedLineIndex - 1) && isPlaying;
+                const isJenny = d.speaker === 'JENNIFER';
+                const isDaak = d.speaker === 'DAAK';
+                const isSys = d.speaker === 'SYS';
+
+                // Real-time word-by-word typewriter streaming
+                let displayText = d.text;
+                if (isCurrentSpeakingLine && activeWordCount > 0) {
+                  const words = d.text.split(' ');
+                  displayText = words.slice(0, activeWordCount).join(' ');
+                }
 
                 return (
                   <div 
-                    key={dIdx} 
-                    ref={isCurrentActiveLine ? activeLineRef : null}
-                    className={`p-2 rounded border transition-all animate-fade-in ${
-                      isCurrentActiveLine
-                        ? 'bg-[#031c3e] border-[#38bdf8]/80 shadow-[0_0_14px_rgba(56,189,248,0.35)]'
-                        : 'bg-black/40 border-white/5 opacity-80'
+                    key={idx}
+                    ref={isCurrentSpeakingLine ? activeLineRef : null}
+                    className={`transition-all duration-300 p-2.5 rounded border ${
+                      isCurrentSpeakingLine
+                        ? 'bg-[#021b3d] border-[#38bdf8] shadow-[0_0_15px_rgba(56,189,248,0.4)]'
+                        : isSys
+                        ? 'bg-[#020b18]/60 border-[#38bdf8]/20 text-[#7dd3fc]/60 italic text-[11px]'
+                        : isJenny
+                        ? 'bg-[#03152d]/80 border-[#38bdf8]/30'
+                        : 'bg-[#021026]/80 border-[#0284c7]/30'
                     }`}
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`font-black text-[10px] tracking-wider uppercase ${
+                    <div className="flex items-center justify-between pb-1 border-b border-[#38bdf8]/20 mb-1.5 text-[10px]">
+                      <span className={`font-black tracking-wider uppercase ${
                         isJenny ? 'text-[#38bdf8]' : isDaak ? 'text-[#7dd3fc]' : 'text-amber-warn'
                       }`}>
-                        [{d.speaker}]:
+                        {isJenny ? '▶ DR. JENNIFER RUIZ' : isDaak ? '▶ CHIEF ENGINEER DAAK' : '▶ SYSTEM LOG'}
                       </span>
-                      {isCurrentActiveLine && isPlaying && (
-                        <span className="text-[9px] text-[#38bdf8] animate-pulse font-bold tracking-widest">
-                          ● TRANSMITTING_VOICE...
+                      {isCurrentSpeakingLine && (
+                        <span className="flex items-center gap-1 text-[9px] text-[#38bdf8] font-mono animate-pulse">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]"></span>
+                          <span>SPEAKING</span>
                         </span>
                       )}
                     </div>
 
-                    <div className={`text-xs md:text-sm leading-relaxed ${
+                    <p className={`leading-relaxed tracking-wide ${
                       isJenny ? 'text-[#bae6fd]' : isDaak ? 'text-[#e0f2fe]' : 'text-white/70 italic'
                     }`}>
-                      {visibleWords.join(' ')}
-                      {isCurrentActiveLine && isPlaying && activeWordCount < words.length && (
-                        <span className="inline-block w-2 h-3.5 ml-1 bg-[#38bdf8] animate-pulse align-middle"></span>
-                      )}
-                    </div>
+                      {displayText}
+                      {isCurrentSpeakingLine && <span className="inline-block w-2 h-3.5 ml-1 bg-[#38bdf8] animate-pulse"></span>}
+                    </p>
                   </div>
                 );
               })}
-
-              {!isPlaying && revealedLineIndex === 0 && (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 text-[#38bdf8]/50 gap-2">
-                  <span className="material-symbols-outlined text-[36px] text-[#38bdf8]/40 animate-pulse">play_circle</span>
-                  <span className="text-xs font-bold tracking-widest">
-                    &gt; CASSETTE DECK READY // PRESS [ ▶ PLAY ] OR SELECT A TAPE TO COMMENCE REPLAY
-                  </span>
-                  <span className="text-[10px] text-white/40 max-w-sm">
-                    Speech audio synthesis and analog magnetic tape hiss will engage dynamically.
-                  </span>
-                </div>
-              )}
             </div>
 
-            {/* Transcript Footer Status Bar */}
-            <div className="border-t border-[#38bdf8]/30 bg-[#020917] p-2 flex justify-between items-center text-[9px] text-[#7dd3fc]/70 flex-shrink-0">
-              <span>&gt; ACOUSTIC_FILTER: TAPE_OXIDE_1350HZ // 52HZ_MAINS_HUM</span>
-              <span>AMOR FATI // 1984–1989 ETERNAL</span>
+            {/* Transcript Footer Status */}
+            <div className="bg-[#020b18] border-t border-[#38bdf8]/30 p-2 flex justify-between items-center text-[9px] text-[#7dd3fc]/70 flex-shrink-0">
+              <span>CrO2_TAPE_BIAS // HIGH_FIDELITY_AUDIO</span>
+              <span className="text-[#38bdf8]">TRANSCRIPT_SYNC: NOMINAL</span>
             </div>
           </div>
+
         </div>
       </div>
     </div>
