@@ -171,8 +171,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
   const [playbackSeconds, setPlaybackSeconds] = useState<number>(0);
   const [exactDuration, setExactDuration] = useState<number>(96);
   const [tapeCounter, setTapeCounter] = useState<number>(104);
-  const [revealedLineIndex, setRevealedLineIndex] = useState<number>(0);
-  const [activeWordCount, setActiveWordCount] = useState<number>(0);
   const [reelWindMode, setReelWindMode] = useState<'IDLE' | 'PLAYING' | 'REWINDING' | 'FAST_FORWARDING'>('IDLE');
   const [audioFrequencies, setAudioFrequencies] = useState<number[]>(new Array(16).fill(0));
 
@@ -180,7 +178,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
   const animFrameRef = useRef<number | null>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const transcriptContainerRef = useRef<HTMLDivElement>(null);
-  const activeLineRef = useRef<HTMLDivElement>(null);
 
   const currentSeason = JENNIFER_SEASONS_DATA[activeSeasonIndex] || JENNIFER_SEASONS_DATA[0];
   const currentEpisode: TapeEpisode = currentSeason.episodes[activeEpisodeIndex] || currentSeason.episodes[0];
@@ -195,9 +192,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
-      }
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
       }
       if (animFrameRef.current) {
         cancelAnimationFrame(animFrameRef.current);
@@ -223,9 +217,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       tapeAudioEngine.stop();
       if (audioRef.current) {
         audioRef.current.pause();
-      }
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
       }
     }
   }, [isOpen, isPlaying, currentEpisode.audioSrc]);
@@ -272,8 +263,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
         if (prev >= totalDuration) {
           if (activeEpisodeIndex < currentSeason.episodes.length - 1) {
             setActiveEpisodeIndex((prevEp) => prevEp + 1);
-            setRevealedLineIndex(0);
-            setActiveWordCount(0);
             return 0;
           } else {
             setIsPlaying(false);
@@ -292,128 +281,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     return () => clearInterval(interval);
   }, [isOpen, isPlaying, activeEpisodeIndex, currentSeason, currentEpisode, totalDuration, onSynthoReact]);
 
-  // Line progression pacing for Speech-synthesized episodes
-  useEffect(() => {
-    if (!isPlaying || currentEpisode.audioSrc) return;
-    const lineInterval = setInterval(() => {
-      setRevealedLineIndex((prev) => {
-        if (prev < currentEpisode.dialogues.length) {
-          setActiveWordCount(0);
-          return prev + 1;
-        }
-        return prev;
-      });
-    }, Math.max(1800, Math.floor((totalDuration * 1000) / Math.max(1, currentEpisode.dialogues.length))));
-
-    return () => clearInterval(lineInterval);
-  }, [isPlaying, currentEpisode, totalDuration]);
-
-  // Real-time word-by-word typewriter effect for current speaking line
-  useEffect(() => {
-    if (!isPlaying || revealedLineIndex === 0) return;
-    const currentLine = currentEpisode.dialogues[revealedLineIndex - 1];
-    if (!currentLine) return;
-
-    const words = currentLine.text.split(' ');
-    const totalWords = words.length;
-    
-    const wordInterval = setInterval(() => {
-      setActiveWordCount((prev) => {
-        if (prev < totalWords) {
-          return prev + 1;
-        }
-        clearInterval(wordInterval);
-        return prev;
-      });
-    }, Math.max(70, Math.floor(1400 / Math.max(1, totalWords))));
-
-    return () => clearInterval(wordInterval);
-  }, [isPlaying, revealedLineIndex, currentEpisode]);
-
-  // Auto-scroll transcript container to active speaking line
-  useEffect(() => {
-    if (activeLineRef.current) {
-      activeLineRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [revealedLineIndex, activeWordCount]);
-
-  // Dual-voice synthetic TTS narration for non-MP3 episodes
-  useEffect(() => {
-    if (!isOpen || !isPlaying || currentEpisode.audioSrc || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-
-    const currentDialogue = currentEpisode.dialogues[revealedLineIndex - 1];
-    if (currentDialogue && currentDialogue.speaker !== 'SYS') {
-      const cleanText = currentDialogue.text.replace(/[*_#`~[\]]/g, '').trim();
-      if (!cleanText) return;
-
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      const voices = window.speechSynthesis.getVoices();
-
-      if (currentDialogue.speaker === 'JENNIFER') {
-        utterance.pitch = 1.0;
-        utterance.rate = 0.96;
-        utterance.volume = 1.0;
-
-        const naturalFemaleVoice = voices.find(v => 
-          (v.name.toLowerCase().includes('samantha') && v.name.toLowerCase().includes('enhanced')) ||
-          (v.name.toLowerCase().includes('karen') && v.name.toLowerCase().includes('premium')) ||
-          v.name.toLowerCase().includes('aria') ||
-          v.name.toLowerCase().includes('jenny') ||
-          v.name.toLowerCase().includes('ava') ||
-          v.name.toLowerCase().includes('zoe') ||
-          v.name.toLowerCase().includes('serena') ||
-          v.name.toLowerCase().includes('victoria') ||
-          v.name.toLowerCase().includes('google us english female') ||
-          v.name.toLowerCase().includes('google uk english female')
-        ) || voices.find(v => 
-          (v.lang.toLowerCase().startsWith('es') || v.name.toLowerCase().includes('spanish')) &&
-          (v.name.toLowerCase().includes('monica') || 
-           v.name.toLowerCase().includes('paulina') || 
-           v.name.toLowerCase().includes('luciana') || 
-           v.name.toLowerCase().includes('francisca') ||
-           v.name.toLowerCase().includes('penelope'))
-        ) || voices.find(v => 
-          v.name.toLowerCase().includes('female') && v.lang.startsWith('en')
-        ) || voices.find(v => 
-          v.name.toLowerCase().includes('samantha') || v.name.toLowerCase().includes('victoria')
-        );
-
-        if (naturalFemaleVoice) {
-          utterance.voice = naturalFemaleVoice;
-        }
-      } else {
-        utterance.pitch = 0.93;
-        utterance.rate = 0.94;
-        utterance.volume = 1.0;
-
-        const philosopherMaleVoice = voices.find(v => 
-          (v.name.toLowerCase().includes('daniel') && v.name.toLowerCase().includes('enhanced')) ||
-          (v.name.toLowerCase().includes('oliver') && v.name.toLowerCase().includes('enhanced')) ||
-          v.name.toLowerCase().includes('arthur') ||
-          v.name.toLowerCase().includes('george') ||
-          v.name.toLowerCase().includes('malcolm') ||
-          v.name.toLowerCase().includes('gordon') ||
-          v.name.toLowerCase().includes('ryan') ||
-          v.name.toLowerCase().includes('guy') ||
-          v.name.toLowerCase().includes('google uk english male')
-        ) || voices.find(v => 
-          v.lang.toLowerCase().includes('en-gb') && v.name.toLowerCase().includes('male')
-        ) || voices.find(v => 
-          v.name.toLowerCase().includes('daniel') || v.lang.toLowerCase().includes('en-gb')
-        ) || voices.find(v => 
-          v.lang.startsWith('en') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('alex'))
-        );
-
-        if (philosopherMaleVoice) {
-          utterance.voice = philosopherMaleVoice;
-        }
-      }
-
-      window.speechSynthesis.speak(utterance);
-    }
-  }, [isOpen, isPlaying, revealedLineIndex, currentEpisode]);
-
   if (!isOpen) return null;
 
   const progressPercent = Math.min(100, Math.max(0, Math.round((playbackSeconds / totalDuration) * 100)));
@@ -427,8 +294,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     if (audioRef.current && currentEpisode.audioSrc) {
       audioRef.current.currentTime = target;
     }
-    setRevealedLineIndex((prev) => Math.min(currentEpisode.dialogues.length, prev + 1));
-    setActiveWordCount(0);
     setTapeCounter((prev) => (prev + 12) % 999);
     setTimeout(() => {
       setReelWindMode(isPlaying ? 'PLAYING' : 'IDLE');
@@ -444,8 +309,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     if (audioRef.current && currentEpisode.audioSrc) {
       audioRef.current.currentTime = target;
     }
-    setRevealedLineIndex((prev) => Math.max(1, prev - 1));
-    setActiveWordCount(0);
     setTapeCounter((prev) => (prev - 12 + 999) % 999);
     setTimeout(() => {
       setReelWindMode(isPlaying ? 'PLAYING' : 'IDLE');
@@ -455,15 +318,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
   // Play / Pause Toggle
   const handlePlayToggle = () => {
     tapeAudioEngine.playMechanicalButtonClick();
-    if (isPlaying) {
-      setIsPlaying(false);
-    } else {
-      setIsPlaying(true);
-      if (revealedLineIndex === 0) {
-        setRevealedLineIndex(1);
-        setActiveWordCount(0);
-      }
-    }
+    setIsPlaying(!isPlaying);
   };
 
   // Stop handler
@@ -471,8 +326,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     tapeAudioEngine.playMechanicalButtonClick();
     setIsPlaying(false);
     setPlaybackSeconds(0);
-    setRevealedLineIndex(0);
-    setActiveWordCount(0);
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.pause();
@@ -492,13 +345,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
     if (audioRef.current && currentEpisode.audioSrc) {
       audioRef.current.currentTime = targetSeconds;
     }
-
-    const targetLineIndex = Math.min(
-      currentEpisode.dialogues.length,
-      Math.max(1, Math.floor((targetSeconds / totalDuration) * currentEpisode.dialogues.length))
-    );
-    setRevealedLineIndex(targetLineIndex);
-    setActiveWordCount(0);
   };
 
   const totalBlocks = 28;
@@ -541,21 +387,10 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
           const curr = Math.floor(a.currentTime);
           setPlaybackSeconds(curr);
           setTapeCounter((prev) => (prev + 1) % 999);
-
-          if (currentEpisode.dialogues.length > 0 && a.duration) {
-            const ratio = a.currentTime / a.duration;
-            const targetLine = Math.min(
-              currentEpisode.dialogues.length,
-              Math.max(1, Math.ceil(ratio * currentEpisode.dialogues.length))
-            );
-            setRevealedLineIndex(targetLine);
-          }
         }}
         onEnded={() => {
           if (activeEpisodeIndex < currentSeason.episodes.length - 1) {
             setActiveEpisodeIndex((prev) => prev + 1);
-            setRevealedLineIndex(0);
-            setActiveWordCount(0);
             setPlaybackSeconds(0);
           } else {
             setIsPlaying(false);
@@ -615,11 +450,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                   setActiveSeasonIndex(idx);
                   setActiveEpisodeIndex(0);
                   setPlaybackSeconds(0);
-                  setRevealedLineIndex(0);
-                  setActiveWordCount(0);
-                  if (isPlaying) {
-                    setRevealedLineIndex(1);
-                  }
                 }}
                 className={`px-2 py-1.5 border text-left font-mono transition-all cursor-pointer flex flex-col justify-between ${
                   isSelected
@@ -850,8 +680,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                         tapeAudioEngine.playMechanicalButtonClick();
                         setActiveEpisodeIndex(idx);
                         setPlaybackSeconds(0);
-                        setRevealedLineIndex(1);
-                        setActiveWordCount(0);
                         setIsPlaying(true);
                       }}
                       className={`p-1.5 border transition-all cursor-pointer flex flex-col justify-between ${
@@ -902,48 +730,25 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
               </div>
             </div>
 
-            {/* Transcript Scroll Area with Real-Time Word-by-Word Streaming Typewriter Effect */}
+            {/* Transcript Scroll Area: Full Audio Transcript Displayed In One Go */}
             <div 
               ref={transcriptContainerRef}
               className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 font-mono text-xs md:text-sm select-text"
             >
-              {revealedLineIndex === 0 && !isPlaying && (
-                <div className="h-full flex flex-col items-center justify-center text-center text-[#7dd3fc]/50 gap-2 my-auto py-12">
-                  <span className="material-symbols-outlined text-[40px] text-[#38bdf8]/40 animate-pulse">
-                    play_circle
-                  </span>
-                  <p className="tracking-widest font-bold">PRESS PLAY OR SELECT A CASSETTE TO ENGAGE MAGNETIC PLAYHEAD</p>
-                  <p className="text-[10px] text-[#bae6fd]/40 max-w-sm">
-                    All 50 episodes feature authentic acoustic tape hiss, transformer hum, and mechanical latching solenoids.
-                  </p>
-                </div>
-              )}
-
-              {currentEpisode.dialogues.slice(0, Math.max(1, revealedLineIndex)).map((d, idx) => {
-                const isCurrentSpeakingLine = idx === Math.max(0, revealedLineIndex - 1) && isPlaying;
+              {currentEpisode.dialogues.map((d, idx) => {
                 const isJenny = d.speaker === 'JENNIFER';
                 const isDaak = d.speaker === 'DAAK';
                 const isSys = d.speaker === 'SYS';
 
-                // Real-time word-by-word typewriter streaming
-                let displayText = d.text;
-                if (isCurrentSpeakingLine && activeWordCount > 0) {
-                  const words = d.text.split(' ');
-                  displayText = words.slice(0, activeWordCount).join(' ');
-                }
-
                 return (
                   <div 
                     key={idx}
-                    ref={isCurrentSpeakingLine ? activeLineRef : null}
-                    className={`transition-all duration-300 p-2.5 rounded border ${
-                      isCurrentSpeakingLine
-                        ? 'bg-[#021b3d] border-[#38bdf8] shadow-[0_0_15px_rgba(56,189,248,0.4)]'
-                        : isSys
+                    className={`transition-all duration-200 p-3 rounded border ${
+                      isSys
                         ? 'bg-[#020b18]/60 border-[#38bdf8]/20 text-[#7dd3fc]/60 italic text-[11px]'
                         : isJenny
-                        ? 'bg-[#03152d]/80 border-[#38bdf8]/30'
-                        : 'bg-[#021026]/80 border-[#0284c7]/30'
+                        ? 'bg-[#03152d]/85 border-[#38bdf8]/40 shadow-[0_0_10px_rgba(56,189,248,0.15)]'
+                        : 'bg-[#021026]/85 border-[#0284c7]/30'
                     }`}
                   >
                     <div className="flex items-center justify-between pb-1 border-b border-[#38bdf8]/20 mb-1.5 text-[10px]">
@@ -952,19 +757,15 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                       }`}>
                         {isJenny ? '▶ DR. JENNIFER RUIZ' : isDaak ? '▶ CHIEF ENGINEER DAAK' : '▶ SYSTEM LOG'}
                       </span>
-                      {isCurrentSpeakingLine && (
-                        <span className="flex items-center gap-1 text-[9px] text-[#38bdf8] font-mono animate-pulse">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]"></span>
-                          <span>SPEAKING</span>
-                        </span>
-                      )}
+                      <span className="text-[9px] text-[#7dd3fc]/60 font-mono">
+                        LINE [{String(idx + 1).padStart(2, '0')}]
+                      </span>
                     </div>
 
                     <p className={`leading-relaxed tracking-wide ${
                       isJenny ? 'text-[#bae6fd]' : isDaak ? 'text-[#e0f2fe]' : 'text-white/70 italic'
                     }`}>
-                      {displayText}
-                      {isCurrentSpeakingLine && <span className="inline-block w-2 h-3.5 ml-1 bg-[#38bdf8] animate-pulse"></span>}
+                      {d.text}
                     </p>
                   </div>
                 );
@@ -974,7 +775,7 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
             {/* Transcript Footer Status */}
             <div className="bg-[#020b18] border-t border-[#38bdf8]/30 p-2 flex justify-between items-center text-[9px] text-[#7dd3fc]/70 flex-shrink-0">
               <span>CrO2_TAPE_BIAS // HIGH_FIDELITY_AUDIO</span>
-              <span className="text-[#38bdf8]">TRANSCRIPT_SYNC: NOMINAL</span>
+              <span className="text-[#38bdf8]">FULL_TRANSCRIPT_LOADED // COMPLETE</span>
             </div>
           </div>
 
