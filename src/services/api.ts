@@ -1,5 +1,7 @@
-import type { ProtocolLogEntry } from '../types';
+import type { ProtocolLogEntry, UserPreferences } from '../types';
 import type { NewsArticle, NewsSourceId } from '../types/news';
+import { getFreshInitialNewsArticles } from '../data/initialNewsData';
+import { DEFAULT_ENABLED_CATEGORIES } from '../config/logCategories';
 import { supabase } from './supabase';
 
 const getStorageKey = (userId?: string | null) => 
@@ -255,6 +257,81 @@ export const api = {
         console.warn('Supabase saveTtyHistory error:', err);
       }
     }
+  },
+
+  async getUserPreferences(userId?: string | null): Promise<UserPreferences> {
+    const defaultPrefs: UserPreferences = {
+      enabledCategories: DEFAULT_ENABLED_CATEGORIES,
+      theme: 'MIDNIGHT_V1.5',
+      crtFlicker: true,
+      speechSynth: false
+    };
+
+    const localKey = userId ? `after_dark_preferences_${userId}` : 'after_dark_preferences_guest';
+    const localRaw = localStorage.getItem(localKey);
+    let cached: UserPreferences = defaultPrefs;
+    if (localRaw) {
+      try {
+        cached = { ...defaultPrefs, ...JSON.parse(localRaw) };
+      } catch {}
+    }
+
+    if (supabase && userId && !userId.startsWith('offline_')) {
+      try {
+        const { data, error } = await supabase
+          .from('user_preferences')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (!error && data) {
+          const fetchedPrefs: UserPreferences = {
+            enabledCategories: Array.isArray(data.enabled_categories) && data.enabled_categories.length > 0
+              ? data.enabled_categories
+              : DEFAULT_ENABLED_CATEGORIES,
+            theme: data.theme || cached.theme,
+            crtFlicker: typeof data.crt_flicker === 'boolean' ? data.crt_flicker : cached.crtFlicker,
+            speechSynth: typeof data.speech_synth === 'boolean' ? data.speech_synth : cached.speechSynth
+          };
+          localStorage.setItem(localKey, JSON.stringify(fetchedPrefs));
+          return fetchedPrefs;
+        }
+      } catch (err) {
+        console.warn('Supabase getUserPreferences error, falling back to local cache:', err);
+      }
+    }
+
+    return cached;
+  },
+
+  async saveUserPreferences(userId: string | null | undefined, prefs: Partial<UserPreferences>): Promise<UserPreferences> {
+    const current = await this.getUserPreferences(userId);
+    const updated: UserPreferences = {
+      ...current,
+      ...prefs
+    };
+
+    const localKey = userId ? `after_dark_preferences_${userId}` : 'after_dark_preferences_guest';
+    localStorage.setItem(localKey, JSON.stringify(updated));
+
+    if (supabase && userId && !userId.startsWith('offline_')) {
+      try {
+        await supabase
+          .from('user_preferences')
+          .upsert({
+            user_id: userId,
+            enabled_categories: updated.enabledCategories,
+            theme: updated.theme,
+            crt_flicker: updated.crtFlicker,
+            speech_synth: updated.speechSynth,
+            updated_at: new Date().toISOString()
+          });
+      } catch (err) {
+        console.warn('Supabase saveUserPreferences error:', err);
+      }
+    }
+
+    return updated;
   },
   
   sendTtyMessage: async (history: {role: 'user'|'assistant', content: string}[]): Promise<string> => {
@@ -650,6 +727,97 @@ RULES:
     } catch (err) {
       console.warn(`[NewsFeed] LLM remote generation fallback for ${sourceId}:`, err);
       return generateOfflineArticle();
+    }
+  },
+
+  async getUniversalNews(): Promise<NewsArticle[]> {
+    if (!supabase) return [];
+
+    try {
+      const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+      const cutoffIso = new Date(Date.now() - TWELVE_HOURS_MS).toISOString();
+      const { data, error } = await supabase
+        .from('universal_news')
+        .select('*')
+        .gte('timestamp', cutoffIso)
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.warn('Supabase getUniversalNews error:', error);
+        return [];
+      }
+
+      if (data && data.length > 0) {
+        return data.map((row) => ({
+          id: row.id,
+          sourceId: row.source_id as NewsSourceId,
+          headline: row.headline,
+          content: row.content,
+          planetOrSector: row.planet_or_sector,
+          timestamp: row.timestamp,
+          tag: row.tag,
+          urgency: row.urgency as any,
+          authorOrWire: row.author_or_wire
+        }));
+      }
+
+      // If database table is empty on first boot, seed it with fresh initial articles in Supabase
+      const seedArticles = getFreshInitialNewsArticles();
+      const rows = seedArticles.map((a) => ({
+        id: a.id,
+        source_id: a.sourceId,
+        headline: a.headline,
+        content: a.content,
+        planet_or_sector: a.planetOrSector,
+        timestamp: a.timestamp,
+        tag: a.tag,
+        urgency: a.urgency,
+        author_or_wire: a.authorOrWire
+      }));
+
+      await supabase.from('universal_news').insert(rows);
+      return seedArticles;
+    } catch (err) {
+      console.warn('Supabase getUniversalNews exception:', err);
+      return [];
+    }
+  },
+
+  async saveAndPurgeUniversalNews(article: NewsArticle): Promise<NewsArticle[]> {
+    if (!supabase) return [];
+
+    try {
+      const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+
+      // 1. Insert new article into Supabase
+      const { error: insertErr } = await supabase.from('universal_news').insert({
+        id: article.id,
+        source_id: article.sourceId,
+        headline: article.headline,
+        content: article.content,
+        planet_or_sector: article.planetOrSector,
+        timestamp: article.timestamp,
+        tag: article.tag,
+        urgency: article.urgency,
+        author_or_wire: article.authorOrWire
+      });
+
+      if (insertErr) {
+        console.warn('Supabase insert article error:', insertErr);
+      }
+
+      // 2. Check & purge items older than 12 hours from Supabase table
+      const cutoffIso = new Date(Date.now() - TWELVE_HOURS_MS).toISOString();
+      await supabase
+        .from('universal_news')
+        .delete()
+        .lt('timestamp', cutoffIso);
+
+      // 3. Return fresh news strictly from Supabase
+      return await this.getUniversalNews();
+    } catch (err) {
+      console.warn('Supabase saveAndPurgeUniversalNews error:', err);
+      return await this.getUniversalNews();
     }
   }
 };

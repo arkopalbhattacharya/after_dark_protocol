@@ -20,64 +20,27 @@
     --color-primary: #1edce0;
     --color-primary-container: #52f9fd;
     --color-on-primary: #003738;
-    --color-secondary: #fdaf00;
-    --color-secondary-container: #ffd392;
-    --color-on-secondary: #432c00;
+    --color-secondary: #00a896;
+    --color-secondary-container: #52f9fd;
+    --color-on-secondary: #003738;
     --color-error: #ffb4ab;
     --color-error-base: #ff0033;
     --glow-color: rgba(30, 220, 224, 0.3);
-    --glow-secondary: rgba(253, 175, 0, 0.3);
+    --glow-secondary: rgba(0, 168, 150, 0.3);
     --border-primary: rgba(30, 220, 224, 0.3);
-    --border-secondary: rgba(253, 175, 0, 0.3);
+    --border-secondary: rgba(0, 168, 150, 0.3);
     --panel-scanline: rgba(30, 220, 224, 0.03);
-    --panel-scanline-secondary: rgba(253, 175, 0, 0.05);
+    --panel-scanline-secondary: rgba(0, 168, 150, 0.05);
     --scanline-color: rgba(0, 0, 0, 0.65);
     --scanline-border: #000;
     --scanline-border-shadow: rgba(0,0,0,1);
     --crt-refresh-color: rgba(30, 220, 224, 0.1);
-    --footer-bg: #cc8e00;
+    --footer-bg: #008080;
     --footer-text: #05070a;
-    --footer-border: rgba(253, 175, 0, 0.8);
+    --footer-border: #1edce0;
     --chromatic-aberration: 1px 0 2px rgba(255, 0, 0, 0.7), -1px 0 2px rgba(0, 255, 255, 0.7);
   }
 
-  [data-theme="MORNING_MIST_V1.0"] {
-    --bg-app: #f0f4f8;
-    --bg-base: #f6fafe;
-    --bg-surface: #ffffff;
-    --bg-panel: #ffffff;
-    --bg-header: #dfe3e7;
-    --bg-container-low: #f0f4f8;
-    --bg-container: #eaeef2;
-    --bg-container-high: #e4e9ed;
-    --bg-container-highest: #dfe3e7;
-    --text-on-surface: #171c1f;
-    --text-on-surface-variant: #3b494b;
-    --color-outline: #6a7a7b;
-    --color-outline-variant: #b9cacb;
-    --color-primary: #006970;
-    --color-primary-container: #00f0ff;
-    --color-on-primary: #ffffff;
-    --color-secondary: #7c5800;
-    --color-secondary-container: #feb700;
-    --color-on-secondary: #ffffff;
-    --color-error: #ba1a1a;
-    --color-error-base: #bd0042;
-    --glow-color: rgba(0, 105, 112, 0.2);
-    --glow-secondary: rgba(124, 88, 0, 0.2);
-    --border-primary: rgba(0, 105, 112, 0.35);
-    --border-secondary: rgba(124, 88, 0, 0.35);
-    --panel-scanline: rgba(0, 105, 112, 0.03);
-    --panel-scanline-secondary: rgba(124, 88, 0, 0.04);
-    --scanline-color: rgba(0, 0, 0, 0.04);
-    --scanline-border: #d1d9e0;
-    --scanline-border-shadow: rgba(0,0,0,0.08);
-    --crt-refresh-color: rgba(0, 240, 255, 0.05);
-    --footer-bg: #dfe3e7;
-    --footer-text: #171c1f;
-    --footer-border: rgba(0, 105, 112, 0.4);
-    --chromatic-aberration: none;
-  }
 
   [data-theme="COMET_SUNSET_V1.0"] {
     --bg-app: #140905;
@@ -191,6 +154,44 @@
     --footer-text: #dcfcff;
     --footer-border: #00eefc;
     --chromatic-aberration: 1px 0 3px rgba(130, 71, 255, 0.8), -1px 0 3px rgba(252, 238, 10, 0.7);
+  }
+
+  [data-theme="MAINFRAME_NEURO_8086"] {
+    --bg-app: #010a03;
+    --bg-base: #021206;
+    --bg-surface: #041c0a;
+    --bg-panel: #06260e;
+    --bg-header: #021407;
+    --bg-container-low: #031808;
+    --bg-container: #06290f;
+    --bg-container-high: #0b3815;
+    --bg-container-highest: #10481c;
+    --text-on-surface: #33ff33;
+    --text-on-surface-variant: #1fd655;
+    --color-outline: #257833;
+    --color-outline-variant: #195323;
+    --color-primary: #33ff00;
+    --color-primary-container: #66ff33;
+    --color-on-primary: #021004;
+    --color-secondary: #00ffaa;
+    --color-secondary-container: #00aa66;
+    --color-on-secondary: #021004;
+    --color-error: #ff0033;
+    --color-error-base: #ff1744;
+    --glow-color: rgba(51, 255, 0, 0.4);
+    --glow-secondary: rgba(0, 255, 170, 0.35);
+    --border-primary: rgba(51, 255, 0, 0.5);
+    --border-secondary: rgba(0, 255, 170, 0.4);
+    --panel-scanline: rgba(51, 255, 0, 0.05);
+    --panel-scanline-secondary: rgba(0, 255, 170, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.7);
+    --scanline-border: #0d3813;
+    --scanline-border-shadow: rgba(0,0,0,1);
+    --crt-refresh-color: rgba(51, 255, 0, 0.15);
+    --footer-bg: #031a08;
+    --footer-text: #33ff33;
+    --footer-border: #33ff00;
+    --chromatic-aberration: 1px 0 2px rgba(51, 255, 0, 0.8), -1px 0 2px rgba(0, 255, 170, 0.7);
   }
 
   body {

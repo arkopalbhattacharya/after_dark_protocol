@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import './index.css';
 import { api } from './services/api';
 import { supabase, isSupabaseConfigured } from './services/supabase';
-import type { ProtocolLogEntry, CategoryType, ThemeName } from './types';
+import type { ProtocolLogEntry, CategoryType, CategoryGroup, ThemeName } from './types';
 import { LogForms } from './components/Forms';
 import { ThemeModal } from './components/ThemeModal';
 import { TickerTape } from './components/TickerTape';
@@ -13,20 +13,23 @@ import { TtyTranscriptModal } from './components/TtyTranscriptModal';
 import { JenniferCipherModal } from './components/JenniferCipherModal';
 import { JenniferCassetteModal } from './components/JenniferCassetteModal';
 import { UniversalNewsPane } from './components/UniversalNewsPane';
-import { INITIAL_NEWS_ARTICLES } from './data/initialNewsData';
+import { LogTypeManagerModal } from './components/LogTypeManagerModal';
+import {
+  ALL_LOG_CATEGORIES,
+  DEFAULT_ENABLED_CATEGORIES,
+  CATEGORY_GROUPS,
+  getCategoryMeta
+} from './config/logCategories';
 import type { NewsArticle, NewsSourceId } from './types/news';
 import { AuthGate } from './components/AuthGate';
 import settings from './config/settings.json';
 
 const OFFLINE_TTL_MS = 60 * 60 * 1000; // 60 minutes offline session window
 
-const JOURNAL_TYPES: { id: CategoryType; label: string; icon: string; codename: string }[] = [
-  { id: 'AI_EXPERIMENT', label: 'AI_LAB', icon: 'science', codename: 'EXP_LOG // MOD_01' },
-  { id: 'CAFFEINE_LOG', label: 'CAFFEINE', icon: 'coffee', codename: 'STIM_LOG // MOD_02' },
-  { id: 'ACTIVITY_LOG', label: 'BIOMETRICS', icon: 'list_alt', codename: 'BIO_LOG // MOD_03' },
-  { id: 'FREEFORM_LOG', label: 'FREEFORM', icon: 'edit_document', codename: 'FREE_LOG // MOD_04' },
-  { id: 'DUTY_ROSTER', label: 'DUTY_ROSTER', icon: 'task_alt', codename: 'ROST_LOG // MOD_05' },
-];
+const activeJournalTypesList = (enabled: CategoryType[]) => {
+  const filtered = ALL_LOG_CATEGORIES.filter((c) => enabled.includes(c.id));
+  return filtered.length > 0 ? filtered : ALL_LOG_CATEGORIES;
+};
 
 function App() {
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; offlineStartedAt?: number } | null>(() => {
@@ -53,17 +56,28 @@ function App() {
 
   const [timeStr, setTimeStr] = useState('');
   const [logs, setLogs] = useState<ProtocolLogEntry[]>([]);
+  const [enabledCategories, setEnabledCategories] = useState<CategoryType[]>(() => {
+    try {
+      const saved = localStorage.getItem('after_dark_enabled_categories');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return DEFAULT_ENABLED_CATEGORIES;
+  });
   const [activeCategory, setActiveCategory] = useState<CategoryType>('AI_EXPERIMENT');
   const [telemetry, setTelemetry] = useState({ totalLogs: 0, categories: {} as Record<string, number> });
   const [title, setTitle] = useState('');
   const [inspectingLogId, setInspectingLogId] = useState<string | null>(null);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
-  const [filterCategory, setFilterCategory] = useState<CategoryType | 'ALL'>('ALL');
+  const [filterCategory, setFilterCategory] = useState<CategoryType | 'ALL' | CategoryGroup>('ALL');
   const [isLocked, setIsLocked] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [isTtyOpen, setIsTtyOpen] = useState(false);
   const [isTtyExpanded, setIsTtyExpanded] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  const [isLogTypeManagerOpen, setIsLogTypeManagerOpen] = useState(false);
   const [isTickerOpen, setIsTickerOpen] = useState(false);
   const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
   const [isFloppyNotesOpen, setIsFloppyNotesOpen] = useState(false);
@@ -75,10 +89,13 @@ function App() {
   const neuralJackRef = useRef<HTMLDivElement>(null);
   const [isJournalMenuOpen, setIsJournalMenuOpen] = useState(false);
   const [focusedJournalIndex, setFocusedJournalIndex] = useState<number>(0);
+  const [journalDropdownGroup, setJournalDropdownGroup] = useState<'ALL' | CategoryGroup>('ALL');
   const journalSelectorRef = useRef<HTMLDivElement>(null);
+
+  const activeJournalTypes = activeJournalTypesList(enabledCategories);
   const [theme, setTheme] = useState<ThemeName>(() => {
     const saved = localStorage.getItem('after_dark_theme') as ThemeName;
-    if (saved && ['MIDNIGHT_V1.5', 'MORNING_MIST_V1.0', 'COMET_SUNSET_V1.0', 'NEO_TWYLITE_V1.0', 'NEON_CITY_AFTERWORK'].includes(saved)) {
+    if (saved && ['MIDNIGHT_V1.5', 'COMET_SUNSET_V1.0', 'NEO_TWYLITE_V1.0', 'NEON_CITY_AFTERWORK', 'MAINFRAME_NEURO_8086'].includes(saved)) {
       return saved;
     }
     return 'MIDNIGHT_V1.5';
@@ -89,17 +106,11 @@ function App() {
     return saved !== 'false';
   });
 
-  // Universal News Feed State
-  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>(() => {
-    try {
-      const saved = localStorage.getItem('after_dark_news_articles');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch { }
-    return INITIAL_NEWS_ARTICLES;
-  });
+  const isOffline = Boolean(!currentUser || currentUser.id.startsWith('offline_') || !supabase);
+
+  // Universal News Feed State (strictly pulled from Supabase, no local memory persistence)
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
+  const [isNewsLoading, setIsNewsLoading] = useState<boolean>(false);
 
   const [isNewsMinimized, setIsNewsMinimized] = useState<boolean>(() => {
     try {
@@ -117,15 +128,6 @@ function App() {
     }
   });
 
-  // Save news state to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('after_dark_news_articles', JSON.stringify(newsArticles));
-    } catch (err) {
-      console.warn('Failed to cache news articles:', err);
-    }
-  }, [newsArticles]);
-
   useEffect(() => {
     try {
       localStorage.setItem('after_dark_news_minimized', String(isNewsMinimized));
@@ -142,10 +144,43 @@ function App() {
     }
   }, [isNewsHeightExpanded]);
 
-  // Periodic randomized 15-30 minute news fetcher per source
+  // Load news strictly from Supabase on mount and when connection/user state changes
   useEffect(() => {
+    if (isOffline) {
+      setNewsArticles([]);
+      setIsNewsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    const loadNewsFromSupabase = async () => {
+      setIsNewsLoading(true);
+      try {
+        const data = await api.getUniversalNews();
+        if (isMounted) {
+          setNewsArticles(data);
+        }
+      } catch (err) {
+        console.warn('Failed to pull news from Supabase:', err);
+      } finally {
+        if (isMounted) {
+          setIsNewsLoading(false);
+        }
+      }
+    };
+
+    loadNewsFromSupabase();
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser, isOffline]);
+
+  // Periodic randomized 15-30 minute news fetcher per source (Only active when online)
+  useEffect(() => {
+    if (isOffline) return;
+
     const sources: NewsSourceId[] = ['PLANETARY_AFFAIRS', 'UNIVERSAL_SPORTS', 'COMMERCE_TRADE', 'VOID_SATIRE'];
-    const timers: NodeJS.Timeout[] = [];
+    const timers: ReturnType<typeof setTimeout>[] = [];
 
     sources.forEach((sourceId) => {
       const scheduleNextFetch = () => {
@@ -153,12 +188,14 @@ function App() {
         const delayMs = (15 + Math.random() * 15) * 60 * 1000;
         const timer = setTimeout(async () => {
           try {
-            const newArticle = await api.fetchLatestUniversalNews(sourceId);
-            setNewsArticles((prev) => {
-              const exists = prev.some((a) => a.id === newArticle.id || a.headline === newArticle.headline);
-              if (exists) return prev;
-              return [newArticle, ...prev].slice(0, 150);
-            });
+            if (!isOffline) {
+              const newArticle = await api.fetchLatestUniversalNews(sourceId);
+              // Save to Supabase and purge records older than 12h in one operation
+              const updatedNews = await api.saveAndPurgeUniversalNews(newArticle);
+              if (updatedNews.length > 0) {
+                setNewsArticles(updatedNews);
+              }
+            }
           } catch (err) {
             console.warn(`Background wire poll failed for ${sourceId}:`, err);
           } finally {
@@ -174,23 +211,7 @@ function App() {
     return () => {
       timers.forEach((t) => clearTimeout(t));
     };
-  }, []);
-
-  const handleManualNewsRefresh = async (sourceId: NewsSourceId) => {
-    setIsRefreshingNews(true);
-    try {
-      const newArticle = await api.fetchLatestUniversalNews(sourceId);
-      setNewsArticles((prev) => {
-        const exists = prev.some((a) => a.id === newArticle.id || a.headline === newArticle.headline);
-        if (exists) return prev;
-        return [newArticle, ...prev].slice(0, 150);
-      });
-    } catch (err) {
-      console.warn('Manual wire refresh error:', err);
-    } finally {
-      setIsRefreshingNews(false);
-    }
-  };
+  }, [isOffline]);
 
   // Track and decrement offline session 60-min window
   useEffect(() => {
@@ -243,13 +264,15 @@ function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
         e.preventDefault();
-        setFocusedJournalIndex((prev) => (prev - 1 + JOURNAL_TYPES.length) % JOURNAL_TYPES.length);
+        setFocusedJournalIndex((prev) => (prev - 1 + activeJournalTypes.length) % activeJournalTypes.length);
       } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
         e.preventDefault();
-        setFocusedJournalIndex((prev) => (prev + 1) % JOURNAL_TYPES.length);
+        setFocusedJournalIndex((prev) => (prev + 1) % activeJournalTypes.length);
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        setActiveCategory(JOURNAL_TYPES[focusedJournalIndex].id);
+        if (activeJournalTypes[focusedJournalIndex]) {
+          setActiveCategory(activeJournalTypes[focusedJournalIndex].id);
+        }
         setIsJournalMenuOpen(false);
       } else if (e.key === 'Escape') {
         e.preventDefault();
@@ -259,7 +282,40 @@ function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isJournalMenuOpen, focusedJournalIndex]);
+  }, [isJournalMenuOpen, focusedJournalIndex, activeJournalTypes]);
+
+  // Keep active category aligned with enabled categories
+  useEffect(() => {
+    if (activeJournalTypes.length > 0 && !enabledCategories.includes(activeCategory)) {
+      setActiveCategory(activeJournalTypes[0].id);
+    }
+  }, [enabledCategories, activeCategory, activeJournalTypes]);
+
+  // Load preferences from Supabase / cache on user change
+  useEffect(() => {
+    const loadUserPrefs = async () => {
+      try {
+        const prefs = await api.getUserPreferences(currentUser?.id);
+        if (prefs.enabledCategories && Array.isArray(prefs.enabledCategories) && prefs.enabledCategories.length > 0) {
+          setEnabledCategories(prefs.enabledCategories);
+          localStorage.setItem('after_dark_enabled_categories', JSON.stringify(prefs.enabledCategories));
+        }
+      } catch (err) {
+        console.warn('Failed to load user preferences:', err);
+      }
+    };
+    loadUserPrefs();
+  }, [currentUser]);
+
+  const handleSaveCategories = async (newEnabled: CategoryType[]) => {
+    setEnabledCategories(newEnabled);
+    localStorage.setItem('after_dark_enabled_categories', JSON.stringify(newEnabled));
+    try {
+      await api.saveUserPreferences(currentUser?.id, { enabledCategories: newEnabled });
+    } catch (err) {
+      console.warn('Failed to save user preferences:', err);
+    }
+  };
 
   // Supabase Auth Listener
   useEffect(() => {
@@ -668,158 +724,363 @@ function App() {
             />
           </div>
         </div>
-        {/* 80s Retro Terminal Journal Type Selector with Arrow Steppers */}
-        <div className="relative" ref={journalSelectorRef}>
-          <div className="flex items-center gap-3 md:gap-4 font-mono text-xs select-none">
-            {/* Left Retro Arrow */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                const activeIdx = JOURNAL_TYPES.findIndex(t => t.id === activeCategory);
-                if (!isJournalMenuOpen) {
-                  setIsJournalMenuOpen(true);
-                  const nextIdx = (activeIdx - 1 + JOURNAL_TYPES.length) % JOURNAL_TYPES.length;
-                  setFocusedJournalIndex(nextIdx);
-                } else {
-                  setFocusedJournalIndex((prev) => (prev - 1 + JOURNAL_TYPES.length) % JOURNAL_TYPES.length);
-                }
-              }}
-              className="px-2.5 py-1 border border-neon-cyan/60 bg-[#021814] text-neon-cyan hover:bg-neon-cyan hover:text-[#020d04] font-black tracking-widest transition-all cursor-pointer shadow-[0_0_10px_var(--glow-color)] hover:shadow-[0_0_16px_var(--glow-color)] active:scale-95 flex items-center justify-center shrink-0"
-              title="PREVIOUS JOURNAL TYPE (MOVES MENU UP)"
-            >
-              [ ◄ ]
-            </button>
-
-            {/* Currently Selected / Staged Type Center Button (Fixed Width to Prevent Arrow Shift) */}
+        {/* 80s Retro Terminal Journal Type Selector (250% Wide Prominent Control) */}
+        <div className="relative flex-1 max-w-[660px] mx-2 md:mx-4" ref={journalSelectorRef}>
+          <div className="w-full font-mono text-xs select-none">
+            {/* Currently Selected / Staged Type Center Button (250% Width) */}
             {(() => {
               const stagedType = isJournalMenuOpen
-                ? JOURNAL_TYPES[focusedJournalIndex]
-                : (JOURNAL_TYPES.find(t => t.id === activeCategory) || JOURNAL_TYPES[0]);
-              const isStagingDifferent = isJournalMenuOpen && stagedType.id !== activeCategory;
+                ? activeJournalTypes[focusedJournalIndex] || activeJournalTypes[0]
+                : (activeJournalTypes.find(t => t.id === activeCategory) || activeJournalTypes[0]);
+              const isStagingDifferent = isJournalMenuOpen && stagedType?.id !== activeCategory;
 
               return (
                 <button
                   type="button"
                   onClick={() => {
-                    if (isJournalMenuOpen) {
+                    if (isJournalMenuOpen && stagedType) {
                       setActiveCategory(stagedType.id);
                       setIsJournalMenuOpen(false);
                     } else {
-                      const activeIdx = JOURNAL_TYPES.findIndex(t => t.id === activeCategory);
+                      const activeIdx = activeJournalTypes.findIndex(t => t.id === activeCategory);
                       setFocusedJournalIndex(activeIdx >= 0 ? activeIdx : 0);
+                      if (stagedType?.group) {
+                        setJournalDropdownGroup(stagedType.group);
+                      }
                       setIsJournalMenuOpen(true);
                     }
                   }}
-                  className={`w-[220px] md:w-[250px] px-3 py-1 border flex items-center justify-between font-mono font-bold tracking-wider transition-all cursor-pointer shrink-0 ${isStagingDifferent
-                    ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_20px_var(--glow-color)] scale-105 animate-pulse'
-                    : isJournalMenuOpen
-                      ? 'bg-neon-cyan/90 text-[#020d04] border-neon-cyan shadow-[0_0_18px_var(--glow-color)]'
-                      : 'bg-[#021814] text-neon-cyan border-neon-cyan/60 hover:bg-neon-cyan/20 hover:border-neon-cyan shadow-[0_0_10px_var(--glow-color)]'
-                    }`}
-                  title={isJournalMenuOpen ? "CLICK OR PRESS ENTER TO CONFIRM & SWITCH TYPE" : "CLICK TO OPEN JOURNAL TYPE MATRIX"}
+                  className={`w-full px-3.5 py-1.5 border-2 flex items-center justify-between font-mono font-bold tracking-wider transition-all cursor-pointer shadow-md ${
+                    isStagingDifferent
+                      ? 'scale-[1.01] animate-pulse'
+                      : ''
+                  }`}
+                  style={{
+                    backgroundColor: (isStagingDifferent || isJournalMenuOpen)
+                      ? 'var(--color-primary)'
+                      : 'color-mix(in srgb, var(--color-primary) 14%, var(--bg-panel) 86%)',
+                    color: (isStagingDifferent || isJournalMenuOpen)
+                      ? 'var(--color-on-primary)'
+                      : 'var(--color-primary)',
+                    borderColor: 'var(--color-primary)',
+                    boxShadow: (isStagingDifferent || isJournalMenuOpen)
+                      ? '0 0 22px var(--glow-color)'
+                      : '0 0 14px var(--glow-color)'
+                  }}
+                  title={isJournalMenuOpen ? "CLICK OR PRESS ENTER TO CONFIRM & COMMIT SCHEMA" : "CLICK TO OPEN TWO-PANE LOG SCHEMA MATRIX"}
                 >
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="material-symbols-outlined text-[15px] shrink-0">
-                      {stagedType.icon}
+                  {/* Left: Domain Group & Icon & Title */}
+                  <div className="flex items-center gap-2.5 truncate">
+                    <span
+                      className="text-[9px] md:text-[10px] px-1.5 py-0.5 border font-mono tracking-widest uppercase shrink-0"
+                      style={{
+                        borderColor: (isStagingDifferent || isJournalMenuOpen)
+                          ? 'var(--color-on-primary)'
+                          : 'var(--border-primary)',
+                        backgroundColor: (isStagingDifferent || isJournalMenuOpen)
+                          ? 'color-mix(in srgb, var(--color-on-primary) 20%, transparent)'
+                          : 'var(--bg-container-high)',
+                        color: (isStagingDifferent || isJournalMenuOpen)
+                          ? 'var(--color-on-primary)'
+                          : 'var(--color-primary)'
+                      }}
+                    >
+                      {stagedType?.group || 'SCHEMA'}
                     </span>
-                    <span className="tracking-widest font-black truncate">
-                      [ {stagedType.label} ]
+
+                    <span
+                      className="material-symbols-outlined text-[17px] shrink-0"
+                      style={{
+                        color: (isStagingDifferent || isJournalMenuOpen)
+                          ? 'var(--color-on-primary)'
+                          : 'var(--color-primary)'
+                      }}
+                    >
+                      {stagedType?.icon}
+                    </span>
+
+                    <span className="text-xs md:text-sm tracking-widest font-black truncate">
+                      [ {stagedType?.label} ]
                     </span>
                   </div>
-                  <span className="text-[10px] opacity-75 shrink-0 ml-1.5 font-mono">
-                    {isJournalMenuOpen ? '▲' : '▼'}
-                  </span>
+
+                  {/* Right: Custom Badge & Dropdown Indicator */}
+                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    <span
+                      className="hidden sm:inline-block text-[9px] md:text-[10px] px-1.5 py-0.5 border font-mono font-bold tracking-wider"
+                      style={{
+                        borderColor: (isStagingDifferent || isJournalMenuOpen)
+                          ? 'var(--color-on-primary)'
+                          : 'var(--border-primary)',
+                        color: (isStagingDifferent || isJournalMenuOpen)
+                          ? 'var(--color-on-primary)'
+                          : 'var(--color-primary)'
+                      }}
+                    >
+                      {stagedType?.badge}
+                    </span>
+                    <span className="text-xs font-mono font-bold">
+                      {isJournalMenuOpen ? '▲' : '▼'}
+                    </span>
+                  </div>
                 </button>
               );
             })()}
-
-            {/* Right Retro Arrow */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                const activeIdx = JOURNAL_TYPES.findIndex(t => t.id === activeCategory);
-                if (!isJournalMenuOpen) {
-                  setIsJournalMenuOpen(true);
-                  const nextIdx = (activeIdx + 1) % JOURNAL_TYPES.length;
-                  setFocusedJournalIndex(nextIdx);
-                } else {
-                  setFocusedJournalIndex((prev) => (prev + 1) % JOURNAL_TYPES.length);
-                }
-              }}
-              className="px-2.5 py-1 border border-neon-cyan/60 bg-[#021814] text-neon-cyan hover:bg-neon-cyan hover:text-[#020d04] font-black tracking-widest transition-all cursor-pointer shadow-[0_0_10px_var(--glow-color)] hover:shadow-[0_0_16px_var(--glow-color)] active:scale-95 flex items-center justify-center shrink-0"
-              title="NEXT JOURNAL TYPE (MOVES MENU DOWN)"
-            >
-              [ ► ]
-            </button>
           </div>
 
-          {/* Journal Type Retro Dropdown Menu */}
+          {/* Two-Pane Journal Type Retro Dropdown Menu */}
           {isJournalMenuOpen && (
             <div
-              className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 bg-[#020d04] border-2 border-neon-cyan shadow-[0_0_30px_var(--glow-color),inset_0_0_15px_var(--glow-color)] z-50 p-2 font-mono text-xs animate-fade-in"
-              style={{ textShadow: '0 0 6px var(--glow-color)' }}
+              className="absolute left-1/2 -translate-x-1/2 mt-2 w-[92vw] max-w-[820px] md:w-[780px] lg:w-[820px] border-2 z-50 p-3 font-mono text-xs animate-fade-in shadow-2xl"
+              style={{
+                backgroundColor: 'var(--bg-panel)',
+                borderColor: 'var(--color-primary)',
+                boxShadow: '0 0 35px var(--glow-color), inset 0 0 15px rgba(0,0,0,0.5)',
+                color: 'var(--text-on-surface)'
+              }}
             >
               {/* Terminal Sub-header */}
-              <div className="border-b border-neon-cyan/30 pb-1.5 mb-2 px-1 flex justify-between items-center text-[10px] text-neon-cyan/70 tracking-widest">
-                <span>JOURNAL // TYPE_SELECTOR</span>
-                <span className="font-bold text-neon-cyan">[ 5 PROFILES ]</span>
+              <div
+                className="border-b pb-2 mb-2.5 px-1 flex justify-between items-center text-[10px] md:text-[11px] tracking-widest"
+                style={{
+                  borderColor: 'var(--border-primary)',
+                  color: 'var(--color-primary)'
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[15px] animate-pulse">schema</span>
+                  <span className="font-bold font-mono">JOURNAL // SCHEMA_SELECTOR</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-bold">[ {activeJournalTypes.length} PROFILES LOADED ]</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsJournalMenuOpen(false);
+                      setIsLogTypeManagerOpen(true);
+                    }}
+                    className="hover:underline font-bold cursor-pointer text-xs"
+                    style={{ color: 'var(--color-primary)' }}
+                  >
+                    [ ⚙️ CONFIGURE MATRIX ]
+                  </button>
+                </div>
               </div>
 
-              {/* Guidance text */}
-              <div className="text-[9px] text-neon-cyan/60 px-1 mb-2">
-                &gt; USE [◄] [►] TO NAVIGATE; CLICK ITEM TO LOAD
-              </div>
+              {/* Two-Pane Body Container */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 min-h-[280px]">
+                {/* LEFT PANE: Categories / Domains (4 cols) */}
+                <div
+                  className="md:col-span-4 border-b md:border-b-0 md:border-r pr-0 md:pr-3 pb-2 md:pb-0 flex flex-col gap-1.5"
+                  style={{ borderColor: 'var(--border-primary)' }}
+                >
+                  <div
+                    className="text-[9.5px] font-black uppercase tracking-wider pb-1 mb-1 border-b"
+                    style={{
+                      borderColor: 'var(--border-primary)',
+                      color: 'var(--text-on-surface-variant)'
+                    }}
+                  >
+                    &gt; DOMAIN_CATEGORIES
+                  </div>
 
-              {/* Category List */}
-              <div className="space-y-1.5">
-                {JOURNAL_TYPES.map((item, idx) => {
-                  const isPointed = focusedJournalIndex === idx;
-                  const isCommitted = activeCategory === item.id;
-
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        setActiveCategory(item.id);
-                        setFocusedJournalIndex(idx);
-                        setIsJournalMenuOpen(false);
+                  {/* ALL Categories Option */}
+                  <button
+                    type="button"
+                    onClick={() => setJournalDropdownGroup('ALL')}
+                    onMouseEnter={() => setJournalDropdownGroup('ALL')}
+                    className="w-full text-left px-2.5 py-2 border font-mono transition-all cursor-pointer flex items-center justify-between text-xs"
+                    style={{
+                      backgroundColor: journalDropdownGroup === 'ALL'
+                        ? 'var(--color-primary)'
+                        : 'var(--bg-surface)',
+                      color: journalDropdownGroup === 'ALL'
+                        ? 'var(--color-on-primary)'
+                        : 'var(--text-on-surface)',
+                      borderColor: journalDropdownGroup === 'ALL'
+                        ? 'var(--color-primary)'
+                        : 'var(--border-primary)',
+                      boxShadow: journalDropdownGroup === 'ALL' ? '0 0 12px var(--glow-color)' : 'none'
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-[15px]">apps</span>
+                      <span className="font-bold tracking-wider">ALL PROFILES</span>
+                    </div>
+                    <span
+                      className="text-[9px] px-1.5 py-0.5 border font-bold"
+                      style={{
+                        borderColor: journalDropdownGroup === 'ALL' ? 'var(--color-on-primary)' : 'var(--border-primary)',
+                        backgroundColor: journalDropdownGroup === 'ALL' ? 'color-mix(in srgb, var(--color-on-primary) 20%, transparent)' : 'var(--bg-container-high)'
                       }}
-                      className={`w-full text-left px-2.5 py-1.5 border font-mono transition-all cursor-pointer flex items-center justify-between ${isPointed
-                        ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_12px_var(--glow-color)] scale-[1.02]'
-                        : isCommitted
-                          ? 'bg-[#04251f]/50 border-neon-cyan/40 text-neon-cyan/90'
-                          : 'bg-transparent border-transparent hover:border-neon-cyan/30 text-neon-cyan/60 hover:text-neon-cyan'
-                        }`}
                     >
-                      <div className="flex items-center gap-2">
-                        {/* Terminal Pointer Indicator */}
-                        <span className={`text-[12px] font-black ${isPointed ? 'text-neon-cyan animate-pulse' : 'opacity-0'}`}>
-                          ►
-                        </span>
-                        <span className="material-symbols-outlined text-[15px]">
-                          {item.icon}
-                        </span>
-                        <span className="font-bold tracking-wider">
-                          {item.label}
-                        </span>
-                      </div>
+                      {activeJournalTypes.length}
+                    </span>
+                  </button>
 
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] opacity-60">
-                          {item.codename}
-                        </span>
-                        {isCommitted && (
-                          <span className="text-[9px] px-1 bg-neon-cyan/20 border border-neon-cyan/60 text-neon-cyan font-bold">
-                            ACTIVE
+                  {/* 4 Category Groups */}
+                  {CATEGORY_GROUPS.map((g) => {
+                    const isSelected = journalDropdownGroup === g.id;
+                    const groupCount = activeJournalTypes.filter((c) => c.group === g.id).length;
+
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() => setJournalDropdownGroup(g.id)}
+                        onMouseEnter={() => setJournalDropdownGroup(g.id)}
+                        className="w-full text-left px-2.5 py-2 border font-mono transition-all cursor-pointer flex items-center justify-between text-xs"
+                        style={{
+                          backgroundColor: isSelected
+                            ? 'var(--color-primary)'
+                            : 'var(--bg-surface)',
+                          color: isSelected
+                            ? 'var(--color-on-primary)'
+                            : 'var(--text-on-surface)',
+                          borderColor: isSelected
+                            ? 'var(--color-primary)'
+                            : 'var(--border-primary)',
+                          boxShadow: isSelected ? '0 0 12px var(--glow-color)' : 'none'
+                        }}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="material-symbols-outlined text-[15px]">
+                            {g.icon}
                           </span>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
+                          <span className="font-bold tracking-wider truncate">
+                            {g.label.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <span
+                          className="text-[9px] px-1.5 py-0.5 border font-bold shrink-0 ml-1.5"
+                          style={{
+                            borderColor: isSelected ? 'var(--color-on-primary)' : 'var(--border-primary)',
+                            backgroundColor: isSelected ? 'color-mix(in srgb, var(--color-on-primary) 20%, transparent)' : 'var(--bg-container-high)'
+                          }}
+                        >
+                          {groupCount}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* RIGHT PANE: Selected Category's Schemas (8 cols) */}
+                <div className="md:col-span-8 flex flex-col pl-0 md:pl-1">
+                  <div
+                    className="text-[9.5px] font-black uppercase tracking-wider pb-1 mb-1.5 border-b flex justify-between items-center"
+                    style={{
+                      borderColor: 'var(--border-primary)',
+                      color: 'var(--text-on-surface-variant)'
+                    }}
+                  >
+                    <span>
+                      &gt; SCHEMAS: {journalDropdownGroup === 'ALL' ? 'ALL LOADED' : journalDropdownGroup} (
+                      {activeJournalTypes.filter((cat) => journalDropdownGroup === 'ALL' || cat.group === journalDropdownGroup).length} ITEMS)
+                    </span>
+                    <span className="text-[9px] opacity-75">CLICK ITEM TO LOAD SCHEMA</span>
+                  </div>
+
+                  {/* Schema List */}
+                  <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                    {activeJournalTypes
+                      .filter((cat) => journalDropdownGroup === 'ALL' || cat.group === journalDropdownGroup)
+                      .map((item) => {
+                        const globalIdx = activeJournalTypes.findIndex((t) => t.id === item.id);
+                        const isPointed = focusedJournalIndex === globalIdx;
+                        const isCommitted = activeCategory === item.id;
+
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setActiveCategory(item.id);
+                              setFocusedJournalIndex(globalIdx >= 0 ? globalIdx : 0);
+                              setIsJournalMenuOpen(false);
+                            }}
+                            className="w-full text-left px-3 py-2 border font-mono transition-all cursor-pointer flex items-center justify-between text-xs"
+                            style={{
+                              backgroundColor: isPointed
+                                ? 'color-mix(in srgb, var(--color-primary) 28%, var(--bg-surface) 72%)'
+                                : isCommitted
+                                ? 'color-mix(in srgb, var(--color-primary) 18%, var(--bg-surface) 82%)'
+                                : 'var(--bg-surface)',
+                              borderColor: isPointed
+                                ? 'var(--color-primary)'
+                                : isCommitted
+                                ? 'var(--color-primary)'
+                                : 'var(--border-primary)',
+                              color: (isPointed || isCommitted)
+                                ? 'var(--color-primary)'
+                                : 'var(--text-on-surface)',
+                              boxShadow: isPointed ? '0 0 12px var(--glow-color)' : 'none'
+                            }}
+                          >
+                            <div className="flex items-center gap-2.5 truncate">
+                              <span
+                                className={`text-[11px] font-black ${isPointed ? 'animate-pulse' : 'opacity-0'}`}
+                                style={{ color: 'var(--color-primary)' }}
+                              >
+                                ►
+                              </span>
+                              <span
+                                className="material-symbols-outlined text-[16px]"
+                                style={{ color: (isPointed || isCommitted) ? 'var(--color-primary)' : 'var(--text-on-surface-variant)' }}
+                              >
+                                {item.icon}
+                              </span>
+                              <div className="flex flex-col">
+                                <span className="font-bold tracking-wider truncate">
+                                  {item.label}
+                                </span>
+                                <span className="text-[9px] opacity-70 font-mono">
+                                  {item.codename}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                              <span
+                                className="text-[8.5px] px-1.5 py-0.5 border font-mono font-bold"
+                                style={{
+                                  borderColor: 'var(--border-primary)',
+                                  color: 'var(--color-primary)',
+                                  backgroundColor: 'var(--bg-container-low)'
+                                }}
+                              >
+                                {item.badge}
+                              </span>
+                              {isCommitted && (
+                                <span
+                                  className="text-[8.5px] px-1.5 py-0.5 font-bold border"
+                                  style={{
+                                    backgroundColor: 'var(--color-primary)',
+                                    color: 'var(--color-on-primary)',
+                                    borderColor: 'var(--color-primary)'
+                                  }}
+                                >
+                                  ACTIVE
+                                </span>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Dropdown Footer Navigation Hint */}
+              <div
+                className="mt-2.5 pt-2 border-t flex justify-between items-center text-[9px] px-1"
+                style={{
+                  borderColor: 'var(--border-primary)',
+                  color: 'var(--text-on-surface-variant)'
+                }}
+              >
+                <span>&gt; USE [◄] [►] OR [▲] [▼] TO NAVIGATE; PRESS [ENTER] TO COMMIT</span>
+                <span className="font-mono opacity-80">[ ESC TO DISMISS ]</span>
               </div>
             </div>
           )}
@@ -829,17 +1090,34 @@ function App() {
           <button
             type="button"
             onClick={() => setIsNeuralJackOpen(!isNeuralJackOpen)}
-            className={`font-label-sm border px-3.5 py-1 min-w-[175px] flex items-center justify-between gap-2 transition-all cursor-pointer ${isNeuralJackOpen
-              ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_20px_var(--glow-color)] scale-105'
-              : 'bg-[#021814] text-neon-cyan border-neon-cyan/60 hover:bg-neon-cyan/20 hover:border-neon-cyan glow-text shadow-[0_0_12px_var(--glow-color)]'
-              }`}
+            className="font-label-sm border-2 px-3.5 py-1 min-w-[175px] flex items-center justify-between gap-2 transition-all cursor-pointer font-mono font-bold tracking-wider"
+            style={{
+              backgroundColor: isNeuralJackOpen
+                ? 'var(--color-primary)'
+                : 'color-mix(in srgb, var(--color-primary) 14%, var(--bg-panel) 86%)',
+              color: isNeuralJackOpen
+                ? 'var(--color-on-primary)'
+                : 'var(--color-primary)',
+              borderColor: 'var(--color-primary)',
+              boxShadow: isNeuralJackOpen
+                ? '0 0 20px var(--glow-color)'
+                : '0 0 12px var(--glow-color)'
+            }}
             title="NEURAL_JACK // SYSTEM MATRIX & OPERATOR CONSOLE"
           >
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[16px] animate-pulse">memory</span>
+              <span
+                className="material-symbols-outlined text-[16px] animate-pulse"
+                style={{ color: isNeuralJackOpen ? 'var(--color-on-primary)' : 'var(--color-primary)' }}
+              >
+                memory
+              </span>
               <span className="font-mono font-black tracking-widest">[ NEURAL_JACK ]</span>
             </div>
-            <span className="material-symbols-outlined text-[16px]">
+            <span
+              className="material-symbols-outlined text-[16px]"
+              style={{ color: isNeuralJackOpen ? 'var(--color-on-primary)' : 'var(--color-primary)' }}
+            >
               {isNeuralJackOpen ? 'arrow_drop_up' : 'arrow_drop_down'}
             </span>
           </button>
@@ -847,28 +1125,64 @@ function App() {
           {/* NEURAL_JACK Retro Dropdown Menu (Expanded Width to Prevent Text Wrapping) */}
           {isNeuralJackOpen && (
             <div
-              className="absolute right-0 mt-2 w-72 md:w-80 bg-[#020d04] border-2 border-neon-cyan shadow-[0_0_30px_var(--glow-color),inset_0_0_15px_var(--glow-color)] z-50 p-2.5 font-mono text-xs animate-fade-in"
-              style={{ textShadow: '0 0 6px var(--glow-color)' }}
+              className="absolute right-0 mt-2 w-72 md:w-80 border-2 z-50 p-2.5 font-mono text-xs animate-fade-in shadow-2xl"
+              style={{
+                backgroundColor: 'var(--bg-panel)',
+                borderColor: 'var(--color-primary)',
+                boxShadow: '0 0 30px var(--glow-color), inset 0 0 15px rgba(0,0,0,0.5)',
+                color: 'var(--text-on-surface)'
+              }}
             >
               {/* Terminal Sub-header */}
-              <div className="border-b border-neon-cyan/30 pb-1.5 mb-2 px-1 flex justify-between items-center text-[10px] text-neon-cyan/70 tracking-widest">
+              <div
+                className="border-b pb-1.5 mb-2 px-1 flex justify-between items-center text-[10px] tracking-widest"
+                style={{
+                  borderColor: 'var(--border-primary)',
+                  color: 'var(--color-primary)'
+                }}
+              >
                 <span>SYS // INTERFACE</span>
-                <span className="font-bold text-neon-cyan">
+                <span className="font-bold">
                   {currentUser?.id.startsWith('offline_') ? 'MODE: OFFLINE' : 'MODE: CLOUD'}
                 </span>
               </div>
 
-              {/* Option 1: Themes Modal */}
+              {/* Option 1: Log Types Matrix Configuration */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsNeuralJackOpen(false);
+                  setIsLogTypeManagerOpen(true);
+                }}
+                className="w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap shadow-sm"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--color-primary) 18%, var(--bg-surface) 82%)',
+                  borderColor: 'var(--color-primary)',
+                  color: 'var(--color-primary)'
+                }}
+              >
+                <span>[ LOG_TYPES_MATRIX ]</span>
+                <span className="font-mono font-black text-xs tracking-widest ml-2">
+                  [{enabledCategories.length}/{ALL_LOG_CATEGORIES.length}]
+                </span>
+              </button>
+
+              {/* Option 2: Themes Modal */}
               <button
                 type="button"
                 onClick={() => {
                   setIsNeuralJackOpen(false);
                   setIsThemeModalOpen(true);
                 }}
-                className={`w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap ${isThemeModalOpen
-                  ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_12px_var(--glow-color)]'
-                  : 'border-neon-cyan/50 bg-[#04251f]/40 text-neon-cyan/80 hover:bg-neon-cyan/20 hover:text-neon-cyan'
-                  }`}
+                className="w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap"
+                style={{
+                  backgroundColor: isThemeModalOpen
+                    ? 'var(--color-primary)'
+                    : 'var(--bg-surface)',
+                  borderColor: isThemeModalOpen ? 'var(--color-primary)' : 'var(--border-primary)',
+                  color: isThemeModalOpen ? 'var(--color-on-primary)' : 'var(--color-primary)',
+                  boxShadow: isThemeModalOpen ? '0 0 12px var(--glow-color)' : 'none'
+                }}
               >
                 <span>[ THEMES ]</span>
                 <span className="font-mono font-black text-xs tracking-widest ml-2">
@@ -876,14 +1190,19 @@ function App() {
                 </span>
               </button>
 
-              {/* Option 2: CRT Flicker Toggle */}
+              {/* Option 3: CRT Flicker Toggle */}
               <button
                 type="button"
                 onClick={() => setFlickerEnabled(!flickerEnabled)}
-                className={`w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap ${flickerEnabled
-                  ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_12px_var(--glow-color)]'
-                  : 'border-neon-cyan/50 bg-[#04251f]/40 text-neon-cyan/80 hover:bg-neon-cyan/20 hover:text-neon-cyan'
-                  }`}
+                className="w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap"
+                style={{
+                  backgroundColor: flickerEnabled
+                    ? 'color-mix(in srgb, var(--color-primary) 22%, var(--bg-surface) 78%)'
+                    : 'var(--bg-surface)',
+                  borderColor: flickerEnabled ? 'var(--color-primary)' : 'var(--border-primary)',
+                  color: flickerEnabled ? 'var(--color-primary)' : 'var(--text-on-surface-variant)',
+                  boxShadow: flickerEnabled ? '0 0 12px var(--glow-color)' : 'none'
+                }}
               >
                 <span>[ CRT_FLICKER ]</span>
                 <span className="font-mono font-black text-xs tracking-widest ml-2">
@@ -891,7 +1210,7 @@ function App() {
                 </span>
               </button>
 
-              {/* Option 3: Speech Synthesizer Toggle */}
+              {/* Option 4: Speech Synthesizer Toggle */}
               <button
                 type="button"
                 onClick={() => {
@@ -902,10 +1221,15 @@ function App() {
                     window.speechSynthesis.cancel();
                   }
                 }}
-                className={`w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap ${isTtyVoiceEnabled
-                  ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_12px_var(--glow-color)]'
-                  : 'border-neon-cyan/50 bg-[#04251f]/40 text-neon-cyan/80 hover:bg-neon-cyan/20 hover:text-neon-cyan'
-                  }`}
+                className="w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap"
+                style={{
+                  backgroundColor: isTtyVoiceEnabled
+                    ? 'color-mix(in srgb, var(--color-primary) 22%, var(--bg-surface) 78%)'
+                    : 'var(--bg-surface)',
+                  borderColor: isTtyVoiceEnabled ? 'var(--color-primary)' : 'var(--border-primary)',
+                  color: isTtyVoiceEnabled ? 'var(--color-primary)' : 'var(--text-on-surface-variant)',
+                  boxShadow: isTtyVoiceEnabled ? '0 0 12px var(--glow-color)' : 'none'
+                }}
               >
                 <span>[ SPEECH_SYNTH ]</span>
                 <span className="font-mono font-black text-xs tracking-widest ml-2">
@@ -956,16 +1280,25 @@ function App() {
 
             {/* Primary Data Entry Terminal (Spans 2 cols, 2 rows) */}
             <div className="terminal-panel terminal-panel-active md:col-span-2 md:row-span-2 flex flex-col">
-              <div className="terminal-header font-label-sm text-label-sm text-neon-cyan">
+              <div className="terminal-header font-label-sm text-label-sm text-neon-cyan flex justify-between items-center">
                 <span>[SYS_CMD_IN] // ROOT</span>
-                <span>SCHEMA: {activeCategory}</span>
+                <span className="font-mono font-bold tracking-wider text-neon-cyan">
+                  SCHEMA: {getCategoryMeta(activeCategory).badge}
+                </span>
               </div>
               <div className="flex-1 p-panel-padding flex flex-col overflow-y-auto">
                 <div className="mb-4">
                   <label className="block text-neon-cyan font-label-sm mb-1">LOG_TITLE</label>
                   <div className="flex items-center border-b border-neon-cyan/30 pb-1">
                     <span className="text-neon-cyan mr-2 font-bold">&gt;</span>
-                    <input autoFocus value={title} onChange={e => setTitle(e.target.value)} className="bg-transparent border-none outline-none focus:ring-0 text-neon-cyan flex-1 font-body-md p-0" placeholder="ENTER TITLE..." type="text" />
+                    <input
+                      autoFocus
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="bg-transparent border-none outline-none focus:ring-0 text-neon-cyan flex-1 font-body-md p-0"
+                      placeholder={`ENTER TITLE... (e.g. ${getCategoryMeta(activeCategory).defaultTitle})`}
+                      type="text"
+                    />
                     <span className="blinking-cursor"></span>
                   </div>
                 </div>
@@ -990,67 +1323,96 @@ function App() {
                   <span>REC_LOGS</span>
                   <span>DB_SYNC: OK</span>
                 </div>
-                <div className="flex border-b border-amber-warn/30 text-[9px] font-label-sm text-amber-warn/50">
+                <div className="flex border-b border-amber-warn/30 text-[9px] font-label-sm text-amber-warn/50 overflow-x-auto">
                   <button
                     onClick={() => setFilterCategory('ALL')}
-                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors ${filterCategory === 'ALL' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                    className={`flex-1 min-w-[36px] py-1 hover:bg-amber-warn/10 transition-colors ${filterCategory === 'ALL' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
                   >ALL</button>
                   <button
-                    onClick={() => setFilterCategory('AI_EXPERIMENT')}
-                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'AI_EXPERIMENT' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                  >AI</button>
+                    onClick={() => setFilterCategory('CYBER_OPS')}
+                    className={`flex-1 min-w-[48px] py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'CYBER_OPS' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >CYBER</button>
                   <button
-                    onClick={() => setFilterCategory('CAFFEINE_LOG')}
-                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'CAFFEINE_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                  >CAFE</button>
+                    onClick={() => setFilterCategory('VITALS')}
+                    className={`flex-1 min-w-[48px] py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'VITALS' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >VITALS</button>
                   <button
-                    onClick={() => setFilterCategory('ACTIVITY_LOG')}
-                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'ACTIVITY_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                  >BIO</button>
+                    onClick={() => setFilterCategory('PRODUCTIVITY')}
+                    className={`flex-1 min-w-[44px] py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'PRODUCTIVITY' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >PROD</button>
                   <button
-                    onClick={() => setFilterCategory('FREEFORM_LOG')}
-                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'FREEFORM_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                  >FREE</button>
-                  <button
-                    onClick={() => setFilterCategory('DUTY_ROSTER')}
-                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'DUTY_ROSTER' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                  >DUTY</button>
+                    onClick={() => setFilterCategory('SKY_LIFE')}
+                    className={`flex-1 min-w-[44px] py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'SKY_LIFE' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >SKY</button>
                 </div>
                 <div className="flex-1 p-0 overflow-y-auto">
                   <div className="divide-y divide-surface-container-high/50">
-                    {logs.filter(log => filterCategory === 'ALL' || log.category === filterCategory).map((log) => (
-                      <div key={log.id} onClick={() => setExpandedLogId(expandedLogId === log.id ? null : log.id)} className="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group flex flex-col">
-                        <div className="flex justify-between items-start">
-                          <div className="font-label-sm text-label-sm text-amber-warn mb-1 group-hover:amber-text transition-all">{log.category}</div>
-                        </div>
-                        <div className="text-sm truncate text-on-surface-variant font-bold">{log.title}</div>
-
-                        {expandedLogId === log.id && (
-                          <div className="mt-2 text-xs border-t border-amber-warn/30 pt-2 space-y-2">
-                            {Object.entries(log.payload).map(([key, value]) => (
-                              <div key={key} className="flex flex-col">
-                                <span className="text-amber-warn/70 uppercase text-[10px]">{key}</span>
-                                <span className="text-on-surface-variant break-words">{String(value)}</span>
+                    {logs
+                      .filter((log) => {
+                        if (filterCategory === 'ALL') return true;
+                        if (['CYBER_OPS', 'VITALS', 'PRODUCTIVITY', 'SKY_LIFE'].includes(filterCategory)) {
+                          const meta = getCategoryMeta(log.category);
+                          return meta?.group === filterCategory;
+                        }
+                        return log.category === filterCategory;
+                      })
+                      .map((log) => {
+                        const meta = getCategoryMeta(log.category);
+                        return (
+                          <div key={log.id} onClick={() => setExpandedLogId(expandedLogId === log.id ? null : log.id)} className="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group flex flex-col">
+                            <div className="flex justify-between items-start mb-0.5">
+                              <div className="flex items-center gap-1.5 truncate">
+                                <span className="material-symbols-outlined text-[13px] text-amber-warn">{meta?.icon || 'article'}</span>
+                                <div className="font-label-sm text-[10px] text-amber-warn font-black tracking-wider group-hover:amber-text transition-all truncate">
+                                  {meta?.badge || `[${log.category}]`}
+                                </div>
                               </div>
-                            ))}
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setInspectingLogId(inspectingLogId === log.id ? null : log.id) }}
-                              className="mt-3 w-full bg-neon-cyan text-obsidian-base font-bold py-1 hover:bg-primary-container transition-colors uppercase text-[10px]"
-                            >
-                              [ {inspectingLogId === log.id ? 'HIDE' : 'VIEW'} RAW JSON ]
-                            </button>
-                            {inspectingLogId === log.id && (
-                              <pre className="mt-2 p-2 bg-obsidian-elevated border border-neon-cyan/30 text-[10px] text-neon-cyan overflow-x-auto whitespace-pre-wrap">
-                                {JSON.stringify(log.payload, null, 2)}
-                              </pre>
-                            )}
-                          </div>
-                        )}
+                              <span className="text-[8.5px] px-1 py-0.2 border border-amber-warn/30 font-mono text-amber-warn/70 shrink-0">
+                                {meta?.group || 'LOG'}
+                              </span>
+                            </div>
+                            <div className="text-sm truncate text-on-surface-variant font-bold">{log.title}</div>
 
-                        <div className="text-[10px] text-outline mt-1 text-right">{new Date(log.timestamp).toLocaleString()}</div>
-                      </div>
-                    ))}
-                    {logs.filter(log => filterCategory === 'ALL' || log.category === filterCategory).length === 0 && (
+                            {expandedLogId === log.id && (
+                              <div className="mt-2 text-xs border-t border-amber-warn/30 pt-2 space-y-2">
+                                {Object.entries(log.payload || {}).map(([key, value]) => (
+                                  <div key={key} className="flex flex-col">
+                                    <span className="text-amber-warn/70 uppercase text-[10px]">{key}</span>
+                                    <span className="text-on-surface-variant break-words">
+                                      {Array.isArray(value)
+                                        ? value.map((v) => (typeof v === 'object' ? JSON.stringify(v) : String(v))).join(', ')
+                                        : typeof value === 'object' && value !== null
+                                        ? JSON.stringify(value)
+                                        : String(value)}
+                                    </span>
+                                  </div>
+                                ))}
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setInspectingLogId(inspectingLogId === log.id ? null : log.id) }}
+                                  className="mt-3 w-full bg-neon-cyan text-obsidian-base font-bold py-1 hover:bg-primary-container transition-colors uppercase text-[10px]"
+                                >
+                                  [ {inspectingLogId === log.id ? 'HIDE' : 'VIEW'} RAW JSON ]
+                                </button>
+                                {inspectingLogId === log.id && (
+                                  <pre className="mt-2 p-2 bg-obsidian-elevated border border-neon-cyan/30 text-[10px] text-neon-cyan overflow-x-auto whitespace-pre-wrap">
+                                    {JSON.stringify(log.payload, null, 2)}
+                                  </pre>
+                                )}
+                              </div>
+                            )}
+
+                            <div className="text-[10px] text-outline mt-1 text-right">{new Date(log.timestamp).toLocaleString()}</div>
+                          </div>
+                        );
+                      })}
+                    {logs.filter((log) => {
+                      if (filterCategory === 'ALL') return true;
+                      if (['CYBER_OPS', 'VITALS', 'PRODUCTIVITY', 'SKY_LIFE'].includes(filterCategory)) {
+                        const meta = getCategoryMeta(log.category);
+                        return meta?.group === filterCategory;
+                      }
+                      return log.category === filterCategory;
+                    }).length === 0 && (
                       <div className="px-3 py-4 text-center text-amber-warn/50 font-label-sm">NO RECORDS FOUND</div>
                     )}
                   </div>
@@ -1080,6 +1442,8 @@ function App() {
                       setIsNewsHeightExpanded(!isNewsHeightExpanded);
                     }
                   }}
+                  isOffline={isOffline}
+                  isLoading={isNewsLoading}
                 />
               </div>
             </div>
@@ -1103,12 +1467,17 @@ function App() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-on-surface-variant font-label-sm text-[10px] mb-2 border-b border-surface-container-high pb-1">CATEGORY_BREAKDOWN</div>
+                  <div className="text-on-surface-variant font-label-sm text-[10px] mb-2 border-b border-surface-container-high pb-1">DOMAIN_BREAKDOWN</div>
                   <div className="grid grid-cols-2 gap-2 text-[10px] font-label-sm">
-                    <div className="flex justify-between text-outline"><span>AI_LAB</span> <span className="text-neon-cyan">{telemetry.categories['AI_EXPERIMENT'] || 0}</span></div>
-                    <div className="flex justify-between text-outline"><span>CAFFEINE</span> <span className="text-neon-cyan">{telemetry.categories['CAFFEINE_LOG'] || 0}</span></div>
-                    <div className="flex justify-between text-outline"><span>BIOMETRICS</span> <span className="text-neon-cyan">{telemetry.categories['ACTIVITY_LOG'] || 0}</span></div>
-                    <div className="flex justify-between text-outline"><span>FREEFORM</span> <span className="text-neon-cyan">{telemetry.categories['FREEFORM_LOG'] || 0}</span></div>
+                    {CATEGORY_GROUPS.map((g) => {
+                      const count = logs.filter((l) => getCategoryMeta(l.category).group === g.id).length;
+                      return (
+                        <div key={g.id} className="flex justify-between text-outline">
+                          <span className="truncate">{g.label}</span>
+                          <span className="text-neon-cyan font-bold font-mono">{count}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -1479,6 +1848,14 @@ function App() {
           setTheme(newTheme);
         }}
         onClose={() => setIsThemeModalOpen(false)}
+      />
+
+      {/* Retro Cyberpunk Log Types Matrix Configuration Modal */}
+      <LogTypeManagerModal
+        isOpen={isLogTypeManagerOpen}
+        enabledCategories={enabledCategories}
+        onSaveCategories={handleSaveCategories}
+        onClose={() => setIsLogTypeManagerOpen(false)}
       />
 
       {/* Green Phosphor CRT Purge Confirmation Modal */}

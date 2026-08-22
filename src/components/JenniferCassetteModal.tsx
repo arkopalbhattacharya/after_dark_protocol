@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { JENNIFER_SEASONS_DATA, type TapeEpisode } from '../data/jenniferTapesData';
 
 interface JenniferCassetteModalProps {

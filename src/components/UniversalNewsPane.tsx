@@ -9,6 +9,8 @@ interface UniversalNewsPaneProps {
   onToggleMinimize: () => void;
   isHeightExpanded?: boolean;
   onToggleHeightExpand?: () => void;
+  isOffline?: boolean;
+  isLoading?: boolean;
 }
 
 export function UniversalNewsPane({
@@ -16,7 +18,9 @@ export function UniversalNewsPane({
   isMinimized,
   onToggleMinimize,
   isHeightExpanded = false,
-  onToggleHeightExpand
+  onToggleHeightExpand,
+  isOffline = false,
+  isLoading = false
 }: UniversalNewsPaneProps) {
   const [selectedFilter, setSelectedFilter] = useState<'ALL' | NewsSourceId>('ALL');
   const [expandedArticleId, setExpandedArticleId] = useState<string | null>(null);
@@ -29,8 +33,6 @@ export function UniversalNewsPane({
       return new Set<string>();
     }
   });
-
-  const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   // Format date and time strictly in 12-hour format (e.g., "Aug 22, 5:45:10 PM")
   const format12HourDateTime = (isoString: string) => {
@@ -183,108 +185,145 @@ export function UniversalNewsPane({
             </div>
 
             {/* Sub-wire Telemetry Info */}
-            <div className="px-3 py-1 bg-[#100701]/90 border-b border-amber-warn/20 text-[9.5px] font-mono text-amber-warn/70 flex justify-between items-center">
+            <div className="px-3 py-1 bg-[#100701]/90 border-b border-amber-warn/20 text-[9.5px] font-mono text-amber-warn/70 flex justify-between items-center select-none">
               <div className="flex items-center gap-1.5">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#33ff00] animate-ping"></span>
-                <span className="tracking-wider">FEED: LIVE_ORBITAL_WIRE</span>
+                <span className={`inline-block w-1.5 h-1.5 rounded-full ${isOffline ? 'bg-[#ff0033] animate-pulse' : 'bg-[#33ff00] animate-ping'}`}></span>
+                <span className={`tracking-wider font-bold ${isOffline ? 'text-[#ff4d6d]' : 'text-amber-warn/80'}`}>
+                  {isOffline ? 'FEED: QUANTUM_CARRIER_OFFLINE // AIRGAP_ENFORCED' : 'FEED: LIVE_SUPABASE_ORBITAL_WIRE'}
+                </span>
               </div>
+              <span className="text-[9px] opacity-75 font-mono">
+                {isOffline ? '[ERR_NO_CARRIER]' : '[DB: SUPABASE_LIVE]'}
+              </span>
             </div>
 
-            {/* Scrollable Article Feed */}
-            <div className="flex-1 p-0 overflow-y-auto">
-              <div className="divide-y divide-amber-warn/20">
-                {filteredArticles.map((article) => {
-                  const isExpanded = expandedArticleId === article.id;
-                  const isRead = readArticleIds.has(article.id);
-                  const formattedTime = format12HourDateTime(article.timestamp);
+            {/* Main Content Area: Offline Warning vs Loading vs Article Feed */}
+            {isOffline ? (
+              <div className="flex-1 p-4 md:p-6 flex flex-col justify-center items-center text-center font-mono overflow-y-auto bg-[#0a0401]/95 select-none space-y-3">
+                <div className="w-10 h-10 border border-[#ff4d6d]/60 flex items-center justify-center bg-[#ff0033]/10 text-[#ff4d6d] animate-pulse shadow-[0_0_15px_rgba(255,0,51,0.25)]">
+                  <span className="material-symbols-outlined text-[24px]">signal_wifi_off</span>
+                </div>
 
-                  return (
-                    <div
-                      key={article.id}
-                      onClick={() => handleArticleClick(article.id)}
-                      className={`px-3.5 py-3 hover:bg-amber-warn/10 cursor-pointer group flex flex-col transition-all ${
-                        isRead ? 'opacity-90' : 'bg-amber-warn/5'
-                      }`}
-                    >
-                      {/* Top Row: Planet & Urgency Tag & TAPE_IT Button */}
-                      <div className="flex justify-between items-center text-[10px] md:text-[10.5px] font-mono mb-1.5">
-                        <div className="flex items-center gap-1.5">
-                          {!isRead && (
-                            <span className="w-2 h-2 rounded-full bg-amber-warn shadow-[0_0_6px_var(--glow-secondary)]"></span>
-                          )}
-                          <span className="font-bold text-amber-warn group-hover:amber-text tracking-wider truncate max-w-[170px]">
-                            {article.planetOrSector}
-                          </span>
-                        </div>
+                <div className="text-xs md:text-sm font-black text-[#ff4d6d] tracking-widest leading-snug">
+                  [ ⚠️ QUANTUM_CARRIER_DE-SYNC // SUB-SPACE COMM-LINK SEVERED ]
+                </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0 font-mono">
-                          {article.urgency === 'FLASH' && (
-                            <span className="px-1.5 py-0.5 bg-[#ff0033]/20 border border-[#ff0033]/60 text-[#ff4d6d] font-black text-[9px] tracking-widest animate-pulse">
-                              FLASH
+                <div className="text-[10px] md:text-[10.5px] text-amber-warn/80 max-w-md leading-relaxed border-t border-b border-amber-warn/30 py-2.5 px-3 bg-[#120601] space-y-1 text-left w-full shadow-inner">
+                  <p className="text-amber-warn font-bold">&gt;&gt;&gt; SATELLITE DISH ARRAY: OFFLINE [ERR_NULL_TRANSPONDER_HANDSHAKE]</p>
+                  <p>&gt;&gt;&gt; SUB-ETHER RELAYS 01-08: UNREACHABLE (SECTOR FLUX ANOMALY)</p>
+                  <p className="text-[#ff4d6d] font-bold">&gt;&gt;&gt; PROTOCOL: LOCAL_AIRGAP_ENFORCED // REMOTE_WIRE_BLOCKED</p>
+                </div>
+
+                <p className="text-[11px] text-amber-warn/70 max-w-sm leading-relaxed">
+                  THE ORBITAL NEWS FEED CANNOT PENETRATE THIS SHIELDED VACUUM CHAMBER. ESTABLISH MAINFRAME CARRIER SIGNAL (ONLINE AUTH) TO DECRYPT INCOMING TELEMETRY.
+                </p>
+
+                <div className="text-[9.5px] text-amber-warn/50 tracking-widest animate-pulse font-mono">
+                  [ STATUS: RETRYING_HYPERLANE_BEACON... ]
+                </div>
+              </div>
+            ) : isLoading ? (
+              <div className="flex-1 p-6 flex flex-col justify-center items-center text-center font-mono text-xs text-amber-warn/70 space-y-2">
+                <div className="w-6 h-6 border-2 border-amber-warn border-t-transparent animate-spin"></div>
+                <span className="tracking-widest animate-pulse font-bold">[ SYNCING_SUPABASE_ORBITAL_WIRE... ]</span>
+              </div>
+            ) : (
+              /* Scrollable Article Feed */
+              <div className="flex-1 p-0 overflow-y-auto">
+                <div className="divide-y divide-amber-warn/20">
+                  {filteredArticles.map((article) => {
+                    const isExpanded = expandedArticleId === article.id;
+                    const isRead = readArticleIds.has(article.id);
+                    const formattedTime = format12HourDateTime(article.timestamp);
+
+                    return (
+                      <div
+                        key={article.id}
+                        onClick={() => handleArticleClick(article.id)}
+                        className={`px-3.5 py-3 hover:bg-amber-warn/10 cursor-pointer group flex flex-col transition-all ${
+                          isRead ? 'opacity-90' : 'bg-amber-warn/5'
+                        }`}
+                      >
+                        {/* Top Row: Planet & Urgency Tag & TAPE_IT Button */}
+                        <div className="flex justify-between items-center text-[10px] md:text-[10.5px] font-mono mb-1.5">
+                          <div className="flex items-center gap-1.5">
+                            {!isRead && (
+                              <span className="w-2 h-2 rounded-full bg-amber-warn shadow-[0_0_6px_var(--glow-secondary)]"></span>
+                            )}
+                            <span className="font-bold text-amber-warn group-hover:amber-text tracking-wider truncate max-w-[170px]">
+                              {article.planetOrSector}
                             </span>
-                          )}
-                          {article.urgency === 'CRITICAL' && (
-                            <span className="px-1.5 py-0.5 bg-[#ffb703]/20 border border-[#ffb703]/60 text-[#ffb703] font-black text-[9px] tracking-widest">
-                              CRITICAL
-                            </span>
-                          )}
-                          {article.urgency === 'ODDITY' && (
-                            <span className="px-1.5 py-0.5 bg-[#b83bf5]/20 border border-[#b83bf5]/60 text-[#df9ffb] font-black text-[9px] tracking-widest">
-                              ODDITY
-                            </span>
-                          )}
-                          <span className="text-[9.5px] text-amber-warn/60 font-mono px-1.5 py-0.5 border border-amber-warn/30">
-                            {article.tag}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              exportNewsArticleToPng(article);
-                            }}
-                            className="px-1.5 py-0.5 bg-transparent text-amber-warn/80 hover:text-amber-warn hover:bg-amber-warn/15 font-mono font-bold text-[9px] tracking-wider border border-amber-warn/50 hover:border-amber-warn transition-all flex items-center justify-center cursor-pointer ml-0.5"
-                            title="EXPORT NEWS CARD AS PNG (TAPE_IT)"
-                          >
-                            [ TAPE_IT ]
-                          </button>
-                        </div>
-                      </div>
+                          </div>
 
-                      {/* Headline */}
-                      <div className="text-[13.5px] md:text-[14px] font-bold font-mono text-on-surface group-hover:text-amber-warn transition-colors leading-snug line-clamp-2">
-                        {article.headline}
-                      </div>
-
-                      {/* Expandable Body */}
-                      {isExpanded ? (
-                        <div className="mt-2.5 text-xs font-mono text-on-surface-variant border-t border-amber-warn/25 pt-2.5 space-y-2.5 animate-fade-in">
-                          <p className="leading-relaxed text-[12.5px] md:text-[13px] text-amber-warn/95 bg-[#0f0701]/95 p-3 border border-amber-warn/40 shadow-inner">
-                            {article.content}
-                          </p>
-                          <div className="flex justify-between items-center text-[10px] md:text-[10.5px] text-outline pt-1 font-mono">
-                            <span>WIRE: {article.authorOrWire || 'SOLAR_DISPATCH'}</span>
-                            <span className="font-bold text-amber-warn/90">{formattedTime}</span>
+                          <div className="flex items-center gap-1.5 shrink-0 font-mono">
+                            {article.urgency === 'FLASH' && (
+                              <span className="px-1.5 py-0.5 bg-[#ff0033]/20 border border-[#ff0033]/60 text-[#ff4d6d] font-black text-[9px] tracking-widest animate-pulse">
+                                FLASH
+                              </span>
+                            )}
+                            {article.urgency === 'CRITICAL' && (
+                              <span className="px-1.5 py-0.5 bg-[#ffb703]/20 border border-[#ffb703]/60 text-[#ffb703] font-black text-[9px] tracking-widest">
+                                CRITICAL
+                              </span>
+                            )}
+                            {article.urgency === 'ODDITY' && (
+                              <span className="px-1.5 py-0.5 bg-[#b83bf5]/20 border border-[#b83bf5]/60 text-[#df9ffb] font-black text-[9px] tracking-widest">
+                                ODDITY
+                              </span>
+                            )}
+                            <span className="text-[9.5px] text-amber-warn/60 font-mono px-1.5 py-0.5 border border-amber-warn/30">
+                              {article.tag}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                exportNewsArticleToPng(article);
+                              }}
+                              className="px-1.5 py-0.5 bg-transparent text-amber-warn/80 hover:text-amber-warn hover:bg-amber-warn/15 font-mono font-bold text-[9px] tracking-wider border border-amber-warn/50 hover:border-amber-warn transition-all flex items-center justify-center cursor-pointer ml-0.5"
+                              title="EXPORT NEWS CARD AS PNG (TAPE_IT)"
+                            >
+                              [ TAPE_IT ]
+                            </button>
                           </div>
                         </div>
-                      ) : (
-                        <div className="flex justify-between items-center text-[11px] md:text-[11.5px] text-outline mt-1.5 font-mono">
-                          <span className="truncate opacity-80 max-w-[200px]">
-                            {article.content.slice(0, 55)}...
-                          </span>
-                          <span className="shrink-0 font-bold text-amber-warn/80 text-[10.5px]">{formattedTime}</span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
 
-                {filteredArticles.length === 0 && (
-                  <div className="px-3 py-8 text-center text-amber-warn/50 font-label-sm text-xs font-mono">
-                    &gt; NO WIRE DISPATCHES RECORDED IN SECTOR
-                  </div>
-                )}
+                        {/* Headline */}
+                        <div className="text-[13.5px] md:text-[14px] font-bold font-mono text-on-surface group-hover:text-amber-warn transition-colors leading-snug line-clamp-2">
+                          {article.headline}
+                        </div>
+
+                        {/* Expandable Body */}
+                        {isExpanded ? (
+                          <div className="mt-2.5 text-xs font-mono text-on-surface-variant border-t border-amber-warn/25 pt-2.5 space-y-2.5 animate-fade-in">
+                            <p className="leading-relaxed text-[12.5px] md:text-[13px] text-amber-warn/95 bg-[#0f0701]/95 p-3 border border-amber-warn/40 shadow-inner">
+                              {article.content}
+                            </p>
+                            <div className="flex justify-between items-center text-[10px] md:text-[10.5px] text-outline pt-1 font-mono">
+                              <span>WIRE: {article.authorOrWire || 'SOLAR_DISPATCH'}</span>
+                              <span className="font-bold text-amber-warn/90">{formattedTime}</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex justify-between items-center text-[11px] md:text-[11.5px] text-outline mt-1.5 font-mono">
+                            <span className="truncate opacity-80 max-w-[200px]">
+                              {article.content.slice(0, 55)}...
+                            </span>
+                            <span className="shrink-0 font-bold text-amber-warn/80 text-[10.5px]">{formattedTime}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {filteredArticles.length === 0 && (
+                    <div className="px-3 py-8 text-center text-amber-warn/50 font-label-sm text-xs font-mono">
+                      &gt; NO WIRE DISPATCHES RECORDED IN SECTOR
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>
@@ -349,8 +388,33 @@ export function UniversalNewsPane({
             </div>
 
             {/* Modal Feed Body */}
-            <div className="p-4 md:p-6 overflow-y-auto max-h-[calc(85vh-120px)] space-y-4 z-30">
-              {filteredArticles.map((article) => {
+            <div className="p-4 md:p-6 overflow-y-auto max-h-[calc(85vh-120px)] space-y-4 z-30 flex-1">
+              {isOffline ? (
+                <div className="py-12 flex flex-col justify-center items-center text-center font-mono space-y-4 select-none">
+                  <div className="w-12 h-12 border border-[#ff4d6d]/60 flex items-center justify-center bg-[#ff0033]/10 text-[#ff4d6d] animate-pulse shadow-[0_0_20px_rgba(255,0,51,0.3)]">
+                    <span className="material-symbols-outlined text-[30px]">signal_wifi_off</span>
+                  </div>
+
+                  <div className="text-sm md:text-base font-black text-[#ff4d6d] tracking-widest leading-snug">
+                    [ ⚠️ QUANTUM_CARRIER_DE-SYNC // SUB-SPACE COMM-LINK SEVERED ]
+                  </div>
+
+                  <div className="text-xs text-amber-warn/80 max-w-lg leading-relaxed border border-amber-warn/30 py-3 px-4 bg-[#120601] space-y-1.5 text-left w-full shadow-inner">
+                    <p className="text-amber-warn font-bold">&gt;&gt;&gt; SATELLITE DISH ARRAY: OFFLINE [ERR_NULL_TRANSPONDER_HANDSHAKE]</p>
+                    <p>&gt;&gt;&gt; SUB-ETHER RELAYS 01-08: UNREACHABLE (SECTOR FLUX ANOMALY)</p>
+                    <p className="text-[#ff4d6d] font-bold">&gt;&gt;&gt; PROTOCOL: LOCAL_AIRGAP_ENFORCED // REMOTE_WIRE_BLOCKED</p>
+                  </div>
+
+                  <p className="text-xs text-amber-warn/70 max-w-md leading-relaxed">
+                    THE ORBITAL NEWS FEED CANNOT PENETRATE THIS SHIELDED VACUUM CHAMBER. ESTABLISH MAINFRAME CARRIER SIGNAL (ONLINE AUTH) TO DECRYPT INCOMING TELEMETRY.
+                  </p>
+
+                  <div className="text-[10px] text-amber-warn/50 tracking-widest animate-pulse font-mono pt-2">
+                    [ STATUS: RETRYING_HYPERLANE_BEACON... ]
+                  </div>
+                </div>
+              ) : (
+                filteredArticles.map((article) => {
                 const formattedTime = format12HourDateTime(article.timestamp);
                 const isRead = readArticleIds.has(article.id);
 
@@ -417,7 +481,8 @@ export function UniversalNewsPane({
                     </div>
                   </div>
                 );
-              })}
+              })
+              )}
             </div>
           </div>
         </div>

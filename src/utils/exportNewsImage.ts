@@ -10,7 +10,6 @@ export function exportNewsArticleToPng(article: NewsArticle): void {
     const panelBg = rootStyle.getPropertyValue('--bg-panel').trim() || '#140801';
     const textColor = rootStyle.getPropertyValue('--text-on-surface').trim() || '#ffffff';
     const textVariantColor = rootStyle.getPropertyValue('--text-on-surface-variant').trim() || '#e0d0c0';
-    const systemTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const formattedTime = (() => {
       try {

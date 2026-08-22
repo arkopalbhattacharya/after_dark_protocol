@@ -39,7 +39,7 @@ export const NEWS_SOURCES: NewsSource[] = [
   }
 ];
 
-export const INITIAL_NEWS_ARTICLES: NewsArticle[] = [
+const RAW_INITIAL_ARTICLES: NewsArticle[] = [
   // =========================================================================
   // 1. PLANETARY AFFAIRS (22 Articles)
   // =========================================================================
@@ -1024,3 +1024,22 @@ export const INITIAL_NEWS_ARTICLES: NewsArticle[] = [
     authorOrWire: 'THE_GLITCH_TRIBUNE'
   }
 ];
+
+/**
+ * Generates fresh seed articles with timestamps spread across the last 11.5 hours,
+ * ensuring all 88 initial dispatches are strictly within the 12-hour retention window.
+ */
+export function getFreshInitialNewsArticles(): NewsArticle[] {
+  const now = Date.now();
+  const maxSpanMs = 11.5 * 60 * 60 * 1000; // 11.5 hours
+  return RAW_INITIAL_ARTICLES.map((article, index) => {
+    const ageMs = Math.min((index + 1) * (maxSpanMs / RAW_INITIAL_ARTICLES.length), maxSpanMs);
+    return {
+      ...article,
+      timestamp: new Date(now - ageMs).toISOString()
+    };
+  });
+}
+
+export const INITIAL_NEWS_ARTICLES: NewsArticle[] = getFreshInitialNewsArticles();
+
