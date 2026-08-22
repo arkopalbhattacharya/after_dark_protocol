@@ -12,6 +12,9 @@ import { FloppyNotesModal } from './components/FloppyNotesModal';
 import { TtyTranscriptModal } from './components/TtyTranscriptModal';
 import { JenniferCipherModal } from './components/JenniferCipherModal';
 import { JenniferCassetteModal } from './components/JenniferCassetteModal';
+import { UniversalNewsPane } from './components/UniversalNewsPane';
+import { INITIAL_NEWS_ARTICLES } from './data/initialNewsData';
+import type { NewsArticle, NewsSourceId } from './types/news';
 import { AuthGate } from './components/AuthGate';
 import settings from './config/settings.json';
 
@@ -85,6 +88,109 @@ function App() {
     const saved = localStorage.getItem('after_dark_flicker_enabled');
     return saved !== 'false';
   });
+
+  // Universal News Feed State
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>(() => {
+    try {
+      const saved = localStorage.getItem('after_dark_news_articles');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch { }
+    return INITIAL_NEWS_ARTICLES;
+  });
+
+  const [isNewsMinimized, setIsNewsMinimized] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('after_dark_news_minimized') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [isNewsHeightExpanded, setIsNewsHeightExpanded] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('after_dark_news_expanded') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // Save news state to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('after_dark_news_articles', JSON.stringify(newsArticles));
+    } catch (err) {
+      console.warn('Failed to cache news articles:', err);
+    }
+  }, [newsArticles]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('after_dark_news_minimized', String(isNewsMinimized));
+    } catch (err) {
+      console.warn('Failed to cache news minimized state:', err);
+    }
+  }, [isNewsMinimized]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('after_dark_news_expanded', String(isNewsHeightExpanded));
+    } catch (err) {
+      console.warn('Failed to cache news height state:', err);
+    }
+  }, [isNewsHeightExpanded]);
+
+  // Periodic randomized 15-30 minute news fetcher per source
+  useEffect(() => {
+    const sources: NewsSourceId[] = ['PLANETARY_AFFAIRS', 'UNIVERSAL_SPORTS', 'COMMERCE_TRADE', 'VOID_SATIRE'];
+    const timers: NodeJS.Timeout[] = [];
+
+    sources.forEach((sourceId) => {
+      const scheduleNextFetch = () => {
+        // Random time between 15 and 30 minutes (in ms)
+        const delayMs = (15 + Math.random() * 15) * 60 * 1000;
+        const timer = setTimeout(async () => {
+          try {
+            const newArticle = await api.fetchLatestUniversalNews(sourceId);
+            setNewsArticles((prev) => {
+              const exists = prev.some((a) => a.id === newArticle.id || a.headline === newArticle.headline);
+              if (exists) return prev;
+              return [newArticle, ...prev].slice(0, 150);
+            });
+          } catch (err) {
+            console.warn(`Background wire poll failed for ${sourceId}:`, err);
+          } finally {
+            scheduleNextFetch();
+          }
+        }, delayMs);
+        timers.push(timer);
+      };
+
+      scheduleNextFetch();
+    });
+
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+    };
+  }, []);
+
+  const handleManualNewsRefresh = async (sourceId: NewsSourceId) => {
+    setIsRefreshingNews(true);
+    try {
+      const newArticle = await api.fetchLatestUniversalNews(sourceId);
+      setNewsArticles((prev) => {
+        const exists = prev.some((a) => a.id === newArticle.id || a.headline === newArticle.headline);
+        if (exists) return prev;
+        return [newArticle, ...prev].slice(0, 150);
+      });
+    } catch (err) {
+      console.warn('Manual wire refresh error:', err);
+    } finally {
+      setIsRefreshingNews(false);
+    }
+  };
 
   // Track and decrement offline session 60-min window
   useEffect(() => {
@@ -868,76 +974,113 @@ function App() {
               </div>
             </div>
 
-            {/* Recent Logs (Spans 1 col, 2 rows) */}
-            <div className="terminal-panel amber-panel lg:col-span-1 md:row-span-2 flex flex-col">
-              <div className="terminal-header font-label-sm text-label-sm text-amber-warn/70">
-                <span>REC_LOGS</span>
-                <span>DB_SYNC: OK</span>
-              </div>
-              <div className="flex border-b border-amber-warn/30 text-[9px] font-label-sm text-amber-warn/50">
-                <button
-                  onClick={() => setFilterCategory('ALL')}
-                  className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors ${filterCategory === 'ALL' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                >ALL</button>
-                <button
-                  onClick={() => setFilterCategory('AI_EXPERIMENT')}
-                  className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'AI_EXPERIMENT' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                >AI</button>
-                <button
-                  onClick={() => setFilterCategory('CAFFEINE_LOG')}
-                  className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'CAFFEINE_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                >CAFE</button>
-                <button
-                  onClick={() => setFilterCategory('ACTIVITY_LOG')}
-                  className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'ACTIVITY_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                >BIO</button>
-                <button
-                  onClick={() => setFilterCategory('FREEFORM_LOG')}
-                  className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'FREEFORM_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                >FREE</button>
-                <button
-                  onClick={() => setFilterCategory('DUTY_ROSTER')}
-                  className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'DUTY_ROSTER' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
-                >DUTY</button>
-              </div>
-              <div className="flex-1 p-0 overflow-y-auto">
-                <div className="divide-y divide-surface-container-high/50">
-                  {logs.filter(log => filterCategory === 'ALL' || log.category === filterCategory).map((log) => (
-                    <div key={log.id} onClick={() => setExpandedLogId(expandedLogId === log.id ? null : log.id)} className="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group flex flex-col">
-                      <div className="flex justify-between items-start">
-                        <div className="font-label-sm text-label-sm text-amber-warn mb-1 group-hover:amber-text transition-all">{log.category}</div>
-                      </div>
-                      <div className="text-sm truncate text-on-surface-variant font-bold">{log.title}</div>
-
-                      {expandedLogId === log.id && (
-                        <div className="mt-2 text-xs border-t border-amber-warn/30 pt-2 space-y-2">
-                          {Object.entries(log.payload).map(([key, value]) => (
-                            <div key={key} className="flex flex-col">
-                              <span className="text-amber-warn/70 uppercase text-[10px]">{key}</span>
-                              <span className="text-on-surface-variant break-words">{String(value)}</span>
-                            </div>
-                          ))}
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setInspectingLogId(inspectingLogId === log.id ? null : log.id) }}
-                            className="mt-3 w-full bg-neon-cyan text-obsidian-base font-bold py-1 hover:bg-primary-container transition-colors uppercase text-[10px]"
-                          >
-                            [ {inspectingLogId === log.id ? 'HIDE' : 'VIEW'} RAW JSON ]
-                          </button>
-                          {inspectingLogId === log.id && (
-                            <pre className="mt-2 p-2 bg-obsidian-elevated border border-neon-cyan/30 text-[10px] text-neon-cyan overflow-x-auto whitespace-pre-wrap">
-                              {JSON.stringify(log.payload, null, 2)}
-                            </pre>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="text-[10px] text-outline mt-1 text-right">{new Date(log.timestamp).toLocaleString()}</div>
-                    </div>
-                  ))}
-                  {logs.filter(log => filterCategory === 'ALL' || log.category === filterCategory).length === 0 && (
-                    <div className="px-3 py-4 text-center text-amber-warn/50 font-label-sm">NO RECORDS FOUND</div>
-                  )}
+            {/* Center Column: Recent Logs + Universal News Feed (Spans 1 col, 2 rows) */}
+            <div className="lg:col-span-1 md:row-span-2 flex flex-col gap-4 min-h-0 h-full">
+              {/* Recent Logs Panel (65% default, 35% when news expanded, 100% when minimized) */}
+              <div
+                className={`terminal-panel amber-panel flex flex-col transition-all duration-300 min-h-0 ${
+                  isNewsMinimized
+                    ? 'flex-1 h-full'
+                    : isNewsHeightExpanded
+                    ? 'h-[35%] flex-[35]'
+                    : 'h-[65%] flex-[65]'
+                }`}
+              >
+                <div className="terminal-header font-label-sm text-label-sm text-amber-warn/70">
+                  <span>REC_LOGS</span>
+                  <span>DB_SYNC: OK</span>
                 </div>
+                <div className="flex border-b border-amber-warn/30 text-[9px] font-label-sm text-amber-warn/50">
+                  <button
+                    onClick={() => setFilterCategory('ALL')}
+                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors ${filterCategory === 'ALL' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >ALL</button>
+                  <button
+                    onClick={() => setFilterCategory('AI_EXPERIMENT')}
+                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'AI_EXPERIMENT' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >AI</button>
+                  <button
+                    onClick={() => setFilterCategory('CAFFEINE_LOG')}
+                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'CAFFEINE_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >CAFE</button>
+                  <button
+                    onClick={() => setFilterCategory('ACTIVITY_LOG')}
+                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'ACTIVITY_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >BIO</button>
+                  <button
+                    onClick={() => setFilterCategory('FREEFORM_LOG')}
+                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'FREEFORM_LOG' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >FREE</button>
+                  <button
+                    onClick={() => setFilterCategory('DUTY_ROSTER')}
+                    className={`flex-1 py-1 hover:bg-amber-warn/10 transition-colors border-l border-amber-warn/30 ${filterCategory === 'DUTY_ROSTER' ? 'bg-amber-warn/20 text-amber-warn font-bold' : ''}`}
+                  >DUTY</button>
+                </div>
+                <div className="flex-1 p-0 overflow-y-auto">
+                  <div className="divide-y divide-surface-container-high/50">
+                    {logs.filter(log => filterCategory === 'ALL' || log.category === filterCategory).map((log) => (
+                      <div key={log.id} onClick={() => setExpandedLogId(expandedLogId === log.id ? null : log.id)} className="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group flex flex-col">
+                        <div className="flex justify-between items-start">
+                          <div className="font-label-sm text-label-sm text-amber-warn mb-1 group-hover:amber-text transition-all">{log.category}</div>
+                        </div>
+                        <div className="text-sm truncate text-on-surface-variant font-bold">{log.title}</div>
+
+                        {expandedLogId === log.id && (
+                          <div className="mt-2 text-xs border-t border-amber-warn/30 pt-2 space-y-2">
+                            {Object.entries(log.payload).map(([key, value]) => (
+                              <div key={key} className="flex flex-col">
+                                <span className="text-amber-warn/70 uppercase text-[10px]">{key}</span>
+                                <span className="text-on-surface-variant break-words">{String(value)}</span>
+                              </div>
+                            ))}
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setInspectingLogId(inspectingLogId === log.id ? null : log.id) }}
+                              className="mt-3 w-full bg-neon-cyan text-obsidian-base font-bold py-1 hover:bg-primary-container transition-colors uppercase text-[10px]"
+                            >
+                              [ {inspectingLogId === log.id ? 'HIDE' : 'VIEW'} RAW JSON ]
+                            </button>
+                            {inspectingLogId === log.id && (
+                              <pre className="mt-2 p-2 bg-obsidian-elevated border border-neon-cyan/30 text-[10px] text-neon-cyan overflow-x-auto whitespace-pre-wrap">
+                                {JSON.stringify(log.payload, null, 2)}
+                              </pre>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="text-[10px] text-outline mt-1 text-right">{new Date(log.timestamp).toLocaleString()}</div>
+                      </div>
+                    ))}
+                    {logs.filter(log => filterCategory === 'ALL' || log.category === filterCategory).length === 0 && (
+                      <div className="px-3 py-4 text-center text-amber-warn/50 font-label-sm">NO RECORDS FOUND</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Universal News Wire (35% default, 65% when height expanded, header bar when minimized) */}
+              <div
+                className={`flex flex-col transition-all duration-300 min-h-0 ${
+                  isNewsMinimized
+                    ? 'shrink-0'
+                    : isNewsHeightExpanded
+                    ? 'h-[65%] flex-[65]'
+                    : 'h-[35%] flex-[35]'
+                }`}
+              >
+                <UniversalNewsPane
+                  articles={newsArticles}
+                  isMinimized={isNewsMinimized}
+                  onToggleMinimize={() => setIsNewsMinimized(!isNewsMinimized)}
+                  isHeightExpanded={isNewsHeightExpanded}
+                  onToggleHeightExpand={() => {
+                    if (isNewsMinimized) {
+                      setIsNewsMinimized(false);
+                      setIsNewsHeightExpanded(true);
+                    } else {
+                      setIsNewsHeightExpanded(!isNewsHeightExpanded);
+                    }
+                  }}
+                />
               </div>
             </div>
 

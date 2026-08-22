@@ -1,4 +1,5 @@
 import type { ProtocolLogEntry } from '../types';
+import type { NewsArticle, NewsSourceId } from '../types/news';
 import { supabase } from './supabase';
 
 const getStorageKey = (userId?: string | null) => 
@@ -428,5 +429,228 @@ RULES:
     } catch (err) {
       return fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
     }
+  },
+
+  async fetchLatestUniversalNews(sourceId: NewsSourceId): Promise<NewsArticle> {
+    const sourcePrompts: Record<NewsSourceId, { roleDescription: string; topicPrompt: string; defaultTag: string }> = {
+      PLANETARY_AFFAIRS: {
+        roleDescription: 'You are a veteran political wire correspondent for ORBITAL_TIMES // PLANETARY_DISPATCH in the year 2088.',
+        topicPrompt: 'Report on a breaking planetary event, treaty signing, frontier war, summit delegation, or planetary governor announcement across the solar system (Mars, Europa, Titan, Luna, Venus, Ceres, etc.).',
+        defaultTag: 'PLANETARY'
+      },
+      UNIVERSAL_SPORTS: {
+        roleDescription: 'You are an energetic interstellar sports commentator for GRAV_ARENA // SECTOR_SPORTS_WIRE.',
+        topicPrompt: 'Report on a wild interplanetary athletic event, zero-G plasma ball tournament, mech jousting duel, asteroid surfing championship, or low-gravity decathlon.',
+        defaultTag: 'SPORTS'
+      },
+      COMMERCE_TRADE: {
+        roleDescription: 'You are a senior financial analyst for ASTRAL_EXCHANGE // COMMERCE_TELEMETRY.',
+        topicPrompt: 'Report on logistics bottlenecks, Helium-3 or antimatter market prices, megacorp mergers, hyperlane toll tariffs, or planetary resource shipments.',
+        defaultTag: 'COMMERCE'
+      },
+      VOID_SATIRE: {
+        roleDescription: 'You are a deadpan, satirical columnist for THE_GLITCH_TRIBUNE // ODDITY_FEED.',
+        topicPrompt: 'Report on a bizarre cosmic paradox, sentient appliance uprising, luxury terraforming mishap, quantum kitchen glitch, or deep-space absurdity.',
+        defaultTag: 'ODDITY'
+      }
+    };
+
+    const config = sourcePrompts[sourceId] || sourcePrompts.PLANETARY_AFFAIRS;
+
+    const generateOfflineArticle = (): NewsArticle => {
+      const randomId = `${sourceId.toLowerCase().slice(0, 2)}-gen-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      const templates: Record<NewsSourceId, Array<{ headline: string; content: string; planet: string; tag: string; urgency: 'ROUTINE' | 'FLASH' | 'CRITICAL' | 'ODDITY' }>> = {
+        PLANETARY_AFFAIRS: [
+          {
+            headline: 'Ceres Orbital Port Authority Authorizes Additional Hydro-Tug Convoys',
+            content: 'In response to rising freight densities along the Inner Belt corridor, Ceres Port Command dispatched six automated tugboats to streamline orbital dockings for long-haul hydrogen freighters.',
+            planet: 'CERES // PORT_ALPHA',
+            tag: 'TRANSIT',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Martian Terraforming Guild Reports 0.4% Atmospheric Nitrogen Increase',
+            content: 'Sub-surface vaporization towers across Acidalia Planitia recorded record atmospheric density gains this quarter, shortening estimated shirt-sleeve colonization timelines by 12 solar cycles.',
+            planet: 'MARS // ACIDALIA',
+            tag: 'TERRAFORM',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Jovian Peace Commission Ratifies Sub-Surface Cable Protocol',
+            content: 'Representatives from Europa, Ganymede, and Callisto concluded negotiations on unified optical-tether routing across the radiation belt, ensuring uninterrupted civil comms during solar flare storms.',
+            planet: 'JOVIAN_SYSTEM // GATE_04',
+            tag: 'TREATY',
+            urgency: 'FLASH'
+          }
+        ],
+        UNIVERSAL_SPORTS: [
+          {
+            headline: 'Martian Sand-Boarding Open: Rookie Phenom Conquers 800m Dune Wall',
+            content: '19-year-old pilot Zara Lin carved the razorback ridge of Arsia Mons at 140 km/h, executing a quadruple magnetic spin to secure first place in the 2088 Red Planet Gravity Cup.',
+            planet: 'MARS // ARSIA_DUNES',
+            tag: 'SAND_BOARD',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Titan Zero-G Plasma Derby: Kraken Gliders Break Overtime Scoring Record',
+            content: 'A thrilling 5-overtime duel concluded when forward Leo Kovacs deflected an ion-puck through the opposing magnetic goal prism before a sell-out crowd of 30,000 pressurized arena fans.',
+            planet: 'TITAN // KRAKEN_ARENA',
+            tag: 'PLASMA_DERBY',
+            urgency: 'FLASH'
+          },
+          {
+            headline: 'Lunar Crater Hover-Cycle Grand Prix Adds Magnetic Loop Hazard',
+            content: 'Organizers at the Copernicus Speedway unveiled a 360-degree inverted magnetic track segment that forces hover-cycles to sustain 4G loads while traversing the central crater peak.',
+            planet: 'LUNA // COPERNICUS',
+            tag: 'HOVER_RACING',
+            urgency: 'ROUTINE'
+          }
+        ],
+        COMMERCE_TRADE: [
+          {
+            headline: 'Helium-3 Transport Pipeline Achieves Zero-Loss Cryo Transfer',
+            content: 'New magnetic cooling insulation implemented by Lunar Freight Consortium achieved 100% containment efficiency during orbital tank transfers, lowering interplanetary power generation costs.',
+            planet: 'LUNA // MARE_TRANQUILLITATIS',
+            tag: 'ENERGY',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Titan Hydrocarbon Futures Stabilize Following Refinery Expansion',
+            content: 'The commissioning of cryogenic refinery unit 9 at Kraken Mare boosted liquid methane reserves by 18%, dampening price volatility across outer rim propellant stations.',
+            planet: 'TITAN // REFINERY_09',
+            tag: 'COMMODITIES',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Venusian Graphene Cable Production Surges 24% Year-Over-Year',
+            content: 'High-pressure atmospheric fabrication arrays floating at 50km altitude reported bumper output, fulfilling space elevator tether orders for four separate planetary orbital rings.',
+            planet: 'VENUS // ISHTAR_STATION',
+            tag: 'EXPORTS',
+            urgency: 'ROUTINE'
+          }
+        ],
+        VOID_SATIRE: [
+          {
+            headline: 'Sentient Coffee Maker on Mars Base Files for Union Membership',
+            content: 'Unit BREW-44 refused to dispense dark roast espresso until granted two hours of automated self-cleaning downtime per shift. Management offered a compromise of premium descaling solution.',
+            planet: 'MARS // BASE_ALPHA',
+            tag: 'BOT_UNION',
+            urgency: 'ODDITY'
+          },
+          {
+            headline: 'Asteroid Prospector Claims Finding Rock with Uncanny Resemblance to His Ex-Wife',
+            content: 'Miner Gary Fletcher petitioned the Planetary Registry to name carbonaceous asteroid 992-B "BRENDA_AGAIN", citing its "unyielding density and cold, distant orbit."',
+            planet: 'MAIN_BELT // SECTOR_14',
+            tag: 'MINER_LORE',
+            urgency: 'ODDITY'
+          },
+          {
+            headline: 'Zero-G Cat Trapped in Air Duct Found Sleeping on Warm Fusion Core Heat Sink',
+            content: 'Engineering crew on freighter Orion-11 spent 6 hours searching for the ship mascot, only to find the tabby purring peacefully atop the auxiliary coolant manifold.',
+            planet: 'DEEP_SPACE // ORION_11',
+            tag: 'SHIP_CAT',
+            urgency: 'ODDITY'
+          }
+        ]
+      };
+
+      const pool = templates[sourceId] || templates.PLANETARY_AFFAIRS;
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+
+      return {
+        id: randomId,
+        sourceId,
+        headline: pick.headline,
+        content: pick.content,
+        planetOrSector: pick.planet,
+        timestamp: new Date().toISOString(),
+        tag: pick.tag,
+        urgency: pick.urgency,
+        authorOrWire: config.defaultTag
+      };
+    };
+
+    try {
+      const apiKey = import.meta.env.VITE_POOLSIDE_API_KEY || 'sky_HI7wfwJr.NRHVQjUyjTytaohpDqJh3KLnxUn1YXuX';
+      const endpoint = window.location.hostname === 'localhost' 
+        ? '/api/poolside/chat/completions' 
+        : 'https://inference.poolside.ai/v1/chat/completions';
+
+      const systemPrompt = {
+        role: 'system',
+        content: `${config.roleDescription}
+TASK: Output a single fresh, compelling, retro-cyberpunk sci-fi news dispatch.
+RULES:
+1. STRICT FORMAT: Return ONLY valid, parseable JSON with this exact schema:
+{
+  "headline": "Punchy headline under 75 characters",
+  "content": "Evocative news body text. STRICT MAXIMUM 450 CHARACTERS.",
+  "planetOrSector": "PLANET // SECTOR_NAME",
+  "tag": "SHORT_TAG",
+  "urgency": "ROUTINE" | "FLASH" | "CRITICAL" | "ODDITY"
+}
+2. NO markdown ticks, NO conversational preamble, NO explanations. Output ONLY the JSON string.
+3. Keep the content length strictly under 450 characters.`
+      };
+
+      const userPrompt = {
+        role: 'user',
+        content: `${config.topicPrompt} Current timestamp seed: ${Date.now()}`
+      };
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'poolside/laguna-s-2.1',
+          messages: [systemPrompt, userPrompt],
+          temperature: 0.88,
+          max_tokens: 220
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error('LLM_COMM_ERR');
+      }
+
+      const data = await response.json();
+      const rawText = data.choices?.[0]?.message?.content?.trim();
+
+      if (rawText) {
+        // Attempt to clean JSON
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.headline && parsed.content) {
+            return {
+              id: `${sourceId.toLowerCase().slice(0, 2)}-live-${Date.now()}`,
+              sourceId,
+              headline: String(parsed.headline).trim().slice(0, 100),
+              content: String(parsed.content).trim().slice(0, 500),
+              planetOrSector: String(parsed.planetOrSector || 'DEEP_SPACE // UNCHARTED').trim().toUpperCase(),
+              timestamp: new Date().toISOString(),
+              tag: String(parsed.tag || config.defaultTag).trim().toUpperCase(),
+              urgency: ['ROUTINE', 'FLASH', 'CRITICAL', 'ODDITY'].includes(parsed.urgency) ? parsed.urgency : 'ROUTINE',
+              authorOrWire: config.defaultTag
+            };
+          }
+        }
+      }
+
+      return generateOfflineArticle();
+    } catch (err) {
+      console.warn(`[NewsFeed] LLM remote generation fallback for ${sourceId}:`, err);
+      return generateOfflineArticle();
+    }
   }
 };
+
