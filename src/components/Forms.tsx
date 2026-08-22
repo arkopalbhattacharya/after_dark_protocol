@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type {
   CategoryType,
   AIExperimentPayload,
@@ -40,80 +40,81 @@ import settings from '../config/settings.json';
 interface FormsProps {
   category: CategoryType;
   onSubmit: (payload: any) => void;
+  initialPayload?: any;
 }
 
-export function LogForms({ category, onSubmit }: FormsProps) {
+export function LogForms({ category, onSubmit, initialPayload }: FormsProps) {
   switch (category) {
     // CYBER_OPS
     case 'AI_EXPERIMENT':
-      return <AIExperimentForm onSubmit={onSubmit} />;
+      return <AIExperimentForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'FLOW_TELEMETRY':
-      return <FlowTelemetryForm onSubmit={onSubmit} />;
+      return <FlowTelemetryForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'INCIDENT_POSTMORTEM':
-      return <IncidentPostmortemForm onSubmit={onSubmit} />;
+      return <IncidentPostmortemForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'INTEL_SYNAPSE':
-      return <IntelSynapseForm onSubmit={onSubmit} />;
+      return <IntelSynapseForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'HOMELAB_RIG':
-      return <HomelabRigForm onSubmit={onSubmit} />;
+      return <HomelabRigForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'RELEASE_RADAR':
-      return <ReleaseRadarForm onSubmit={onSubmit} />;
+      return <ReleaseRadarForm onSubmit={onSubmit} initialData={initialPayload} />;
 
     // VITALS
     case 'CAFFEINE_LOG':
-      return <CaffeineForm onSubmit={onSubmit} />;
+      return <CaffeineForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'ACTIVITY_LOG':
-      return <ActivityForm onSubmit={onSubmit} />;
+      return <ActivityForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'HIBERNATION_LOG':
-      return <HibernationLogForm onSubmit={onSubmit} />;
+      return <HibernationLogForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'CHEM_STACK':
-      return <ChemStackForm onSubmit={onSubmit} />;
+      return <ChemStackForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'RATION_INTEL':
-      return <RationIntelForm onSubmit={onSubmit} />;
+      return <RationIntelForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'MOOD_SPECTRUM':
-      return <MoodSpectrumForm onSubmit={onSubmit} />;
+      return <MoodSpectrumForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'STILLNESS_INTERVAL':
-      return <StillnessIntervalForm onSubmit={onSubmit} />;
+      return <StillnessIntervalForm onSubmit={onSubmit} initialData={initialPayload} />;
 
     // PRODUCTIVITY
     case 'DUTY_ROSTER':
-      return <DutyRosterForm onSubmit={onSubmit} />;
+      return <DutyRosterForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'CHRONO_SPRINT':
-      return <ChronoSprintForm onSubmit={onSubmit} />;
+      return <ChronoSprintForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'DAILY_FROG':
-      return <DailyFrogForm onSubmit={onSubmit} />;
+      return <DailyFrogForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'QUADRANT_MATRIX':
-      return <QuadrantMatrixForm onSubmit={onSubmit} />;
+      return <QuadrantMatrixForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'BLOCKED_QUEUE':
-      return <BlockedQueueForm onSubmit={onSubmit} />;
+      return <BlockedQueueForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'INTERSTITIAL_JOT':
-      return <InterstitialJotForm onSubmit={onSubmit} />;
+      return <InterstitialJotForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'DAWN_DUSK_STANDUP':
-      return <DawnDuskStandupForm onSubmit={onSubmit} />;
+      return <DawnDuskStandupForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'NEURAL_SCRATCHPAD':
-      return <NeuralScratchpadForm onSubmit={onSubmit} />;
+      return <NeuralScratchpadForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'FIVE_MINUTE_IGNITION':
-      return <FiveMinuteIgnitionForm onSubmit={onSubmit} />;
+      return <FiveMinuteIgnitionForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'DAILY_CADENCE_CHECKLIST':
-      return <DailyCadenceChecklistForm onSubmit={onSubmit} />;
+      return <DailyCadenceChecklistForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'FREEFORM_LOG':
-      return <FreeformForm onSubmit={onSubmit} />;
+      return <FreeformForm onSubmit={onSubmit} initialData={initialPayload} />;
 
     // SKY_LIFE
     case 'CREDIT_BURN':
-      return <CreditBurnForm onSubmit={onSubmit} />;
+      return <CreditBurnForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'SCREEN_TELEMETRY':
-      return <ScreenTelemetryForm onSubmit={onSubmit} />;
+      return <ScreenTelemetryForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'SONIC_CHRONICLE':
-      return <SonicChronicleForm onSubmit={onSubmit} />;
+      return <SonicChronicleForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'VIRTUAL_ARENA':
-      return <VirtualArenaForm onSubmit={onSubmit} />;
+      return <VirtualArenaForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'COMMS_LINK':
-      return <CommsLinkForm onSubmit={onSubmit} />;
+      return <CommsLinkForm onSubmit={onSubmit} initialData={initialPayload} />;
     case 'MICRO_TRIUMPHS':
-      return <MicroTriumphsForm onSubmit={onSubmit} />;
+      return <MicroTriumphsForm onSubmit={onSubmit} initialData={initialPayload} />;
 
     default:
-      return <FreeformForm onSubmit={onSubmit} />;
+      return <FreeformForm onSubmit={onSubmit} initialData={initialPayload} />;
   }
 }
 
@@ -179,116 +180,68 @@ function CustomSelect({
   );
 }
 
-// -------------------------------------------------------------
-// MICRO-TIMER WIDGET COMPONENT
-// -------------------------------------------------------------
-
 function MicroTimer({
-  initialSeconds = 1500,
   mode = 'COUNTDOWN',
+  initialSeconds = 300,
   onTimeUpdate,
-  label = 'CHRONO_TIMER'
+  label = 'TIMER'
 }: {
-  initialSeconds?: number;
   mode?: 'COUNTDOWN' | 'STOPWATCH';
-  onTimeUpdate?: (secondsElapsedOrRemaining: number) => void;
+  initialSeconds?: number;
+  onTimeUpdate?: (seconds: number) => void;
   label?: string;
 }) {
   const [seconds, setSeconds] = useState(initialSeconds);
-  const [isRunning, setIsRunning] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
-  useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | null = null;
-    if (isRunning) {
-      interval = setInterval(() => {
-        setSeconds((prev) => {
-          const next = mode === 'COUNTDOWN' ? Math.max(prev - 1, 0) : prev + 1;
-          if (onTimeUpdate) onTimeUpdate(next);
-          if (mode === 'COUNTDOWN' && next === 0) {
-            setIsRunning(false);
-          }
-          return next;
-        });
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isRunning, mode, onTimeUpdate]);
+  const toggle = () => setIsActive(!isActive);
 
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  const reset = () => {
+    setIsActive(false);
+    setSeconds(initialSeconds);
+    onTimeUpdate?.(initialSeconds);
+  };
+
+  const formatTime = (totalSec: number) => {
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
 
   return (
-    <div className="p-2.5 border border-neon-cyan/40 bg-[#021814]/80 text-neon-cyan font-mono my-2 flex flex-wrap items-center justify-between gap-2 shadow-[0_0_10px_rgba(30,220,224,0.15)]">
+    <div className="bg-[#021814] border border-neon-cyan/40 p-2.5 flex items-center justify-between font-mono text-xs mb-3 shadow-[0_0_10px_rgba(30,220,224,0.1)]">
       <div className="flex items-center gap-2">
-        <span className="material-symbols-outlined text-[16px] text-neon-cyan animate-pulse">timer</span>
-        <span className="text-[10px] font-black tracking-widest text-neon-cyan/80">[{label}]</span>
-        <span className="text-sm md:text-base font-black tracking-widest font-mono text-neon-cyan bg-[#020d04] px-2 py-0.5 border border-neon-cyan/50 shadow-inner">
-          {formatted}
+        <span className="material-symbols-outlined text-[16px] text-neon-cyan animate-pulse">
+          {mode === 'COUNTDOWN' ? 'hourglass_top' : 'timer'}
         </span>
+        <span className="text-neon-cyan font-bold tracking-wider">{label}</span>
       </div>
 
-      <div className="flex items-center gap-1 text-[10px]">
-        <button
-          type="button"
-          onClick={() => setIsRunning(!isRunning)}
-          className={`px-2 py-0.5 border font-bold transition-all cursor-pointer ${
-            isRunning
-              ? 'bg-[#ff0033]/20 border-[#ff0033] text-[#ff4d6d] animate-pulse'
-              : 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-[#020d04]'
-          }`}
-        >
-          {isRunning ? '[ PAUSE ]' : '[ START ]'}
-        </button>
+      <div className="flex items-center gap-3">
+        <span className="text-base font-black text-[#33ff00] drop-shadow-[0_0_5px_rgba(51,255,0,0.6)]">
+          {formatTime(seconds)}
+        </span>
 
-        <button
-          type="button"
-          onClick={() => {
-            setIsRunning(false);
-            setSeconds(initialSeconds);
-            if (onTimeUpdate) onTimeUpdate(initialSeconds);
-          }}
-          className="px-2 py-0.5 border border-neon-cyan/40 bg-transparent text-neon-cyan/80 hover:bg-neon-cyan/20 font-bold cursor-pointer"
-        >
-          [ RESET ]
-        </button>
-
-        {mode === 'COUNTDOWN' && (
-          <>
-            <button
-              type="button"
-              onClick={() => {
-                setSeconds(300);
-                if (onTimeUpdate) onTimeUpdate(300);
-              }}
-              className="px-1.5 py-0.5 border border-neon-cyan/30 text-[9px] hover:bg-neon-cyan/20 cursor-pointer"
-            >
-              5M
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSeconds(1500);
-                if (onTimeUpdate) onTimeUpdate(1500);
-              }}
-              className="px-1.5 py-0.5 border border-neon-cyan/30 text-[9px] hover:bg-neon-cyan/20 cursor-pointer"
-            >
-              25M
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSeconds(3000);
-                if (onTimeUpdate) onTimeUpdate(3000);
-              }}
-              className="px-1.5 py-0.5 border border-neon-cyan/30 text-[9px] hover:bg-neon-cyan/20 cursor-pointer"
-            >
-              50M
-            </button>
-          </>
-        )}
+        <div className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={toggle}
+            className={`px-2 py-0.5 font-bold text-[10.5px] border cursor-pointer transition-colors ${
+              isActive
+                ? 'bg-[#ffb703] border-[#ffb703] text-black hover:bg-amber-400'
+                : 'bg-neon-cyan border-neon-cyan text-black hover:bg-cyan-300'
+            }`}
+          >
+            {isActive ? '[ PAUSE ]' : '[ START ]'}
+          </button>
+          <button
+            type="button"
+            onClick={reset}
+            className="px-1.5 py-0.5 text-[10.5px] border border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/20 cursor-pointer"
+          >
+            [ RST ]
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -298,27 +251,27 @@ function MicroTimer({
 // 1. CYBER_OPS FORMS
 // =============================================================
 
-function AIExperimentForm({ onSubmit }: { onSubmit: (data: AIExperimentPayload) => void }) {
-  const [subType, setSubType] = useState<AIExperimentSubType>('AI_ML_EXPERIMENTATION');
+function AIExperimentForm({ onSubmit, initialData }: { onSubmit: (data: AIExperimentPayload) => void; initialData?: any }) {
+  const [subType, setSubType] = useState<AIExperimentSubType>(initialData?.subType || 'AI_ML_EXPERIMENTATION');
 
   const [mlData, setMlData] = useState({
-    modelStack: '',
-    experimentNotes: '',
-    epochs: 0,
-    loss: 0.0,
-    outcomeObservation: ''
+    modelStack: initialData?.modelStack || '',
+    experimentNotes: initialData?.experimentNotes || '',
+    epochs: initialData?.epochs ?? 0,
+    loss: initialData?.loss ?? 0.0,
+    outcomeObservation: initialData?.outcomeObservation || ''
   });
 
   const [trialData, setTrialData] = useState({
-    productName: '',
-    targetDevice: '',
-    positives: '',
-    negatives: '',
-    isPaid: false,
-    paymentType: 'SUBSCRIPTION' as 'SUBSCRIPTION' | 'ONE_TIME',
-    costDetails: '',
-    verdict: 'KEEP' as 'KEEP' | 'CAN_IT',
-    trialNotes: ''
+    productName: initialData?.productName || '',
+    targetDevice: initialData?.targetDevice || '',
+    positives: initialData?.positives || '',
+    negatives: initialData?.negatives || '',
+    isPaid: Boolean(initialData?.isPaid),
+    paymentType: (initialData?.paymentType || 'SUBSCRIPTION') as 'SUBSCRIPTION' | 'ONE_TIME',
+    costDetails: initialData?.costDetails || '',
+    verdict: (initialData?.verdict || 'KEEP') as 'KEEP' | 'CAN_IT',
+    trialNotes: initialData?.trialNotes || ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -450,59 +403,34 @@ function AIExperimentForm({ onSubmit }: { onSubmit: (data: AIExperimentPayload) 
                 value={trialData.targetDevice}
                 onChange={(e) => setTrialData({ ...trialData, targetDevice: e.target.value })}
                 className="w-full bg-surface-container-high border border-outline-variant p-2 text-on-surface focus:border-neon-cyan outline-none"
-                placeholder="e.g. Mac M3 Max, Linux Rig"
+                placeholder="e.g. Mac M3 Max, Linux Rig, iPhone"
               />
             </div>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-neon-cyan font-label-sm mb-1">POSITIVES</label>
+              <label className="block text-neon-cyan font-label-sm mb-1">POSITIVES / STRENGTHS</label>
               <textarea
                 value={trialData.positives}
                 onChange={(e) => setTrialData({ ...trialData, positives: e.target.value })}
                 className="w-full bg-surface-container-high border border-outline-variant p-2 text-on-surface focus:border-neon-cyan outline-none h-16"
-                placeholder="Key strengths..."
+                placeholder="Lightning fast latency, great context window..."
               ></textarea>
             </div>
             <div>
-              <label className="block text-neon-cyan font-label-sm mb-1">NEGATIVES</label>
+              <label className="block text-neon-cyan font-label-sm mb-1">NEGATIVES / FRICTION</label>
               <textarea
                 value={trialData.negatives}
                 onChange={(e) => setTrialData({ ...trialData, negatives: e.target.value })}
                 className="w-full bg-surface-container-high border border-outline-variant p-2 text-on-surface focus:border-neon-cyan outline-none h-16"
-                placeholder="Pain points / latency..."
+                placeholder="High token cost, occasional hallucination..."
               ></textarea>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 items-center">
-            <div>
-              <label className="block text-neon-cyan font-label-sm mb-1">VERDICT</label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTrialData({ ...trialData, verdict: 'KEEP' })}
-                  className={`flex-1 py-1.5 border text-xs font-mono font-bold cursor-pointer ${
-                    trialData.verdict === 'KEEP'
-                      ? 'bg-[#33ff00]/20 border-[#33ff00] text-[#33ff00]'
-                      : 'border-outline-variant text-outline'
-                  }`}
-                >
-                  [ KEEP ]
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTrialData({ ...trialData, verdict: 'CAN_IT' })}
-                  className={`flex-1 py-1.5 border text-xs font-mono font-bold cursor-pointer ${
-                    trialData.verdict === 'CAN_IT'
-                      ? 'bg-[#ff0033]/20 border-[#ff0033] text-[#ff4d6d]'
-                      : 'border-outline-variant text-outline'
-                  }`}
-                >
-                  [ CAN_IT ]
-                </button>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 pt-4">
+
+          <div className="grid grid-cols-3 gap-3 items-center">
+            <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="isPaid"
@@ -511,30 +439,91 @@ function AIExperimentForm({ onSubmit }: { onSubmit: (data: AIExperimentPayload) 
                 className="accent-neon-cyan w-4 h-4 cursor-pointer"
               />
               <label htmlFor="isPaid" className="text-neon-cyan font-mono text-xs cursor-pointer">
-                PAID_SERVICE
+                PAID_TOOL
               </label>
             </div>
+
+            {trialData.isPaid && (
+              <>
+                <div>
+                  <CustomSelect
+                    value={trialData.paymentType}
+                    onChange={(val) => setTrialData({ ...trialData, paymentType: val as any })}
+                    options={['SUBSCRIPTION', 'ONE_TIME']}
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    value={trialData.costDetails}
+                    onChange={(e) => setTrialData({ ...trialData, costDetails: e.target.value })}
+                    placeholder="$20/mo"
+                    className="w-full bg-surface-container-high border border-outline-variant p-2 text-on-surface focus:border-neon-cyan outline-none"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-neon-cyan font-label-sm mb-1">FINAL_VERDICT</label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => setTrialData({ ...trialData, verdict: 'KEEP' })}
+                className={`flex-1 py-1.5 border text-xs font-mono font-bold cursor-pointer ${
+                  trialData.verdict === 'KEEP'
+                    ? 'bg-[#33ff00]/20 border-[#33ff00] text-[#33ff00]'
+                    : 'border-outline-variant text-outline'
+                }`}
+              >
+                [ KEEP IN STACK ]
+              </button>
+              <button
+                type="button"
+                onClick={() => setTrialData({ ...trialData, verdict: 'CAN_IT' })}
+                className={`flex-1 py-1.5 border text-xs font-mono font-bold cursor-pointer ${
+                  trialData.verdict === 'CAN_IT'
+                    ? 'bg-[#ff0033]/20 border-[#ff0033] text-[#ff4d6d]'
+                    : 'border-outline-variant text-outline'
+                }`}
+              >
+                [ CAN IT / DISCARD ]
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-neon-cyan font-label-sm mb-1">TRIAL_NOTES</label>
+            <textarea
+              value={trialData.trialNotes}
+              onChange={(e) => setTrialData({ ...trialData, trialNotes: e.target.value })}
+              className="w-full bg-surface-container-high border border-outline-variant p-2 text-on-surface focus:border-neon-cyan outline-none h-16"
+              placeholder="Overall evaluation and integration potential..."
+            ></textarea>
           </div>
         </>
       )}
 
       <button
         type="submit"
-        className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 hover:bg-primary-container transition-colors uppercase font-mono tracking-widest mt-4 cursor-pointer shadow-[0_0_12px_rgba(30,220,224,0.3)]"
+        className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 hover:bg-primary-container transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(30,220,224,0.3)] cursor-pointer"
       >
-        [ COMMIT AI TELEMETRY ]
+        {initialData ? '[ SAVE MODIFIED EXPERIMENT ]' : '[ COMMIT AI EXPERIMENT ]'}
       </button>
     </form>
   );
 }
 
-function FlowTelemetryForm({ onSubmit }: { onSubmit: (data: FlowTelemetryPayload) => void }) {
-  const [targetModule, setTargetModule] = useState('');
-  const [durationMinutes, setDurationMinutes] = useState(60);
-  const [flowDepth, setFlowDepth] = useState<'SURFACE' | 'MODERATE' | 'DEEP_VOID' | 'TRANSCENDENT'>('DEEP_VOID');
-  const [interruptCount, setInterruptCount] = useState(0);
-  const [soundtrack, setSoundtrack] = useState('');
-  const [sessionNotes, setSessionNotes] = useState('');
+function FlowTelemetryForm({ onSubmit, initialData }: { onSubmit: (data: FlowTelemetryPayload) => void; initialData?: any }) {
+  const [targetModule, setTargetModule] = useState(initialData?.targetModule || '');
+  const [durationMinutes, setDurationMinutes] = useState(initialData?.durationMinutes ?? 60);
+  const [flowDepth, setFlowDepth] = useState<'SURFACE' | 'MODERATE' | 'DEEP_VOID' | 'TRANSCENDENT'>(
+    initialData?.flowDepth || 'DEEP_VOID'
+  );
+  const [interruptCount, setInterruptCount] = useState(initialData?.interruptCount ?? 0);
+  const [soundtrack, setSoundtrack] = useState(initialData?.soundtrack || '');
+  const [sessionNotes, setSessionNotes] = useState(initialData?.sessionNotes || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -613,7 +602,7 @@ function FlowTelemetryForm({ onSubmit }: { onSubmit: (data: FlowTelemetryPayload
             />
             <button
               type="button"
-              onClick={() => setInterruptCount((prev) => prev + 1)}
+              onClick={() => setInterruptCount((prev: number) => prev + 1)}
               className="px-2.5 py-2 border border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/20 text-xs font-mono font-bold cursor-pointer"
             >
               +1 PING
@@ -646,18 +635,18 @@ function FlowTelemetryForm({ onSubmit }: { onSubmit: (data: FlowTelemetryPayload
         type="submit"
         className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 hover:bg-primary-container transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(30,220,224,0.3)] cursor-pointer"
       >
-        [ COMMIT FLOW TELEMETRY ]
+        {initialData ? '[ SAVE MODIFIED TELEMETRY ]' : '[ COMMIT FLOW TELEMETRY ]'}
       </button>
     </form>
   );
 }
 
-function IncidentPostmortemForm({ onSubmit }: { onSubmit: (data: IncidentPostmortemPayload) => void }) {
-  const [anomalyName, setAnomalyName] = useState('');
-  const [severity, setSeverity] = useState<'LOW' | 'HAZARD' | 'SYSTEM_CRITICAL'>('HAZARD');
-  const [rootCauseType, setRootCauseType] = useState<IncidentPostmortemPayload['rootCauseType']>('ASYNC_RACE');
-  const [timeToFixMinutes, setTimeToFixMinutes] = useState(30);
-  const [resolutionSnippet, setResolutionSnippet] = useState('');
+function IncidentPostmortemForm({ onSubmit, initialData }: { onSubmit: (data: IncidentPostmortemPayload) => void; initialData?: any }) {
+  const [anomalyName, setAnomalyName] = useState(initialData?.anomalyName || '');
+  const [severity, setSeverity] = useState<'LOW' | 'HAZARD' | 'SYSTEM_CRITICAL'>(initialData?.severity || 'HAZARD');
+  const [rootCauseType, setRootCauseType] = useState<IncidentPostmortemPayload['rootCauseType']>(initialData?.rootCauseType || 'ASYNC_RACE');
+  const [timeToFixMinutes, setTimeToFixMinutes] = useState(initialData?.timeToFixMinutes ?? 30);
+  const [resolutionSnippet, setResolutionSnippet] = useState(initialData?.resolutionSnippet || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -744,17 +733,19 @@ function IncidentPostmortemForm({ onSubmit }: { onSubmit: (data: IncidentPostmor
         type="submit"
         className="w-full bg-[#ff4d6d] text-obsidian-base font-bold py-2 hover:bg-[#ff0033] transition-colors uppercase font-mono tracking-widest cursor-pointer shadow-[0_0_12px_rgba(255,0,51,0.3)]"
       >
-        [ COMMIT ANOMALY REPORT ]
+        {initialData ? '[ SAVE MODIFIED ANOMALY ]' : '[ COMMIT ANOMALY REPORT ]'}
       </button>
     </form>
   );
 }
 
-function IntelSynapseForm({ onSubmit }: { onSubmit: (data: IntelSynapsePayload) => void }) {
-  const [title, setTitle] = useState('');
-  const [sourceUrl, setSourceUrl] = useState('');
-  const [applicability, setApplicability] = useState<'THEORETICAL' | 'IMMEDIATE_USE' | 'FUTURE_PROJECT'>('IMMEDIATE_USE');
-  const [keyTakeaways, setKeyTakeaways] = useState('');
+function IntelSynapseForm({ onSubmit, initialData }: { onSubmit: (data: IntelSynapsePayload) => void; initialData?: any }) {
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [sourceUrl, setSourceUrl] = useState(initialData?.sourceUrl || '');
+  const [applicability, setApplicability] = useState<'THEORETICAL' | 'IMMEDIATE_USE' | 'FUTURE_PROJECT'>(
+    initialData?.applicability || 'IMMEDIATE_USE'
+  );
+  const [keyTakeaways, setKeyTakeaways] = useState(initialData?.keyTakeaways || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -816,18 +807,18 @@ function IntelSynapseForm({ onSubmit }: { onSubmit: (data: IntelSynapsePayload) 
         type="submit"
         className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 hover:bg-primary-container transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(30,220,224,0.3)] cursor-pointer"
       >
-        [ COMMIT RESEARCH DIGEST ]
+        {initialData ? '[ SAVE MODIFIED DIGEST ]' : '[ COMMIT RESEARCH DIGEST ]'}
       </button>
     </form>
   );
 }
 
-function HomelabRigForm({ onSubmit }: { onSubmit: (data: HomelabRigPayload) => void }) {
-  const [nodeId, setNodeId] = useState('');
-  const [thermalsCelsius, setThermalsCelsius] = useState(48);
-  const [powerDrawWatts, setPowerDrawWatts] = useState(120);
-  const [storageDelta, setStorageDelta] = useState('');
-  const [configChangeNotes, setConfigChangeNotes] = useState('');
+function HomelabRigForm({ onSubmit, initialData }: { onSubmit: (data: HomelabRigPayload) => void; initialData?: any }) {
+  const [nodeId, setNodeId] = useState(initialData?.nodeId || '');
+  const [thermalsCelsius, setThermalsCelsius] = useState(initialData?.thermalsCelsius ?? 48);
+  const [powerDrawWatts, setPowerDrawWatts] = useState(initialData?.powerDrawWatts ?? 120);
+  const [storageDelta, setStorageDelta] = useState(initialData?.storageDelta || '');
+  const [configChangeNotes, setConfigChangeNotes] = useState(initialData?.configChangeNotes || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -902,18 +893,22 @@ function HomelabRigForm({ onSubmit }: { onSubmit: (data: HomelabRigPayload) => v
         type="submit"
         className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 hover:bg-primary-container transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(30,220,224,0.3)] cursor-pointer"
       >
-        [ COMMIT HARDWARE TELEMETRY ]
+        {initialData ? '[ SAVE MODIFIED TELEMETRY ]' : '[ COMMIT HARDWARE TELEMETRY ]'}
       </button>
     </form>
   );
 }
 
-function ReleaseRadarForm({ onSubmit }: { onSubmit: (data: ReleaseRadarPayload) => void }) {
-  const [versionTag, setVersionTag] = useState('');
-  const [environment, setEnvironment] = useState<'STAGING' | 'PRODUCTION' | 'CLOUD_EDGE'>('PRODUCTION');
-  const [gitCommitHash, setGitCommitHash] = useState('');
-  const [breakingChanges, setBreakingChanges] = useState(false);
-  const [deploymentOutcome, setDeploymentOutcome] = useState<'SUCCESS' | 'ROLLED_BACK' | 'DEGRADED'>('SUCCESS');
+function ReleaseRadarForm({ onSubmit, initialData }: { onSubmit: (data: ReleaseRadarPayload) => void; initialData?: any }) {
+  const [versionTag, setVersionTag] = useState(initialData?.versionTag || '');
+  const [environment, setEnvironment] = useState<'STAGING' | 'PRODUCTION' | 'CLOUD_EDGE'>(
+    initialData?.environment || 'PRODUCTION'
+  );
+  const [gitCommitHash, setGitCommitHash] = useState(initialData?.gitCommitHash || '');
+  const [breakingChanges, setBreakingChanges] = useState(Boolean(initialData?.breakingChanges));
+  const [deploymentOutcome, setDeploymentOutcome] = useState<'SUCCESS' | 'ROLLED_BACK' | 'DEGRADED'>(
+    initialData?.deploymentOutcome || 'SUCCESS'
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1001,7 +996,7 @@ function ReleaseRadarForm({ onSubmit }: { onSubmit: (data: ReleaseRadarPayload) 
         type="submit"
         className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 hover:bg-primary-container transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(30,220,224,0.3)] cursor-pointer"
       >
-        [ COMMIT RELEASE TELEMETRY ]
+        {initialData ? '[ SAVE MODIFIED RELEASE ]' : '[ COMMIT RELEASE TELEMETRY ]'}
       </button>
     </form>
   );
@@ -1011,11 +1006,11 @@ function ReleaseRadarForm({ onSubmit }: { onSubmit: (data: ReleaseRadarPayload) 
 // 2. VITALS FORMS
 // =============================================================
 
-function CaffeineForm({ onSubmit }: { onSubmit: (data: CaffeineLogPayload) => void }) {
-  const [beanOrigin, setBeanOrigin] = useState('');
-  const [brewMethod, setBrewMethod] = useState(settings.brewMethods[0] || 'V60 Pour-Over');
-  const [liked, setLiked] = useState(true);
-  const [flavorProfile, setFlavorProfile] = useState('');
+function CaffeineForm({ onSubmit, initialData }: { onSubmit: (data: CaffeineLogPayload) => void; initialData?: any }) {
+  const [beanOrigin, setBeanOrigin] = useState(initialData?.beanOrigin || '');
+  const [brewMethod, setBrewMethod] = useState(initialData?.brewMethod || settings.brewMethods[0] || 'V60 Pour-Over');
+  const [liked, setLiked] = useState(initialData?.liked ?? true);
+  const [flavorProfile, setFlavorProfile] = useState(initialData?.flavorProfile || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1076,21 +1071,21 @@ function CaffeineForm({ onSubmit }: { onSubmit: (data: CaffeineLogPayload) => vo
         type="submit"
         className="w-full bg-[#ffb703] text-obsidian-base font-bold py-2 hover:bg-amber-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,183,3,0.3)] cursor-pointer"
       >
-        [ COMMIT STIMULANT LOG ]
+        {initialData ? '[ SAVE MODIFIED STIMULANT LOG ]' : '[ COMMIT STIMULANT LOG ]'}
       </button>
     </form>
   );
 }
 
-function ActivityForm({ onSubmit }: { onSubmit: (data: ActivityLogPayload) => void }) {
-  const [activitySubType, setActivitySubType] = useState<ActivitySubType>('WALK_RUN');
-  const [durationMinutes, setDurationMinutes] = useState(30);
-  const [avgHeartRate, setAvgHeartRate] = useState(135);
-  const [activeKcals, setActiveKcals] = useState(250);
-  const [routeLocation, setRouteLocation] = useState('');
-  const [stairsClimbed, setStairsClimbed] = useState(20);
-  const [bodyWeightKg, setBodyWeightKg] = useState(72.5);
-  const [postMoodState, setPostMoodState] = useState(settings.postMoodStates[1] || 'Centered');
+function ActivityForm({ onSubmit, initialData }: { onSubmit: (data: ActivityLogPayload) => void; initialData?: any }) {
+  const [activitySubType, setActivitySubType] = useState<ActivitySubType>(initialData?.activitySubType || 'WALK_RUN');
+  const [durationMinutes, setDurationMinutes] = useState(initialData?.durationMinutes ?? 30);
+  const [avgHeartRate, setAvgHeartRate] = useState(initialData?.avgHeartRate ?? 135);
+  const [activeKcals, setActiveKcals] = useState(initialData?.activeKcals ?? 250);
+  const [routeLocation, setRouteLocation] = useState(initialData?.routeLocation || '');
+  const [stairsClimbed, setStairsClimbed] = useState(initialData?.stairsClimbed ?? 20);
+  const [bodyWeightKg, setBodyWeightKg] = useState(initialData?.bodyWeightKg ?? 72.5);
+  const [postMoodState, setPostMoodState] = useState(initialData?.postMoodState || settings.postMoodStates[1] || 'Centered');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1203,19 +1198,21 @@ function ActivityForm({ onSubmit }: { onSubmit: (data: ActivityLogPayload) => vo
         type="submit"
         className="w-full bg-[#33ff00] text-obsidian-base font-bold py-2 hover:bg-green-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(51,255,0,0.3)] cursor-pointer"
       >
-        [ COMMIT BIOMETRIC DISPATCH ]
+        {initialData ? '[ SAVE MODIFIED BIOMETRICS ]' : '[ COMMIT BIOMETRIC DISPATCH ]'}
       </button>
     </form>
   );
 }
 
-function HibernationLogForm({ onSubmit }: { onSubmit: (data: HibernationLogPayload) => void }) {
-  const [lightsOutTime, setLightsOutTime] = useState('02:30');
-  const [wakeTime, setWakeTime] = useState('09:15');
-  const [sleepQualityScore, setSleepQualityScore] = useState(8);
-  const [sleepDebtHours, setSleepDebtHours] = useState(1.5);
-  const [morningClarity, setMorningClarity] = useState<'GROGGY' | 'FUNCTIONAL' | 'HYPER_ALERT'>('FUNCTIONAL');
-  const [dreamFragments, setDreamFragments] = useState('');
+function HibernationLogForm({ onSubmit, initialData }: { onSubmit: (data: HibernationLogPayload) => void; initialData?: any }) {
+  const [lightsOutTime, setLightsOutTime] = useState(initialData?.lightsOutTime || '02:30');
+  const [wakeTime, setWakeTime] = useState(initialData?.wakeTime || '09:15');
+  const [sleepQualityScore, setSleepQualityScore] = useState(initialData?.sleepQualityScore ?? 8);
+  const [sleepDebtHours, setSleepDebtHours] = useState(initialData?.sleepDebtHours ?? 1.5);
+  const [morningClarity, setMorningClarity] = useState<'GROGGY' | 'FUNCTIONAL' | 'HYPER_ALERT'>(
+    initialData?.morningClarity || 'FUNCTIONAL'
+  );
+  const [dreamFragments, setDreamFragments] = useState(initialData?.dreamFragments || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1314,17 +1311,17 @@ function HibernationLogForm({ onSubmit }: { onSubmit: (data: HibernationLogPaylo
         type="submit"
         className="w-full bg-[#33ff00] text-obsidian-base font-bold py-2 hover:bg-green-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(51,255,0,0.3)] cursor-pointer"
       >
-        [ COMMIT SLEEP TELEMETRY ]
+        {initialData ? '[ SAVE MODIFIED SLEEP LOG ]' : '[ COMMIT SLEEP TELEMETRY ]'}
       </button>
     </form>
   );
 }
 
-function ChemStackForm({ onSubmit }: { onSubmit: (data: ChemStackPayload) => void }) {
-  const [intakeType, setIntakeType] = useState('L_THEANINE');
-  const [dosage, setDosage] = useState('200mg');
-  const [energyDelta, setEnergyDelta] = useState(1);
-  const [timeAdministered, setTimeAdministered] = useState(new Date().toLocaleTimeString().slice(0, 5));
+function ChemStackForm({ onSubmit, initialData }: { onSubmit: (data: ChemStackPayload) => void; initialData?: any }) {
+  const [intakeType, setIntakeType] = useState(initialData?.intakeType || 'L_THEANINE');
+  const [dosage, setDosage] = useState(initialData?.dosage || '200mg');
+  const [energyDelta, setEnergyDelta] = useState(initialData?.energyDelta ?? 1);
+  const [timeAdministered, setTimeAdministered] = useState(initialData?.timeAdministered || new Date().toLocaleTimeString().slice(0, 5));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1400,18 +1397,22 @@ function ChemStackForm({ onSubmit }: { onSubmit: (data: ChemStackPayload) => voi
         type="submit"
         className="w-full bg-[#33ff00] text-obsidian-base font-bold py-2 hover:bg-green-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(51,255,0,0.3)] cursor-pointer"
       >
-        [ COMMIT CHEM STACK ]
+        {initialData ? '[ SAVE MODIFIED CHEM STACK ]' : '[ COMMIT CHEM STACK ]'}
       </button>
     </form>
   );
 }
 
-function RationIntelForm({ onSubmit }: { onSubmit: (data: RationIntelPayload) => void }) {
-  const [mealType, setMealType] = useState<RationIntelPayload['mealType']>('EVENING_FUEL');
-  const [fastingWindowHours, setFastingWindowHours] = useState(16);
-  const [cleanlinessRating, setCleanlinessRating] = useState<RationIntelPayload['cleanlinessRating']>('WHOLE_FOODS');
-  const [digestiveEnergy, setDigestiveEnergy] = useState<RationIntelPayload['digestiveEnergy']>('LIGHT_ENERGETIC');
-  const [foodDescription, setFoodDescription] = useState('');
+function RationIntelForm({ onSubmit, initialData }: { onSubmit: (data: RationIntelPayload) => void; initialData?: any }) {
+  const [mealType, setMealType] = useState<RationIntelPayload['mealType']>(initialData?.mealType || 'EVENING_FUEL');
+  const [fastingWindowHours, setFastingWindowHours] = useState(initialData?.fastingWindowHours ?? 16);
+  const [cleanlinessRating, setCleanlinessRating] = useState<RationIntelPayload['cleanlinessRating']>(
+    initialData?.cleanlinessRating || 'WHOLE_FOODS'
+  );
+  const [digestiveEnergy, setDigestiveEnergy] = useState<RationIntelPayload['digestiveEnergy']>(
+    initialData?.digestiveEnergy || 'LIGHT_ENERGETIC'
+  );
+  const [foodDescription, setFoodDescription] = useState(initialData?.foodDescription || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1480,18 +1481,18 @@ function RationIntelForm({ onSubmit }: { onSubmit: (data: RationIntelPayload) =>
         type="submit"
         className="w-full bg-[#33ff00] text-obsidian-base font-bold py-2 hover:bg-green-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(51,255,0,0.3)] cursor-pointer"
       >
-        [ COMMIT NUTRITION LOG ]
+        {initialData ? '[ SAVE MODIFIED NUTRITION ]' : '[ COMMIT NUTRITION LOG ]'}
       </button>
     </form>
   );
 }
 
-function MoodSpectrumForm({ onSubmit }: { onSubmit: (data: MoodSpectrumPayload) => void }) {
-  const [moodScore, setMoodScore] = useState(8);
-  const [stressLevel, setStressLevel] = useState<MoodSpectrumPayload['stressLevel']>('LOW');
-  const [primaryTrigger, setPrimaryTrigger] = useState('WORK');
-  const [stoicGratitude, setStoicGratitude] = useState('');
-  const [mindsetNotes, setMindsetNotes] = useState('');
+function MoodSpectrumForm({ onSubmit, initialData }: { onSubmit: (data: MoodSpectrumPayload) => void; initialData?: any }) {
+  const [moodScore, setMoodScore] = useState(initialData?.moodScore ?? 8);
+  const [stressLevel, setStressLevel] = useState<MoodSpectrumPayload['stressLevel']>(initialData?.stressLevel || 'LOW');
+  const [primaryTrigger, setPrimaryTrigger] = useState(initialData?.primaryTrigger || 'WORK');
+  const [stoicGratitude, setStoicGratitude] = useState(initialData?.stoicGratitude || '');
+  const [mindsetNotes, setMindsetNotes] = useState(initialData?.mindsetNotes || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1575,17 +1576,23 @@ function MoodSpectrumForm({ onSubmit }: { onSubmit: (data: MoodSpectrumPayload) 
         type="submit"
         className="w-full bg-[#33ff00] text-obsidian-base font-bold py-2 hover:bg-green-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(51,255,0,0.3)] cursor-pointer"
       >
-        [ COMMIT PSYCHE LOG ]
+        {initialData ? '[ SAVE MODIFIED PSYCHE ]' : '[ COMMIT PSYCHE LOG ]'}
       </button>
     </form>
   );
 }
 
-function StillnessIntervalForm({ onSubmit }: { onSubmit: (data: StillnessIntervalPayload) => void }) {
-  const [practiceType, setPracticeType] = useState<StillnessIntervalPayload['practiceType']>('BOX_BREATHING');
-  const [durationMinutes, setDurationMinutes] = useState(15);
-  const [mentalChatterBefore, setMentalChatterBefore] = useState<'CHAOTIC' | 'ACTIVE' | 'CALM'>('ACTIVE');
-  const [mentalChatterAfter, setMentalChatterAfter] = useState<'STILL_VOID' | 'CENTERED' | 'RESTORED'>('CENTERED');
+function StillnessIntervalForm({ onSubmit, initialData }: { onSubmit: (data: StillnessIntervalPayload) => void; initialData?: any }) {
+  const [practiceType, setPracticeType] = useState<StillnessIntervalPayload['practiceType']>(
+    initialData?.practiceType || 'BOX_BREATHING'
+  );
+  const [durationMinutes, setDurationMinutes] = useState(initialData?.durationMinutes ?? 15);
+  const [mentalChatterBefore, setMentalChatterBefore] = useState<'CHAOTIC' | 'ACTIVE' | 'CALM'>(
+    initialData?.mentalChatterBefore || 'ACTIVE'
+  );
+  const [mentalChatterAfter, setMentalChatterAfter] = useState<'STILL_VOID' | 'CENTERED' | 'RESTORED'>(
+    initialData?.mentalChatterAfter || 'CENTERED'
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1650,7 +1657,7 @@ function StillnessIntervalForm({ onSubmit }: { onSubmit: (data: StillnessInterva
         type="submit"
         className="w-full bg-[#80ed99] text-obsidian-base font-bold py-2 hover:bg-[#57cc99] transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(128,237,153,0.3)] cursor-pointer"
       >
-        [ COMMIT ZEN DISPATCH ]
+        {initialData ? '[ SAVE MODIFIED ZEN DISPATCH ]' : '[ COMMIT ZEN DISPATCH ]'}
       </button>
     </form>
   );
@@ -1660,12 +1667,12 @@ function StillnessIntervalForm({ onSubmit }: { onSubmit: (data: StillnessInterva
 // 3. PRODUCTIVITY FORMS
 // =============================================================
 
-function DutyRosterForm({ onSubmit }: { onSubmit: (data: DutyRosterPayload) => void }) {
-  const [taskDescription, setTaskDescription] = useState('');
-  const [status, setStatus] = useState(settings.dutyStatuses[0] || 'PENDING');
-  const [priority, setPriority] = useState(settings.dutyPriorities[1] || 'MEDIUM');
-  const [assignedOfficer, setAssignedOfficer] = useState('');
-  const [deadlineEst, setDeadlineEst] = useState('');
+function DutyRosterForm({ onSubmit, initialData }: { onSubmit: (data: DutyRosterPayload) => void; initialData?: any }) {
+  const [taskDescription, setTaskDescription] = useState(initialData?.taskDescription || '');
+  const [status, setStatus] = useState(initialData?.status || settings.dutyStatuses[0] || 'PENDING');
+  const [priority, setPriority] = useState(initialData?.priority || settings.dutyPriorities[1] || 'MEDIUM');
+  const [assignedOfficer, setAssignedOfficer] = useState(initialData?.assignedOfficer || '');
+  const [deadlineEst, setDeadlineEst] = useState(initialData?.deadlineEst || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1723,19 +1730,19 @@ function DutyRosterForm({ onSubmit }: { onSubmit: (data: DutyRosterPayload) => v
         type="submit"
         className="w-full bg-[#ffb703] text-obsidian-base font-bold py-2 hover:bg-amber-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,183,3,0.3)] cursor-pointer"
       >
-        [ COMMIT DUTY ROSTER ]
+        {initialData ? '[ SAVE MODIFIED DUTY ROSTER ]' : '[ COMMIT DUTY ROSTER ]'}
       </button>
     </form>
   );
 }
 
-function ChronoSprintForm({ onSubmit }: { onSubmit: (data: ChronoSprintPayload) => void }) {
-  const [taskObjective, setTaskObjective] = useState('');
-  const [durationMinutes, setDurationMinutes] = useState(25);
-  const [distractionPings, setDistractionPings] = useState(0);
-  const [items, setItems] = useState<string[]>([]);
+function ChronoSprintForm({ onSubmit, initialData }: { onSubmit: (data: ChronoSprintPayload) => void; initialData?: any }) {
+  const [taskObjective, setTaskObjective] = useState(initialData?.taskObjective || '');
+  const [durationMinutes, setDurationMinutes] = useState(initialData?.durationMinutes ?? 25);
+  const [distractionPings, setDistractionPings] = useState(initialData?.distractionPings ?? 0);
+  const [items, setItems] = useState<string[]>(initialData?.completedItems || []);
   const [newItemText, setNewItemText] = useState('');
-  const [status, setStatus] = useState<'COMPLETED' | 'EXTENDED' | 'ABORTED'>('COMPLETED');
+  const [status, setStatus] = useState<'COMPLETED' | 'EXTENDED' | 'ABORTED'>(initialData?.status || 'COMPLETED');
 
   const addItem = () => {
     if (newItemText.trim()) {
@@ -1839,7 +1846,7 @@ function ChronoSprintForm({ onSubmit }: { onSubmit: (data: ChronoSprintPayload) 
             />
             <button
               type="button"
-              onClick={() => setDistractionPings((prev) => prev + 1)}
+              onClick={() => setDistractionPings((prev: number) => prev + 1)}
               className="px-2.5 py-2 border border-[#ffb703] text-[#ffb703] hover:bg-[#ffb703]/20 text-xs font-mono font-bold cursor-pointer"
             >
               +1 URGE
@@ -1861,19 +1868,21 @@ function ChronoSprintForm({ onSubmit }: { onSubmit: (data: ChronoSprintPayload) 
         type="submit"
         className="w-full bg-[#ffb703] text-obsidian-base font-bold py-2 hover:bg-amber-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,183,3,0.3)] cursor-pointer"
       >
-        [ COMMIT CHRONO SPRINT ]
+        {initialData ? '[ SAVE MODIFIED CHRONO SPRINT ]' : '[ COMMIT CHRONO SPRINT ]'}
       </button>
     </form>
   );
 }
 
-function DailyFrogForm({ onSubmit }: { onSubmit: (data: DailyFrogPayload) => void }) {
-  const [targetChallenge, setTargetChallenge] = useState('');
-  const [resistanceLevel, setResistanceLevel] = useState(4);
-  const [estimatedMinutes, setEstimatedMinutes] = useState(45);
-  const [actualMinutes, setActualMinutes] = useState(35);
-  const [victoryOutcome, setVictoryOutcome] = useState<DailyFrogPayload['victoryOutcome']>('SLAYED_COMPLETELY');
-  const [reliefScore, setReliefScore] = useState(9);
+function DailyFrogForm({ onSubmit, initialData }: { onSubmit: (data: DailyFrogPayload) => void; initialData?: any }) {
+  const [targetChallenge, setTargetChallenge] = useState(initialData?.targetChallenge || '');
+  const [resistanceLevel, setResistanceLevel] = useState(initialData?.resistanceLevel ?? 4);
+  const [estimatedMinutes, setEstimatedMinutes] = useState(initialData?.estimatedMinutes ?? 45);
+  const [actualMinutes, setActualMinutes] = useState(initialData?.actualMinutes ?? 35);
+  const [victoryOutcome, setVictoryOutcome] = useState<DailyFrogPayload['victoryOutcome']>(
+    initialData?.victoryOutcome || 'SLAYED_COMPLETELY'
+  );
+  const [reliefScore, setReliefScore] = useState(initialData?.reliefScore ?? 9);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1975,17 +1984,19 @@ function DailyFrogForm({ onSubmit }: { onSubmit: (data: DailyFrogPayload) => voi
         type="submit"
         className="w-full bg-[#ff9e00] text-obsidian-base font-bold py-2 hover:bg-orange-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,158,0,0.3)] cursor-pointer"
       >
-        [ COMMIT FROG ELIMINATION ]
+        {initialData ? '[ SAVE MODIFIED FROG LOG ]' : '[ COMMIT FROG ELIMINATION ]'}
       </button>
     </form>
   );
 }
 
-function QuadrantMatrixForm({ onSubmit }: { onSubmit: (data: QuadrantMatrixPayload) => void }) {
-  const [taskName, setTaskName] = useState('');
-  const [quadrant, setQuadrant] = useState<QuadrantMatrixPayload['quadrant']>('Q1_FIRE');
-  const [deadline, setDeadline] = useState('');
-  const [executionStatus, setExecutionStatus] = useState<QuadrantMatrixPayload['executionStatus']>('ACTIVE');
+function QuadrantMatrixForm({ onSubmit, initialData }: { onSubmit: (data: QuadrantMatrixPayload) => void; initialData?: any }) {
+  const [taskName, setTaskName] = useState(initialData?.taskName || '');
+  const [quadrant, setQuadrant] = useState<QuadrantMatrixPayload['quadrant']>(initialData?.quadrant || 'Q1_FIRE');
+  const [deadline, setDeadline] = useState(initialData?.deadline || '');
+  const [executionStatus, setExecutionStatus] = useState<QuadrantMatrixPayload['executionStatus']>(
+    initialData?.executionStatus || 'ACTIVE'
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2062,18 +2073,18 @@ function QuadrantMatrixForm({ onSubmit }: { onSubmit: (data: QuadrantMatrixPaylo
         type="submit"
         className="w-full bg-[#ffb703] text-obsidian-base font-bold py-2 hover:bg-amber-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,183,3,0.3)] cursor-pointer"
       >
-        [ COMMIT QUADRANT ITEM ]
+        {initialData ? '[ SAVE MODIFIED QUADRANT ]' : '[ COMMIT QUADRANT ITEM ]'}
       </button>
     </form>
   );
 }
 
-function BlockedQueueForm({ onSubmit }: { onSubmit: (data: BlockedQueuePayload) => void }) {
-  const [taskSubject, setTaskSubject] = useState('');
-  const [waitingOnPerson, setWaitingOnPerson] = useState('');
-  const [blockerType, setBlockerType] = useState('CODE_REVIEW');
-  const [stalledSince, setStalledSince] = useState(new Date().toLocaleDateString());
-  const [nextPingDate, setNextPingDate] = useState('Tomorrow 10:00');
+function BlockedQueueForm({ onSubmit, initialData }: { onSubmit: (data: BlockedQueuePayload) => void; initialData?: any }) {
+  const [taskSubject, setTaskSubject] = useState(initialData?.taskSubject || '');
+  const [waitingOnPerson, setWaitingOnPerson] = useState(initialData?.waitingOnPerson || '');
+  const [blockerType, setBlockerType] = useState(initialData?.blockerType || 'CODE_REVIEW');
+  const [stalledSince, setStalledSince] = useState(initialData?.stalledSince || new Date().toLocaleDateString());
+  const [nextPingDate, setNextPingDate] = useState(initialData?.nextPingDate || 'Tomorrow 10:00');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2148,17 +2159,17 @@ function BlockedQueueForm({ onSubmit }: { onSubmit: (data: BlockedQueuePayload) 
         type="submit"
         className="w-full bg-[#ffb703] text-obsidian-base font-bold py-2 hover:bg-amber-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,183,3,0.3)] cursor-pointer"
       >
-        [ COMMIT BLOCKED QUEUE ]
+        {initialData ? '[ SAVE MODIFIED BLOCKED ITEM ]' : '[ COMMIT BLOCKED QUEUE ]'}
       </button>
     </form>
   );
 }
 
-function InterstitialJotForm({ onSubmit }: { onSubmit: (data: InterstitialJotPayload) => void }) {
-  const [justFinished, setJustFinished] = useState('');
-  const [nextAction, setNextAction] = useState('');
-  const [energyLevel, setEnergyLevel] = useState<'HIGH' | 'STEADY' | 'DEPLETED'>('STEADY');
-  const [transitionFriction, setTransitionFriction] = useState<'SMOOTH' | 'SLUGGISH'>('SMOOTH');
+function InterstitialJotForm({ onSubmit, initialData }: { onSubmit: (data: InterstitialJotPayload) => void; initialData?: any }) {
+  const [justFinished, setJustFinished] = useState(initialData?.justFinished || '');
+  const [nextAction, setNextAction] = useState(initialData?.nextAction || '');
+  const [energyLevel, setEnergyLevel] = useState<'HIGH' | 'STEADY' | 'DEPLETED'>(initialData?.energyLevel || 'STEADY');
+  const [transitionFriction, setTransitionFriction] = useState<'SMOOTH' | 'SLUGGISH'>(initialData?.transitionFriction || 'SMOOTH');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2242,21 +2253,29 @@ function InterstitialJotForm({ onSubmit }: { onSubmit: (data: InterstitialJotPay
         type="submit"
         className="w-full bg-[#ffb703] text-obsidian-base font-bold py-2 hover:bg-amber-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,183,3,0.3)] cursor-pointer"
       >
-        [ COMMIT TRANSITION JOT ]
+        {initialData ? '[ SAVE MODIFIED JOT ]' : '[ COMMIT TRANSITION JOT ]'}
       </button>
     </form>
   );
 }
 
-function DawnDuskStandupForm({ onSubmit }: { onSubmit: (data: DawnDuskStandupPayload) => void }) {
-  const [cyclePhase, setCyclePhase] = useState<'DAWN_INTENTIONS' | 'DUSK_DEBRIEF'>('DAWN_INTENTIONS');
-  const [obj1, setObj1] = useState('');
-  const [obj2, setObj2] = useState('');
-  const [obj3, setObj3] = useState('');
-  const [hazards, setHazards] = useState('');
-  const [accomplishmentsText, setAccomplishmentsText] = useState('');
-  const [rolloverText, setRolloverText] = useState('');
-  const [dailyGrade, setDailyGrade] = useState<'MISSION_ACCOMPLISHED' | 'ACCEPTABLE' | 'LOST_TO_VOID'>('MISSION_ACCOMPLISHED');
+function DawnDuskStandupForm({ onSubmit, initialData }: { onSubmit: (data: DawnDuskStandupPayload) => void; initialData?: any }) {
+  const [cyclePhase, setCyclePhase] = useState<'DAWN_INTENTIONS' | 'DUSK_DEBRIEF'>(
+    initialData?.cyclePhase || 'DAWN_INTENTIONS'
+  );
+  const [obj1, setObj1] = useState(initialData?.top3Objectives?.[0] || '');
+  const [obj2, setObj2] = useState(initialData?.top3Objectives?.[1] || '');
+  const [obj3, setObj3] = useState(initialData?.top3Objectives?.[2] || '');
+  const [hazards, setHazards] = useState(initialData?.potentialHazards || '');
+  const [accomplishmentsText, setAccomplishmentsText] = useState(
+    Array.isArray(initialData?.accomplishments) ? initialData.accomplishments.join('\n') : ''
+  );
+  const [rolloverText, setRolloverText] = useState(
+    Array.isArray(initialData?.unresolvedRollover) ? initialData.unresolvedRollover.join('\n') : ''
+  );
+  const [dailyGrade, setDailyGrade] = useState<'MISSION_ACCOMPLISHED' | 'ACCEPTABLE' | 'LOST_TO_VOID'>(
+    initialData?.dailyGrade || 'MISSION_ACCOMPLISHED'
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2392,16 +2411,18 @@ function DawnDuskStandupForm({ onSubmit }: { onSubmit: (data: DawnDuskStandupPay
         type="submit"
         className="w-full bg-[#ffb703] text-obsidian-base font-bold py-2 hover:bg-amber-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,183,3,0.3)] cursor-pointer"
       >
-        [ COMMIT SOLAR STANDUP ]
+        {initialData ? '[ SAVE MODIFIED STANDUP ]' : '[ COMMIT SOLAR STANDUP ]'}
       </button>
     </form>
   );
 }
 
-function NeuralScratchpadForm({ onSubmit }: { onSubmit: (data: NeuralScratchpadPayload) => void }) {
-  const [rawNote, setRawNote] = useState('');
-  const [autoCategory, setAutoCategory] = useState<NeuralScratchpadPayload['autoCategory']>('IDEA_SPARK');
-  const [isProcessed, setIsProcessed] = useState(false);
+function NeuralScratchpadForm({ onSubmit, initialData }: { onSubmit: (data: NeuralScratchpadPayload) => void; initialData?: any }) {
+  const [rawNote, setRawNote] = useState(initialData?.rawNote || '');
+  const [autoCategory, setAutoCategory] = useState<NeuralScratchpadPayload['autoCategory']>(
+    initialData?.autoCategory || 'IDEA_SPARK'
+  );
+  const [isProcessed, setIsProcessed] = useState(Boolean(initialData?.isProcessed));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2467,16 +2488,20 @@ function NeuralScratchpadForm({ onSubmit }: { onSubmit: (data: NeuralScratchpadP
         type="submit"
         className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 hover:bg-primary-container transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(30,220,224,0.3)] cursor-pointer"
       >
-        [ COMMIT NEURAL SCRATCHPAD ]
+        {initialData ? '[ SAVE MODIFIED SCRATCHPAD ]' : '[ COMMIT NEURAL SCRATCHPAD ]'}
       </button>
     </form>
   );
 }
 
-function FiveMinuteIgnitionForm({ onSubmit }: { onSubmit: (data: FiveMinuteIgnitionPayload) => void }) {
-  const [stalledTask, setStalledTask] = useState('');
-  const [didMomentumCatch, setDidMomentumCatch] = useState<'YES_KEPT_GOING' | 'NO_STOPPED_AFTER_5M'>('YES_KEPT_GOING');
-  const [frictionSource, setFrictionSource] = useState<'BOREDOM' | 'CONFUSION' | 'PERFECTIONISM' | 'FATIGUE'>('PERFECTIONISM');
+function FiveMinuteIgnitionForm({ onSubmit, initialData }: { onSubmit: (data: FiveMinuteIgnitionPayload) => void; initialData?: any }) {
+  const [stalledTask, setStalledTask] = useState(initialData?.stalledTask || '');
+  const [didMomentumCatch, setDidMomentumCatch] = useState<'YES_KEPT_GOING' | 'NO_STOPPED_AFTER_5M'>(
+    initialData?.didMomentumCatch || 'YES_KEPT_GOING'
+  );
+  const [frictionSource, setFrictionSource] = useState<'BOREDOM' | 'CONFUSION' | 'PERFECTIONISM' | 'FATIGUE'>(
+    initialData?.frictionSource || 'PERFECTIONISM'
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2545,21 +2570,25 @@ function FiveMinuteIgnitionForm({ onSubmit }: { onSubmit: (data: FiveMinuteIgnit
         type="submit"
         className="w-full bg-[#ff5400] text-obsidian-base font-bold py-2 hover:bg-orange-600 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,84,0,0.3)] cursor-pointer"
       >
-        [ COMMIT IGNITION TELEMETRY ]
+        {initialData ? '[ SAVE MODIFIED IGNITION ]' : '[ COMMIT IGNITION TELEMETRY ]'}
       </button>
     </form>
   );
 }
 
-function DailyCadenceChecklistForm({ onSubmit }: { onSubmit: (data: DailyCadenceChecklistPayload) => void }) {
-  const [routineType, setRoutineType] = useState<DailyCadenceChecklistPayload['routineType']>('MORNING_IGNITION');
-  const [items, setItems] = useState<CadenceChecklistItem[]>([
-    { id: '1', text: 'Zero out notifications / inbox zero', done: false },
-    { id: '2', text: 'Hydrate (500ml water + electrolytes)', done: true },
-    { id: '3', text: 'Review solar cycle top 3 objectives', done: false },
-    { id: '4', text: 'Tidy physical workspace & terminal', done: false },
-    { id: '5', text: 'Sync git commit / cloud backup', done: false }
-  ]);
+function DailyCadenceChecklistForm({ onSubmit, initialData }: { onSubmit: (data: DailyCadenceChecklistPayload) => void; initialData?: any }) {
+  const [routineType, setRoutineType] = useState<DailyCadenceChecklistPayload['routineType']>(
+    initialData?.routineType || 'MORNING_IGNITION'
+  );
+  const [items, setItems] = useState<CadenceChecklistItem[]>(
+    initialData?.items || [
+      { id: '1', text: 'Zero out notifications / inbox zero', done: false },
+      { id: '2', text: 'Hydrate (500ml water + electrolytes)', done: true },
+      { id: '3', text: 'Review solar cycle top 3 objectives', done: false },
+      { id: '4', text: 'Tidy physical workspace & terminal', done: false },
+      { id: '5', text: 'Sync git commit / cloud backup', done: false }
+    ]
+  );
   const [newItemText, setNewItemText] = useState('');
 
   const toggleItem = (id: string) => {
@@ -2680,14 +2709,14 @@ function DailyCadenceChecklistForm({ onSubmit }: { onSubmit: (data: DailyCadence
         type="submit"
         className="w-full bg-[#ffb703] text-obsidian-base font-bold py-2 hover:bg-amber-400 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,183,3,0.3)] cursor-pointer"
       >
-        [ COMMIT ROUTINE CADENCE ]
+        {initialData ? '[ SAVE MODIFIED CADENCE ]' : '[ COMMIT ROUTINE CADENCE ]'}
       </button>
     </form>
   );
 }
 
-function FreeformForm({ onSubmit }: { onSubmit: (data: FreeformLogPayload) => void }) {
-  const [rawContent, setRawContent] = useState('');
+function FreeformForm({ onSubmit, initialData }: { onSubmit: (data: FreeformLogPayload) => void; initialData?: any }) {
+  const [rawContent, setRawContent] = useState(initialData?.rawContent || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2710,7 +2739,7 @@ function FreeformForm({ onSubmit }: { onSubmit: (data: FreeformLogPayload) => vo
         type="submit"
         className="w-full bg-neon-cyan text-obsidian-base font-bold py-2 hover:bg-primary-container transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(30,220,224,0.3)] cursor-pointer"
       >
-        [ COMMIT FREEFORM LOG ]
+        {initialData ? '[ SAVE MODIFIED FREEFORM ]' : '[ COMMIT FREEFORM LOG ]'}
       </button>
     </form>
   );
@@ -2720,13 +2749,15 @@ function FreeformForm({ onSubmit }: { onSubmit: (data: FreeformLogPayload) => vo
 // 4. SKY_LIFE FORMS
 // =============================================================
 
-function CreditBurnForm({ onSubmit }: { onSubmit: (data: CreditBurnPayload) => void }) {
-  const [amount, setAmount] = useState(24.5);
-  const [currency, setCurrency] = useState('USD');
-  const [category, setCategory] = useState<CreditBurnPayload['category']>('DINING_OUT');
-  const [merchantName, setMerchantName] = useState('');
-  const [isImpulseBuy, setIsImpulseBuy] = useState(false);
-  const [regretIndex, setRegretIndex] = useState<CreditBurnPayload['regretIndex']>('MONEY_WELL_SPENT');
+function CreditBurnForm({ onSubmit, initialData }: { onSubmit: (data: CreditBurnPayload) => void; initialData?: any }) {
+  const [amount, setAmount] = useState(initialData?.amount ?? 24.5);
+  const [currency, setCurrency] = useState(initialData?.currency || 'USD');
+  const [category, setCategory] = useState<CreditBurnPayload['category']>(initialData?.category || 'DINING_OUT');
+  const [merchantName, setMerchantName] = useState(initialData?.merchantName || '');
+  const [isImpulseBuy, setIsImpulseBuy] = useState(Boolean(initialData?.isImpulseBuy));
+  const [regretIndex, setRegretIndex] = useState<CreditBurnPayload['regretIndex']>(
+    initialData?.regretIndex || 'MONEY_WELL_SPENT'
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2814,18 +2845,18 @@ function CreditBurnForm({ onSubmit }: { onSubmit: (data: CreditBurnPayload) => v
         type="submit"
         className="w-full bg-[#df9ffb] text-obsidian-base font-bold py-2 hover:bg-purple-300 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(223,159,251,0.3)] cursor-pointer"
       >
-        [ COMMIT EXPENSE TELEMETRY ]
+        {initialData ? '[ SAVE MODIFIED EXPENSE ]' : '[ COMMIT EXPENSE TELEMETRY ]'}
       </button>
     </form>
   );
 }
 
-function ScreenTelemetryForm({ onSubmit }: { onSubmit: (data: ScreenTelemetryPayload) => void }) {
-  const [title, setTitle] = useState('');
-  const [mediaType, setMediaType] = useState<ScreenTelemetryPayload['mediaType']>('CINEMA_FILM');
-  const [rating, setRating] = useState(5);
-  const [synopsisVerdict, setSynopsisVerdict] = useState('');
-  const [watchPartyWith, setWatchPartyWith] = useState('');
+function ScreenTelemetryForm({ onSubmit, initialData }: { onSubmit: (data: ScreenTelemetryPayload) => void; initialData?: any }) {
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [mediaType, setMediaType] = useState<ScreenTelemetryPayload['mediaType']>(initialData?.mediaType || 'CINEMA_FILM');
+  const [rating, setRating] = useState(initialData?.rating ?? 5);
+  const [synopsisVerdict, setSynopsisVerdict] = useState(initialData?.synopsisVerdict || '');
+  const [watchPartyWith, setWatchPartyWith] = useState(initialData?.watchPartyWith || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2910,17 +2941,19 @@ function ScreenTelemetryForm({ onSubmit }: { onSubmit: (data: ScreenTelemetryPay
         type="submit"
         className="w-full bg-[#df9ffb] text-obsidian-base font-bold py-2 hover:bg-purple-300 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(223,159,251,0.3)] cursor-pointer"
       >
-        [ COMMIT CINEMA TELEMETRY ]
+        {initialData ? '[ SAVE MODIFIED CINEMA ]' : '[ COMMIT CINEMA TELEMETRY ]'}
       </button>
     </form>
   );
 }
 
-function SonicChronicleForm({ onSubmit }: { onSubmit: (data: SonicChroniclePayload) => void }) {
-  const [trackOrAlbum, setTrackOrAlbum] = useState('');
-  const [genreOrHost, setGenreOrHost] = useState('');
-  const [vibeScore, setVibeScore] = useState<SonicChroniclePayload['vibeScore']>('BACKGROUND_FOCUS');
-  const [favoriteTimestamp, setFavoriteTimestamp] = useState('');
+function SonicChronicleForm({ onSubmit, initialData }: { onSubmit: (data: SonicChroniclePayload) => void; initialData?: any }) {
+  const [trackOrAlbum, setTrackOrAlbum] = useState(initialData?.trackOrAlbum || '');
+  const [genreOrHost, setGenreOrHost] = useState(initialData?.genreOrHost || '');
+  const [vibeScore, setVibeScore] = useState<SonicChroniclePayload['vibeScore']>(
+    initialData?.vibeScore || 'BACKGROUND_FOCUS'
+  );
+  const [favoriteTimestamp, setFavoriteTimestamp] = useState(initialData?.favoriteTimestamp || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2982,18 +3015,20 @@ function SonicChronicleForm({ onSubmit }: { onSubmit: (data: SonicChroniclePaylo
         type="submit"
         className="w-full bg-[#df9ffb] text-obsidian-base font-bold py-2 hover:bg-purple-300 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(223,159,251,0.3)] cursor-pointer"
       >
-        [ COMMIT SONIC DISPATCH ]
+        {initialData ? '[ SAVE MODIFIED SONIC DISPATCH ]' : '[ COMMIT SONIC DISPATCH ]'}
       </button>
     </form>
   );
 }
 
-function VirtualArenaForm({ onSubmit }: { onSubmit: (data: VirtualArenaPayload) => void }) {
-  const [gameTitle, setGameTitle] = useState('');
-  const [platform, setPlatform] = useState<VirtualArenaPayload['platform']>('PC');
-  const [sessionMinutes, setSessionMinutes] = useState(45);
-  const [sessionGoal, setSessionGoal] = useState('');
-  const [winLossOutcome, setWinLossOutcome] = useState<VirtualArenaPayload['winLossOutcome']>('VICTORY');
+function VirtualArenaForm({ onSubmit, initialData }: { onSubmit: (data: VirtualArenaPayload) => void; initialData?: any }) {
+  const [gameTitle, setGameTitle] = useState(initialData?.gameTitle || '');
+  const [platform, setPlatform] = useState<VirtualArenaPayload['platform']>(initialData?.platform || 'PC');
+  const [sessionMinutes, setSessionMinutes] = useState(initialData?.sessionMinutes ?? 45);
+  const [sessionGoal, setSessionGoal] = useState(initialData?.sessionGoal || '');
+  const [winLossOutcome, setWinLossOutcome] = useState<VirtualArenaPayload['winLossOutcome']>(
+    initialData?.winLossOutcome || 'VICTORY'
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -3077,17 +3112,19 @@ function VirtualArenaForm({ onSubmit }: { onSubmit: (data: VirtualArenaPayload) 
         type="submit"
         className="w-full bg-[#df9ffb] text-obsidian-base font-bold py-2 hover:bg-purple-300 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(223,159,251,0.3)] cursor-pointer"
       >
-        [ COMMIT GAMING DISPATCH ]
+        {initialData ? '[ SAVE MODIFIED GAMING ]' : '[ COMMIT GAMING DISPATCH ]'}
       </button>
     </form>
   );
 }
 
-function CommsLinkForm({ onSubmit }: { onSubmit: (data: CommsLinkPayload) => void }) {
-  const [contactName, setContactName] = useState('');
-  const [interactionType, setInteractionType] = useState<CommsLinkPayload['interactionType']>('VOICE_CALL');
-  const [conversationSummary, setConversationSummary] = useState('');
-  const [nextCatchupDate, setNextCatchupDate] = useState('');
+function CommsLinkForm({ onSubmit, initialData }: { onSubmit: (data: CommsLinkPayload) => void; initialData?: any }) {
+  const [contactName, setContactName] = useState(initialData?.contactName || '');
+  const [interactionType, setInteractionType] = useState<CommsLinkPayload['interactionType']>(
+    initialData?.interactionType || 'VOICE_CALL'
+  );
+  const [conversationSummary, setConversationSummary] = useState(initialData?.conversationSummary || '');
+  const [nextCatchupDate, setNextCatchupDate] = useState(initialData?.nextCatchupDate || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -3149,16 +3186,18 @@ function CommsLinkForm({ onSubmit }: { onSubmit: (data: CommsLinkPayload) => voi
         type="submit"
         className="w-full bg-[#df9ffb] text-obsidian-base font-bold py-2 hover:bg-purple-300 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(223,159,251,0.3)] cursor-pointer"
       >
-        [ COMMIT SOCIAL ORBIT ]
+        {initialData ? '[ SAVE MODIFIED SOCIAL ORBIT ]' : '[ COMMIT SOCIAL ORBIT ]'}
       </button>
     </form>
   );
 }
 
-function MicroTriumphsForm({ onSubmit }: { onSubmit: (data: MicroTriumphsPayload) => void }) {
-  const [triumphText, setTriumphText] = useState('');
-  const [category, setCategory] = useState<MicroTriumphsPayload['category']>('DISCIPLINE');
-  const [dopamineLevel, setDopamineLevel] = useState<MicroTriumphsPayload['dopamineLevel']>('PROUD');
+function MicroTriumphsForm({ onSubmit, initialData }: { onSubmit: (data: MicroTriumphsPayload) => void; initialData?: any }) {
+  const [triumphText, setTriumphText] = useState(initialData?.triumphText || '');
+  const [category, setCategory] = useState<MicroTriumphsPayload['category']>(initialData?.category || 'DISCIPLINE');
+  const [dopamineLevel, setDopamineLevel] = useState<MicroTriumphsPayload['dopamineLevel']>(
+    initialData?.dopamineLevel || 'PROUD'
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -3218,7 +3257,7 @@ function MicroTriumphsForm({ onSubmit }: { onSubmit: (data: MicroTriumphsPayload
         type="submit"
         className="w-full bg-[#ffd166] text-obsidian-base font-bold py-2 hover:bg-yellow-300 transition-colors uppercase font-mono tracking-widest shadow-[0_0_12px_rgba(255,209,102,0.3)] cursor-pointer"
       >
-        [ COMMIT MICRO TRIUMPH ]
+        {initialData ? '[ SAVE MODIFIED TRIUMPH ]' : '[ COMMIT MICRO TRIUMPH ]'}
       </button>
     </form>
   );

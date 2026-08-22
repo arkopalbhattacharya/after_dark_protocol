@@ -83,6 +83,32 @@ export const api = {
     localStorage.setItem(getStorageKey(userId), JSON.stringify(logs));
   },
 
+  async deleteLog(logId: string, userId?: string | null): Promise<void> {
+    const isOnlineSession = Boolean(supabase && userId && !userId.startsWith('offline_'));
+    if (isOnlineSession && supabase && userId) {
+      try {
+        await supabase
+          .from('protocol_logs')
+          .delete()
+          .eq('id', logId);
+      } catch (err) {
+        console.warn('Supabase deleteLog error:', err);
+      }
+    }
+
+    const key = getStorageKey(userId);
+    const data = localStorage.getItem(key);
+    if (data) {
+      try {
+        const logs: ProtocolLogEntry[] = JSON.parse(data);
+        const filtered = logs.filter(l => l.id !== logId);
+        localStorage.setItem(key, JSON.stringify(filtered));
+      } catch (err) {
+        console.warn('Local deleteLog error:', err);
+      }
+    }
+  },
+
   addToPendingSync(log: ProtocolLogEntry, userEmail?: string | null) {
     try {
       const key = getPendingSyncKey(userEmail);

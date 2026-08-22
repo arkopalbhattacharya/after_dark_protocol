@@ -14,6 +14,8 @@ import { JenniferCipherModal } from './components/JenniferCipherModal';
 import { JenniferCassetteModal } from './components/JenniferCassetteModal';
 import { UniversalNewsPane } from './components/UniversalNewsPane';
 import { LogTypeManagerModal } from './components/LogTypeManagerModal';
+import { DotMatrixNoteStub } from './components/DotMatrixNoteStub';
+import { ManualModal } from './components/ManualModal';
 import {
   ALL_LOG_CATEGORIES,
   DEFAULT_ENABLED_CATEGORIES,
@@ -85,6 +87,9 @@ function App() {
   const [isCipherModalOpen, setIsCipherModalOpen] = useState(false);
   const [isCassetteModalOpen, setIsCassetteModalOpen] = useState(false);
   const [isJenniferCipherUnlocked, setIsJenniferCipherUnlocked] = useState(false);
+  const [editingLogId, setEditingLogId] = useState<string | null>(null);
+  const [printingLogId, setPrintingLogId] = useState<string | null>(null);
+  const [isManualOpen, setIsManualOpen] = useState(false);
   const [isNeuralJackOpen, setIsNeuralJackOpen] = useState(false);
   const neuralJackRef = useRef<HTMLDivElement>(null);
   const [isJournalMenuOpen, setIsJournalMenuOpen] = useState(false);
@@ -584,9 +589,10 @@ function App() {
       alert("TITLE IS REQUIRED");
       return;
     }
+    const existingLog = editingLogId ? logs.find(l => l.id === editingLogId) : null;
     const entry: ProtocolLogEntry = {
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
+      id: editingLogId || crypto.randomUUID(),
+      timestamp: existingLog ? existingLog.timestamp : new Date().toISOString(),
       category: activeCategory,
       title: title,
       payload: payload
@@ -594,6 +600,7 @@ function App() {
 
     await api.saveLog(entry, currentUser?.id, currentUser?.email);
     setTitle('');
+    setEditingLogId(null);
     await loadData(currentUser?.id, currentUser?.email);
   };
 
@@ -1237,6 +1244,29 @@ function App() {
                 </span>
               </button>
 
+              {/* Option 5: Operator Field Manual & Documentation */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsNeuralJackOpen(false);
+                  setIsManualOpen(true);
+                }}
+                className="w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap"
+                style={{
+                  backgroundColor: isManualOpen
+                    ? 'var(--color-primary)'
+                    : 'var(--bg-surface)',
+                  borderColor: isManualOpen ? 'var(--color-primary)' : 'var(--border-primary)',
+                  color: isManualOpen ? 'var(--color-on-primary)' : 'var(--color-primary)',
+                  boxShadow: isManualOpen ? '0 0 12px var(--glow-color)' : 'none'
+                }}
+              >
+                <span>[ OPERATOR_FIELD_MANUAL ]</span>
+                <span className="font-mono font-black text-xs tracking-widest ml-2">
+                  {isManualOpen ? '[X]' : '[ ]'}
+                </span>
+              </button>
+
               {/* Option 4: Attempt Server Login (Only when in Offline Mode and Health < 10%) */}
               {currentUser && currentUser.id.startsWith('offline_') && (offlineRemainingSecs / 3600) < 0.1 && (
                 <button
@@ -1287,6 +1317,22 @@ function App() {
                 </span>
               </div>
               <div className="flex-1 p-panel-padding flex flex-col overflow-y-auto">
+                {editingLogId && (
+                  <div className="bg-[#ffb703]/20 border border-[#ffb703] px-2.5 py-1 mb-3 flex justify-between items-center text-xs text-[#ffb703] font-bold animate-pulse">
+                    <span>[ EDITING_RECORD: ADP-{editingLogId.slice(0, 6).toUpperCase()} ]</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingLogId(null);
+                        setTitle('');
+                      }}
+                      className="hover:underline text-[10.5px] cursor-pointer"
+                    >
+                      [ CANCEL EDIT ]
+                    </button>
+                  </div>
+                )}
+
                 <div className="mb-4">
                   <label className="block text-neon-cyan font-label-sm mb-1">LOG_TITLE</label>
                   <div className="flex items-center border-b border-neon-cyan/30 pb-1">
@@ -1303,7 +1349,17 @@ function App() {
                   </div>
                 </div>
 
-                <LogForms category={activeCategory} onSubmit={handleFormSubmit} />
+                {(() => {
+                  const editingLog = editingLogId ? logs.find((l) => l.id === editingLogId) : null;
+                  return (
+                    <LogForms
+                      key={editingLogId ? `edit-${editingLogId}` : `new-${activeCategory}`}
+                      category={activeCategory}
+                      onSubmit={handleFormSubmit}
+                      initialPayload={editingLog?.payload}
+                    />
+                  );
+                })()}
               </div>
             </div>
 
@@ -1359,7 +1415,11 @@ function App() {
                       .map((log) => {
                         const meta = getCategoryMeta(log.category);
                         return (
-                          <div key={log.id} onClick={() => setExpandedLogId(expandedLogId === log.id ? null : log.id)} className="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group flex flex-col">
+                          <div
+                            key={log.id}
+                            onClick={() => setExpandedLogId(expandedLogId === log.id ? null : log.id)}
+                            className="px-3 py-2 hover:bg-surface-variant/20 cursor-pointer group flex flex-col relative transition-all"
+                          >
                             <div className="flex justify-between items-start mb-0.5">
                               <div className="flex items-center gap-1.5 truncate">
                                 <span className="material-symbols-outlined text-[13px] text-amber-warn">{meta?.icon || 'article'}</span>
@@ -1367,11 +1427,77 @@ function App() {
                                   {meta?.badge || `[${log.category}]`}
                                 </div>
                               </div>
-                              <span className="text-[8.5px] px-1 py-0.2 border border-amber-warn/30 font-mono text-amber-warn/70 shrink-0">
-                                {meta?.group || 'LOG'}
-                              </span>
+
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {/* Hover Action Icons (Edit, Print, Delete) */}
+                                <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity duration-150 mr-1 bg-black/70 px-1 py-0.5 border border-amber-warn/30">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingLogId(log.id);
+                                      setActiveCategory(log.category);
+                                      setTitle(log.title);
+                                    }}
+                                    className="hover:text-[#1edce0] text-amber-warn/80 hover:bg-white/10 p-0.5 transition-colors cursor-pointer flex items-center"
+                                    title="Edit Log Entry"
+                                  >
+                                    <span className="material-symbols-outlined text-[13px]">edit</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPrintingLogId(printingLogId === log.id ? null : log.id);
+                                    }}
+                                    className={`p-0.5 transition-colors cursor-pointer flex items-center ${
+                                      printingLogId === log.id 
+                                        ? 'text-[#33ff00] bg-[#33ff00]/20' 
+                                        : 'text-amber-warn/80 hover:text-[#33ff00] hover:bg-white/10'
+                                    }`}
+                                    title="Print Dot-Matrix Note Stub"
+                                  >
+                                    <span className="material-symbols-outlined text-[13px]">print</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      if (window.confirm(`DELETE PROTOCOL LOG ENTRY: "${log.title}"?`)) {
+                                        await api.deleteLog(log.id, currentUser?.id);
+                                        if (editingLogId === log.id) {
+                                          setEditingLogId(null);
+                                          setTitle('');
+                                        }
+                                        if (printingLogId === log.id) {
+                                          setPrintingLogId(null);
+                                        }
+                                        await loadData(currentUser?.id, currentUser?.email);
+                                      }
+                                    }}
+                                    className="hover:text-[#ff0033] text-amber-warn/80 hover:bg-white/10 p-0.5 transition-colors cursor-pointer flex items-center"
+                                    title="Delete Log Entry"
+                                  >
+                                    <span className="material-symbols-outlined text-[13px]">delete</span>
+                                  </button>
+                                </div>
+
+                                <span className="text-[8.5px] px-1 py-0.2 border border-amber-warn/30 font-mono text-amber-warn/70">
+                                  {meta?.group || 'LOG'}
+                                </span>
+                              </div>
                             </div>
+
                             <div className="text-sm truncate text-on-surface-variant font-bold">{log.title}</div>
+
+                            {/* Slide-Down Dot-Matrix Note Stub */}
+                            {printingLogId === log.id && (
+                              <DotMatrixNoteStub
+                                log={log}
+                                userEmail={currentUser?.email}
+                                onClose={() => setPrintingLogId(null)}
+                              />
+                            )}
 
                             {expandedLogId === log.id && (
                               <div className="mt-2 text-xs border-t border-amber-warn/30 pt-2 space-y-2">
@@ -1797,6 +1923,13 @@ function App() {
               return;
             }
 
+            // Command /help, /manual, /guide, /docs opens the Operator Field Manual
+            if (rawTrimmed === '/help' || rawTrimmed === '/manual' || rawTrimmed === '/guide' || rawTrimmed === '/docs') {
+              setIsManualOpen(true);
+              setTtyInput('');
+              return;
+            }
+
             const promptEst = estimateTokens(ttyInput) + 300;
             if (ttyTokenData.tokensUsed + promptEst >= MAX_CHAT_TOKENS) {
               const quotaMsg = { role: 'user' as const, content: ttyInput };
@@ -1910,6 +2043,12 @@ function App() {
           saveTtyMessages([...ttyMessages, reaction]);
           speakRoboticResponse(reaction.content, isTtyVoiceEnabled);
         }}
+      />
+
+      {/* 80s Classified Operator Field Manual Modal */}
+      <ManualModal
+        isOpen={isManualOpen}
+        onClose={() => setIsManualOpen(false)}
       />
     </>
   );
