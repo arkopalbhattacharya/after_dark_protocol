@@ -169,19 +169,22 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
   const [activeEpisodeIndex, setActiveEpisodeIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playbackSeconds, setPlaybackSeconds] = useState<number>(0);
-  const [exactDuration, setExactDuration] = useState<number>(96);
+  const [exactDuration, setExactDuration] = useState<number>(141);
   const [tapeCounter, setTapeCounter] = useState<number>(104);
   const [reelWindMode, setReelWindMode] = useState<'IDLE' | 'PLAYING' | 'REWINDING' | 'FAST_FORWARDING'>('IDLE');
-  const [audioFrequencies, setAudioFrequencies] = useState<number[]>(new Array(16).fill(0));
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const animFrameRef = useRef<number | null>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
   const transcriptContainerRef = useRef<HTMLDivElement>(null);
 
   const currentSeason = JENNIFER_SEASONS_DATA[activeSeasonIndex] || JENNIFER_SEASONS_DATA[0];
   const currentEpisode: TapeEpisode = currentSeason.episodes[activeEpisodeIndex] || currentSeason.episodes[0];
   const totalDuration = exactDuration || currentEpisode.durationSecs || 60;
+
+  // Sync duration on episode change
+  useEffect(() => {
+    setPlaybackSeconds(0);
+    setExactDuration(currentEpisode.durationSecs || 60);
+  }, [activeSeasonIndex, activeEpisodeIndex, currentEpisode.durationSecs]);
 
   // Cleanup on modal close or unmount
   useEffect(() => {
@@ -193,10 +196,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-      setAudioFrequencies(new Array(16).fill(0));
     }
   }, [isOpen]);
 
@@ -220,39 +219,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       }
     }
   }, [isOpen, isPlaying, currentEpisode.audioSrc]);
-
-  // Real-time Audio Spectrum Visualizer Animation Loop (Bounces organically during playback)
-  useEffect(() => {
-    if (!isOpen || !isPlaying) {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-      setAudioFrequencies(new Array(16).fill(0));
-      return;
-    }
-
-    let phase = 0;
-    const animateVisualizer = () => {
-      phase += 0.12;
-      const levels = Array.from({ length: 16 }, (_, i) => {
-        const primary = Math.sin(phase * 2.2 + i * 0.45) * 38;
-        const secondary = Math.cos(phase * 3.1 - i * 0.7) * 25;
-        const flutter = (Math.random() * 2 - 1) * 15;
-        const combined = 42 + primary + secondary + flutter;
-        return Math.max(10, Math.min(96, Math.round(combined)));
-      });
-      setAudioFrequencies(levels);
-      animFrameRef.current = requestAnimationFrame(animateVisualizer);
-    };
-
-    animFrameRef.current = requestAnimationFrame(animateVisualizer);
-
-    return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
-    };
-  }, [isOpen, isPlaying]);
 
   // Secondary playback timer for speech-synthesized episodes (when audioSrc is not an MP3)
   useEffect(() => {
@@ -282,8 +248,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
   }, [isOpen, isPlaying, activeEpisodeIndex, currentSeason, currentEpisode, totalDuration, onSynthoReact]);
 
   if (!isOpen) return null;
-
-  const progressPercent = Math.min(100, Math.max(0, Math.round((playbackSeconds / totalDuration) * 100)));
 
   // Fast forward trigger
   const handleFastForward = () => {
@@ -331,24 +295,6 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
       audioRef.current.pause();
     }
   };
-
-  // Interactive seek bar handler
-  const handleSeekProgress = (e: React.MouseEvent<HTMLDivElement>) => {
-    tapeAudioEngine.playMechanicalButtonClick();
-    if (!progressBarRef.current) return;
-    const rect = progressBarRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const fraction = Math.max(0, Math.min(1, clickX / rect.width));
-    const targetSeconds = Math.round(fraction * totalDuration);
-    setPlaybackSeconds(targetSeconds);
-
-    if (audioRef.current && currentEpisode.audioSrc) {
-      audioRef.current.currentTime = targetSeconds;
-    }
-  };
-
-  const totalBlocks = 28;
-  const filledBlocks = Math.round((progressPercent / 100) * totalBlocks);
 
   // Determine Reel Rotation Speed & Direction
   let reelAnimClass = '';
@@ -542,80 +488,14 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                 </div>
               </div>
 
-              {/* Stereo Audio Frequency Spectrum Visualizer / VU Meter */}
-              <div className="bg-[#020b18] border border-[#38bdf8]/50 p-2 rounded flex flex-col gap-1 shadow-inner">
-                <div className="flex justify-between items-center text-[9px] text-[#7dd3fc] font-mono border-b border-[#38bdf8]/30 pb-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${isPlaying ? 'bg-[#38bdf8] animate-ping' : 'bg-white/20'}`}></span>
-                    <span className="font-bold">SPECTRUM_ANALYZER // 16-BAND_EQ</span>
-                  </span>
-                  <span className="text-[8.5px] text-[#bae6fd]/80 font-mono">
-                    {isPlaying ? (currentEpisode.audioSrc ? '♫ CrO2_ANALOG_MASTER' : '♫ SYNTH_AUDIO_VOX') : '0.0 dB // IDLE'}
-                  </span>
-                </div>
-
-                <div className="h-9 flex items-end justify-between gap-1 px-1 pt-1 bg-[#01040a] rounded-xs border border-[#38bdf8]/20">
-                  {audioFrequencies.map((lvl, idx) => {
-                    const isPeak = lvl > 75;
-                    const isMid = lvl > 40;
-                    return (
-                      <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full">
-                        <div 
-                          className={`w-full rounded-t-xs transition-all duration-75 ${
-                            isPeak 
-                              ? 'bg-gradient-to-t from-[#0284c7] via-[#38bdf8] to-[#ff0033] shadow-[0_0_8px_rgba(255,0,51,0.8)]' 
-                              : isMid 
-                              ? 'bg-gradient-to-t from-[#0284c7] via-[#38bdf8] to-[#7dd3fc] shadow-[0_0_6px_rgba(56,189,248,0.7)]' 
-                              : 'bg-gradient-to-t from-[#034078] to-[#0284c7]'
-                          }`}
-                          style={{ height: `${Math.max(8, lvl)}%` }}
-                        ></div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 80s Clickable/Scrubbable Terminal Progress Bar */}
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-[9px] text-[#7dd3fc] font-mono">
-                  <span>&gt; SCRUB_SEEK_BAR:</span>
-                  <span>
-                    {String(Math.floor(playbackSeconds / 60)).padStart(2, '0')}:{String(playbackSeconds % 60).padStart(2, '0')} / {String(Math.floor(totalDuration / 60)).padStart(2, '0')}:{String(totalDuration % 60).padStart(2, '0')} [{progressPercent}%]
-                  </span>
-                </div>
-
-                {/* Clickable Terminal Progress Rail */}
-                <div
-                  ref={progressBarRef}
-                  onClick={handleSeekProgress}
-                  title="CLICK ANYWHERE TO SEEK / SCRUB TAPE"
-                  className="w-full bg-black border border-[#38bdf8]/60 h-6 px-2 flex items-center justify-between cursor-pointer select-none relative hover:border-[#38bdf8] transition-colors shadow-inner"
-                >
-                  <div className="flex items-center gap-0.5 font-mono text-[12px] tracking-tighter w-full overflow-hidden">
-                    {Array.from({ length: totalBlocks }).map((_, bIdx) => {
-                      const isFilled = bIdx < filledBlocks;
-                      return (
-                        <span 
-                          key={bIdx} 
-                          className={isFilled ? 'text-[#38bdf8] font-black' : 'text-white/20 font-normal'}
-                        >
-                          {isFilled ? '█' : '░'}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Transport Buttons with Immediate Audio/Motor Reaction */}
-              <div className="flex items-center justify-between pt-1 border-t border-[#38bdf8]/30">
-                <div className="flex items-center gap-1.5">
+              {/* Transport Buttons with Immediate Audio/Motor Reaction - Single Line */}
+              <div className="flex items-center justify-between pt-1.5 border-t border-[#38bdf8]/30 gap-1 overflow-x-auto flex-nowrap">
+                <div className="flex items-center gap-1.5 flex-nowrap flex-shrink-0">
                   {/* Rewind */}
                   <button
                     type="button"
                     onClick={handleRewind}
-                    className="px-2.5 py-1 border border-[#38bdf8]/60 bg-[#02132e] text-[#38bdf8] hover:bg-[#38bdf8] hover:text-[#020617] transition-all cursor-pointer font-bold text-[10px]"
+                    className="px-2.5 py-1 border border-[#38bdf8]/60 bg-[#02132e] text-[#38bdf8] hover:bg-[#38bdf8] hover:text-[#020617] transition-all cursor-pointer font-bold text-[10px] whitespace-nowrap flex-shrink-0"
                     title="REWIND (REVERSE MOTOR)"
                   >
                     [ ◀◀ REW ]
@@ -625,21 +505,21 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                   <button
                     type="button"
                     onClick={handlePlayToggle}
-                    className={`px-3 py-1 border font-bold transition-all cursor-pointer flex items-center gap-1 text-[10px] ${
+                    className={`px-3 py-1 border font-bold transition-all cursor-pointer flex items-center gap-1 text-[10px] whitespace-nowrap flex-shrink-0 ${
                       isPlaying
                         ? 'bg-[#38bdf8] text-[#020617] border-[#38bdf8] shadow-[0_0_16px_rgba(56,189,248,0.9)]'
                         : 'bg-[#02132e] text-[#38bdf8] border-[#38bdf8]/60 hover:bg-[#38bdf8] hover:text-[#020617]'
                     }`}
                     title={isPlaying ? "PAUSE AUDIO" : "PLAY AUDIO"}
                   >
-                    <span>{isPlaying ? '[ ❚❚ PAUSE ]' : '[ ▶ PLAY ]'}</span>
+                    <span className="whitespace-nowrap">{isPlaying ? '[ ❚❚ PAUSE ]' : '[ ▶ PLAY ]'}</span>
                   </button>
 
                   {/* Stop (Instant) */}
                   <button
                     type="button"
                     onClick={handleStop}
-                    className="px-2.5 py-1 border border-[#38bdf8]/60 bg-[#02132e] text-[#38bdf8] hover:bg-[#38bdf8] hover:text-[#020617] transition-all cursor-pointer font-bold text-[10px]"
+                    className="px-2.5 py-1 border border-[#38bdf8]/60 bg-[#02132e] text-[#38bdf8] hover:bg-[#38bdf8] hover:text-[#020617] transition-all cursor-pointer font-bold text-[10px] whitespace-nowrap flex-shrink-0"
                     title="STOP AUDIO (CANCEL)"
                   >
                     [ ■ STOP ]
@@ -649,14 +529,14 @@ export function JenniferCassetteModal({ isOpen, onClose, onSynthoReact }: Jennif
                   <button
                     type="button"
                     onClick={handleFastForward}
-                    className="px-2.5 py-1 border border-[#38bdf8]/60 bg-[#02132e] text-[#38bdf8] hover:bg-[#38bdf8] hover:text-[#020617] transition-all cursor-pointer font-bold text-[10px]"
+                    className="px-2.5 py-1 border border-[#38bdf8]/60 bg-[#02132e] text-[#38bdf8] hover:bg-[#38bdf8] hover:text-[#020617] transition-all cursor-pointer font-bold text-[10px] whitespace-nowrap flex-shrink-0"
                     title="FAST FORWARD MOTOR"
                   >
                     [ FF ▶▶ ]
                   </button>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-[9px] text-[#7dd3fc]">
+                <div className="flex items-center gap-1.5 text-[9px] text-[#7dd3fc] whitespace-nowrap flex-shrink-0">
                   <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-[#38bdf8] animate-ping' : 'bg-white/20'}`}></span>
                   <span>{isPlaying ? (currentEpisode.audioSrc ? 'ANALOG_MASTER' : 'SYNTH_VOX') : 'MUTED'}</span>
                 </div>

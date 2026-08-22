@@ -69,6 +69,19 @@ const THEME_OPTIONS: ThemeOption[] = [
       { name: 'Void', color: '#150629' },
       { name: 'Indigo', color: '#231437' }
     ]
+  },
+  {
+    id: 'NEON_CITY_AFTERWORK',
+    key: '5',
+    name: 'NEON_CITY_AFTERWORK',
+    codename: 'NEON_CITY // AFTER_HOURS',
+    description: 'Electric bluish-purple neon emitters, neon yellow protocol typography, and neon teal status telemetry over deep twilight.',
+    swatches: [
+      { name: 'Blurple', color: '#8247ff' },
+      { name: 'Yellow', color: '#fcee0a' },
+      { name: 'Teal', color: '#008080' },
+      { name: 'Void', color: '#150629' }
+    ]
   }
 ];
 
@@ -92,6 +105,8 @@ export function ThemeModal({
         onSelectTheme('COMET_SUNSET_V1.0');
       } else if (e.key === '4') {
         onSelectTheme('NEO_TWYLITE_V1.0');
+      } else if (e.key === '5') {
+        onSelectTheme('NEON_CITY_AFTERWORK');
       }
     };
 
@@ -133,7 +148,7 @@ export function ThemeModal({
           {/* ASCII Banner */}
           <div className="text-[11px] leading-tight text-[#33ff00] opacity-90 border-b border-[#33ff00]/40 pb-2.5">
             <div className="font-bold tracking-wider">╔═══════════════════════════════════════════════════════════════╗</div>
-            <div className="font-bold tracking-wider">║  &gt;&gt; SYSTEM COLOR MATRIX // SELECT ACTIVE PROTOCOL [1-4]       ║</div>
+            <div className="font-bold tracking-wider">║  &gt;&gt; SYSTEM COLOR MATRIX // SELECT ACTIVE PROTOCOL [1-5]       ║</div>
             <div className="font-bold tracking-wider">╚═══════════════════════════════════════════════════════════════╝</div>
             <div className="mt-2 text-[10px] text-[#33ff00]/70 flex justify-between">
               <span>DRIVER: PROTOCOL_STITCH_RENDERER_v4.2</span>
@@ -219,7 +234,7 @@ export function ThemeModal({
           <div className="border border-[#33ff00]/50 p-2.5 bg-[#041a07] flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <span className="font-bold text-[#33ff00]">&gt; PROMPT:</span>
-              <span className="text-[#33ff00]/90">PRESS [1-4] OR CLICK PROFILE TO EXECUTE MATRIX</span>
+              <span className="text-[#33ff00]/90">PRESS [1-5] OR CLICK PROFILE TO EXECUTE MATRIX</span>
               <span className="inline-block w-2 h-3.5 bg-[#33ff00] animate-pulse"></span>
             </div>
             <button

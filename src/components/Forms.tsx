@@ -122,7 +122,7 @@ function AIExperimentForm({ onSubmit }: { onSubmit: (data: AIExperimentPayload) 
             onClick={() => setSubType('AI_ML_EXPERIMENTATION')}
             className={`py-1.5 px-2 text-xs font-label-sm font-bold transition-all text-center ${
               subType === 'AI_ML_EXPERIMENTATION'
-                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_rgba(30,220,224,0.4)]'
+                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_var(--glow-color)]'
                 : 'text-neon-cyan/70 hover:text-neon-cyan hover:bg-neon-cyan/10'
             }`}
           >
@@ -133,7 +133,7 @@ function AIExperimentForm({ onSubmit }: { onSubmit: (data: AIExperimentPayload) 
             onClick={() => setSubType('AI_PRODUCTS_TRIALS')}
             className={`py-1.5 px-2 text-xs font-label-sm font-bold transition-all text-center ${
               subType === 'AI_PRODUCTS_TRIALS'
-                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_rgba(30,220,224,0.4)]'
+                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_var(--glow-color)]'
                 : 'text-neon-cyan/70 hover:text-neon-cyan hover:bg-neon-cyan/10'
             }`}
           >
@@ -325,7 +325,7 @@ function AIExperimentForm({ onSubmit }: { onSubmit: (data: AIExperimentPayload) 
                 onClick={() => setTrialData({...trialData, verdict: 'KEEP'})}
                 className={`px-4 py-1.5 text-xs font-bold border transition-all ${
                   trialData.verdict === 'KEEP'
-                    ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_rgba(30,220,224,0.5)]'
+                    ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_var(--glow-color)]'
                     : 'border-neon-cyan/30 text-neon-cyan hover:bg-neon-cyan/10'
                 }`}
               >
@@ -491,7 +491,7 @@ function ActivityForm({ onSubmit }: { onSubmit: (data: ActivityLogPayload) => vo
             onClick={() => setSubType('WALK_RUN')}
             className={`py-1.5 px-2 text-xs font-label-sm font-bold transition-all text-center ${
               subType === 'WALK_RUN'
-                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_rgba(30,220,224,0.4)]'
+                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_var(--glow-color)]'
                 : 'text-neon-cyan/70 hover:text-neon-cyan hover:bg-neon-cyan/10'
             }`}
           >
@@ -502,7 +502,7 @@ function ActivityForm({ onSubmit }: { onSubmit: (data: ActivityLogPayload) => vo
             onClick={() => setSubType('STAIRS')}
             className={`py-1.5 px-2 text-xs font-label-sm font-bold transition-all text-center ${
               subType === 'STAIRS'
-                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_rgba(30,220,224,0.4)]'
+                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_var(--glow-color)]'
                 : 'text-neon-cyan/70 hover:text-neon-cyan hover:bg-neon-cyan/10'
             }`}
           >
@@ -513,7 +513,7 @@ function ActivityForm({ onSubmit }: { onSubmit: (data: ActivityLogPayload) => vo
             onClick={() => setSubType('WEIGHT')}
             className={`py-1.5 px-2 text-xs font-label-sm font-bold transition-all text-center ${
               subType === 'WEIGHT'
-                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_rgba(30,220,224,0.4)]'
+                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_var(--glow-color)]'
                 : 'text-neon-cyan/70 hover:text-neon-cyan hover:bg-neon-cyan/10'
             }`}
           >
@@ -524,7 +524,7 @@ function ActivityForm({ onSubmit }: { onSubmit: (data: ActivityLogPayload) => vo
             onClick={() => setSubType('CORE')}
             className={`py-1.5 px-2 text-xs font-label-sm font-bold transition-all text-center ${
               subType === 'CORE'
-                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_rgba(30,220,224,0.4)]'
+                ? 'bg-neon-cyan text-obsidian-base shadow-[0_0_10px_var(--glow-color)]'
                 : 'text-neon-cyan/70 hover:text-neon-cyan hover:bg-neon-cyan/10'
             }`}
           >

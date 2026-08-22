@@ -155,6 +155,44 @@
     --chromatic-aberration: 1px 0 2px rgba(255, 0, 255, 0.7), -1px 0 2px rgba(0, 238, 252, 0.7);
   }
 
+  [data-theme="NEON_CITY_AFTERWORK"] {
+    --bg-app: #100320;
+    --bg-base: #150629;
+    --bg-surface: #1a0b2e;
+    --bg-panel: #231437;
+    --bg-header: #150629;
+    --bg-container-low: #231437;
+    --bg-container: #27183b;
+    --bg-container-high: #322346;
+    --bg-container-highest: #3d2e52;
+    --text-on-surface: #eddcff;
+    --text-on-surface-variant: #dcbed4;
+    --color-outline: #a4899d;
+    --color-outline-variant: #564052;
+    --color-primary: #8247ff;
+    --color-primary-container: #c4b5fd;
+    --color-on-primary: #1e004a;
+    --color-secondary: #fcee0a;
+    --color-secondary-container: #fff9a6;
+    --color-on-secondary: #3b3700;
+    --color-error: #ffb4ab;
+    --color-error-base: #93000a;
+    --glow-color: rgba(130, 71, 255, 0.55);
+    --glow-secondary: rgba(252, 238, 10, 0.45);
+    --border-primary: rgba(130, 71, 255, 0.55);
+    --border-secondary: rgba(252, 238, 10, 0.4);
+    --panel-scanline: rgba(130, 71, 255, 0.05);
+    --panel-scanline-secondary: rgba(252, 238, 10, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.65);
+    --scanline-border: #0a0115;
+    --scanline-border-shadow: rgba(0,0,0,1);
+    --crt-refresh-color: rgba(130, 71, 255, 0.15);
+    --footer-bg: #008080;
+    --footer-text: #dcfcff;
+    --footer-border: #00eefc;
+    --chromatic-aberration: 1px 0 3px rgba(130, 71, 255, 0.8), -1px 0 3px rgba(252, 238, 10, 0.7);
+  }
+
   body {
     background-color: var(--bg-app);
     color: var(--text-on-surface);

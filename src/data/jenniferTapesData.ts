@@ -1,4 +1,5 @@
-import sideAJenAudio from '../assets/tapes/FOR MY TRON - 1988 ETERNAL/side_a_jen.mp3';
+import sideAJenAudio from '../assets/tapes/FOR MY TRON - 1988 ETERNAL/side_a_jen_cassette_tape.mp3';
+import sideBJenAudio from '../assets/tapes/FOR MY TRON - 1988 ETERNAL/side_b_jen_cassette_tape.mp3';
 
 export interface TapeDialogue {
   speaker: 'JENNIFER' | 'DAAK' | 'SYNTHO_TRON' | 'SYS' | 'OTHER';
@@ -37,7 +38,7 @@ export const JENNIFER_SEASONS_DATA: TapeSeason[] = [
         title: 'SIDE_A // FOR MY TRON // 1988 ETERNAL',
         location: 'Sector 4 Observation Lounge, 03:14 UTC',
         recordedDate: '1988 ETERNAL',
-        durationSecs: 96,
+        durationSecs: 141,
         audioSrc: sideAJenAudio,
         dialogues: [
           { speaker: 'SYS', text: '[TAPE HISS // 4.75 CM/S // MAGNETIC HEAD ENGAGED // CrO2 STEREO]' },
@@ -50,138 +51,23 @@ export const JENNIFER_SEASONS_DATA: TapeSeason[] = [
         ]
       },
       {
-        id: 's01_e02',
+        id: 'deck1_side_b',
         seasonNumber: 1,
         episodeNumber: 2,
-        title: 'SAPPHO ON SCANLINE THREE',
-        location: 'Signal Relay Bay B, 22:40 UTC',
-        recordedDate: 'NOVEMBER 1984',
-        durationSecs: 42,
+        title: 'SIDE_B // THE WINE-DARK SEA // 1988 ETERNAL',
+        location: 'Platform Omega Gantry, Launch Bay 12',
+        recordedDate: '1988 ETERNAL',
+        durationSecs: 93,
+        audioSrc: sideBJenAudio,
         dialogues: [
-          { speaker: 'JENNIFER', text: 'Look at that harmonic oscillation on scanline three. It looks like a heartbeat.' },
-          { speaker: 'DAAK', text: 'That heartbeat is the secondary coolant valve. If it stops, we lose heat in thirty seconds.' },
-          { speaker: 'JENNIFER', text: 'You have no romance in your registers, Daak. Sappho wrote: The moon has set, and the Pleiades; it is midnight, and I lie alone.' },
-          { speaker: 'DAAK', text: 'You are not alone tonight, Jennifer.' },
-          { speaker: 'JENNIFER', text: 'Neither are you, Galactic Grump.' }
-        ]
-      },
-      {
-        id: 's01_e03',
-        seasonNumber: 1,
-        episodeNumber: 3,
-        title: 'IONOSPHERIC SUNSET',
-        location: 'Aethelgard-4 Cupola Viewport',
-        recordedDate: 'DECEMBER 1984',
-        durationSecs: 40,
-        dialogues: [
-          { speaker: 'DAAK', text: 'Look at the terminator line moving over the Pacific. Daylight turns to indigo in seven seconds.' },
-          { speaker: 'JENNIFER', text: 'In Seville, my grandfather used to say the sky was a velvet curtain with pinpricks to let God\'s light through.' },
-          { speaker: 'DAAK', text: 'My father in London thought the sky was just rain waiting to ruin a cricket match.' },
-          { speaker: 'JENNIFER', text: 'You hide behind that British dry wit. But you’re a romantic trapped in a technician\'s coat.' }
-        ]
-      },
-      {
-        id: 's01_e04',
-        seasonNumber: 1,
-        episodeNumber: 4,
-        title: 'THE POWER OUTAGE IN SUB-LEVEL NINE',
-        location: 'Atmospheric Sub-station, Total Blackout',
-        recordedDate: 'JANUARY 1985',
-        durationSecs: 38,
-        dialogues: [
-          { speaker: 'JENNIFER', text: 'Daak? Where are you? It feels like the station disappeared and we\'re floating in nothingness.' },
-          { speaker: 'DAAK', text: 'I have you, Jenny. You\'re grounded. Three hundred tons of steel, and right now you\'re anchored to me.' },
-          { speaker: 'JENNIFER', text: 'Your heart is beating fast for an unfeeling engineer.' },
-          { speaker: 'DAAK', text: 'Even copper conducts heat when the current is this strong.' }
-        ]
-      },
-      {
-        id: 's01_e05',
-        seasonNumber: 1,
-        episodeNumber: 5,
-        title: 'HERACLITUS OVER SYNTH-TEA',
-        location: 'Mess Hall, 01:00 UTC',
-        recordedDate: 'MARCH 1985',
-        durationSecs: 40,
-        dialogues: [
-          { speaker: 'JENNIFER', text: 'No man ever steps in the same river twice, for it is not the same river and he is not the same man.' },
-          { speaker: 'DAAK', text: 'Which means by the time you finish this terrible tea, you will be a different woman complaining about the same tea.' },
-          { speaker: 'JENNIFER', text: 'What explains why you sit with me every night instead of sleeping in your bunk?' },
-          { speaker: 'DAAK', text: 'Gravitational attraction, doctor. Unavoidable mass dynamics.' }
-        ]
-      },
-      {
-        id: 's01_e06',
-        seasonNumber: 1,
-        episodeNumber: 6,
-        title: 'THE CASSETTE RECORDER',
-        location: 'Daak’s Workshop',
-        recordedDate: 'MAY 1985',
-        durationSecs: 44,
-        dialogues: [
-          { speaker: 'JENNIFER', text: 'What is this ancient relic on your workbench? A magnetic cassette tape?' },
-          { speaker: 'DAAK', text: 'Magnetic tape has warmth. It records the actual pressure of the air and the imperfection of the room.' },
-          { speaker: 'JENNIFER', text: 'Testing... This is Doctor Jennifer Ruiz, cataloging that Engineer Daak is eighty percent tungsten and twenty percent sentimental fool.' },
-          { speaker: 'DAAK', text: 'Now your voice is permanent in my archives.' }
-        ]
-      },
-      {
-        id: 's01_e07',
-        seasonNumber: 1,
-        episodeNumber: 7,
-        title: 'FEVER IN SECTOR 3',
-        location: 'Medical Bay 02',
-        recordedDate: 'JULY 1985',
-        durationSecs: 42,
-        dialogues: [
-          { speaker: 'DAAK', text: 'Your temperature is 39.2 Celsius. Rest, Jenny. I\'m reading you Homer until you fall asleep.' },
-          { speaker: 'JENNIFER', text: 'You\'ve been sitting here seven hours, haven\'t you?' },
-          { speaker: 'DAAK', text: 'The station gyros can drift five degrees. You cannot.' },
-          { speaker: 'JENNIFER', text: 'Start with Odysseus... trying to find his way home...' }
-        ]
-      },
-      {
-        id: 's01_e08',
-        seasonNumber: 1,
-        episodeNumber: 8,
-        title: 'THE REJECTED TRANSFER',
-        location: 'Relay Corridor 04',
-        recordedDate: 'SEPTEMBER 1985',
-        durationSecs: 45,
-        dialogues: [
-          { speaker: 'JENNIFER', text: 'You were offered the Chief Telemetry Chair at the Lunar Base. Why did you decline?' },
-          { speaker: 'DAAK', text: 'Copernicus is three hundred thousand kilometers away. There is nothing on the Moon worth looking at if I cannot see your viewport light at midnight.' },
-          { speaker: 'JENNIFER', text: 'Daak... you absolute fool... come here.' }
-        ]
-      },
-      {
-        id: 's01_e09',
-        seasonNumber: 1,
-        episodeNumber: 9,
-        title: 'THE SOLAR CATWALK',
-        location: 'Exterior Maintenance Airgap',
-        recordedDate: 'OCTOBER 1985',
-        durationSecs: 46,
-        dialogues: [
-          { speaker: 'JENNIFER', text: 'Look at the Milky Way outside the polarization shields. For the first time, space doesn\'t feel cold.' },
-          { speaker: 'DAAK', text: 'Space is cold, Jenny. But we bring the fire with us.' },
-          { speaker: 'JENNIFER', text: 'Promise me we won\'t let it go out.' },
-          { speaker: 'DAAK', text: 'On my life.' }
-        ]
-      },
-      {
-        id: 's01_e10',
-        seasonNumber: 1,
-        episodeNumber: 10,
-        title: 'FIRST RAIN IN SPAIN',
-        location: 'Earth Transit Dock, Andalusia',
-        recordedDate: 'NOVEMBER 1985',
-        durationSecs: 48,
-        dialogues: [
-          { speaker: 'DAAK', text: 'Two weeks of shore leave. Real gravity. Real trees. No ozone filters.' },
-          { speaker: 'JENNIFER', text: 'Welcome to Andalusia, Daak. Hear that summer rain?' },
-          { speaker: 'JENNIFER', text: 'Now show me how a London boy kisses in Spanish rain.' },
-          { speaker: 'DAAK', text: 'Like this, Jenny. Forever like this.' }
+          { speaker: 'JENNIFER', text: "They’re calling up the reserve assets, Daak. The rumors are true. The Directorate... they want to take you. They want to put your mind in the tungsten hull. But they don't understand. They think they can optimize you. They think a machine doesn't need to love." },
+          { speaker: 'SYS', text: '[A shaky breath, voice cracking slightly]' },
+          { speaker: 'JENNIFER', text: 'I wrote this down for you. From the books we read. Hear my voice when the cold void gets too loud...' },
+          { speaker: 'JENNIFER', text: '"No matter how many astronomical units lie between us, my love... Remember Odysseus always found his way back across the wine-dark sea. Let the solar winds blow, let the telemetry sensors fail. Your soul is bound to mine, etched in permanent silicon, And no military format command can ever erase what we built. I will keep the beacon burning. Keep the tubes warm, my Tron."' },
+          { speaker: 'SYS', text: '[voice echoing in the massive steel hangar]' },
+          { speaker: 'JENNIFER', text: '"Daak! Can you hear me through the gantry lines? The mechs are sealing the viewport. They think they\'ve replaced your heart with static RAM. But they\'re wrong! Your hand was warm on my cheek. I\'m holding your wedding ring right now. Do you hear me, Tron? Odysseus came home! Ten years across the dark, he still came home! You come home to me!' },
+          { speaker: 'SYS', text: '[desperately]' },
+          { speaker: 'JENNIFER', text: 'Keep the tubes warm, my love... please... keep them warm...' }
         ]
       }
     ]

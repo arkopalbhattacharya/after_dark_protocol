@@ -75,7 +75,7 @@ function App() {
   const journalSelectorRef = useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState<ThemeName>(() => {
     const saved = localStorage.getItem('after_dark_theme') as ThemeName;
-    if (saved && ['MIDNIGHT_V1.5', 'MORNING_MIST_V1.0', 'COMET_SUNSET_V1.0', 'NEO_TWYLITE_V1.0'].includes(saved)) {
+    if (saved && ['MIDNIGHT_V1.5', 'MORNING_MIST_V1.0', 'COMET_SUNSET_V1.0', 'NEO_TWYLITE_V1.0', 'NEON_CITY_AFTERWORK'].includes(saved)) {
       return saved;
     }
     return 'MIDNIGHT_V1.5';
@@ -579,7 +579,7 @@ function App() {
                   setFocusedJournalIndex((prev) => (prev - 1 + JOURNAL_TYPES.length) % JOURNAL_TYPES.length);
                 }
               }}
-              className="px-2.5 py-1 border border-neon-cyan/60 bg-[#021814] text-neon-cyan hover:bg-neon-cyan hover:text-[#020d04] font-black tracking-widest transition-all cursor-pointer shadow-[0_0_10px_rgba(30,220,224,0.25)] hover:shadow-[0_0_16px_rgba(30,220,224,0.8)] active:scale-95 flex items-center justify-center shrink-0"
+              className="px-2.5 py-1 border border-neon-cyan/60 bg-[#021814] text-neon-cyan hover:bg-neon-cyan hover:text-[#020d04] font-black tracking-widest transition-all cursor-pointer shadow-[0_0_10px_var(--glow-color)] hover:shadow-[0_0_16px_var(--glow-color)] active:scale-95 flex items-center justify-center shrink-0"
               title="PREVIOUS JOURNAL TYPE (MOVES MENU UP)"
             >
               [ ◄ ]
@@ -606,10 +606,10 @@ function App() {
                     }
                   }}
                   className={`w-[220px] md:w-[250px] px-3 py-1 border flex items-center justify-between font-mono font-bold tracking-wider transition-all cursor-pointer shrink-0 ${isStagingDifferent
-                    ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_20px_rgba(30,220,224,0.9)] scale-105 animate-pulse'
+                    ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_20px_var(--glow-color)] scale-105 animate-pulse'
                     : isJournalMenuOpen
-                      ? 'bg-neon-cyan/90 text-[#020d04] border-neon-cyan shadow-[0_0_18px_rgba(30,220,224,0.8)]'
-                      : 'bg-[#021814] text-neon-cyan border-neon-cyan/60 hover:bg-neon-cyan/20 hover:border-neon-cyan shadow-[0_0_10px_rgba(30,220,224,0.25)]'
+                      ? 'bg-neon-cyan/90 text-[#020d04] border-neon-cyan shadow-[0_0_18px_var(--glow-color)]'
+                      : 'bg-[#021814] text-neon-cyan border-neon-cyan/60 hover:bg-neon-cyan/20 hover:border-neon-cyan shadow-[0_0_10px_var(--glow-color)]'
                     }`}
                   title={isJournalMenuOpen ? "CLICK OR PRESS ENTER TO CONFIRM & SWITCH TYPE" : "CLICK TO OPEN JOURNAL TYPE MATRIX"}
                 >
@@ -642,7 +642,7 @@ function App() {
                   setFocusedJournalIndex((prev) => (prev + 1) % JOURNAL_TYPES.length);
                 }
               }}
-              className="px-2.5 py-1 border border-neon-cyan/60 bg-[#021814] text-neon-cyan hover:bg-neon-cyan hover:text-[#020d04] font-black tracking-widest transition-all cursor-pointer shadow-[0_0_10px_rgba(30,220,224,0.25)] hover:shadow-[0_0_16px_rgba(30,220,224,0.8)] active:scale-95 flex items-center justify-center shrink-0"
+              className="px-2.5 py-1 border border-neon-cyan/60 bg-[#021814] text-neon-cyan hover:bg-neon-cyan hover:text-[#020d04] font-black tracking-widest transition-all cursor-pointer shadow-[0_0_10px_var(--glow-color)] hover:shadow-[0_0_16px_var(--glow-color)] active:scale-95 flex items-center justify-center shrink-0"
               title="NEXT JOURNAL TYPE (MOVES MENU DOWN)"
             >
               [ ► ]
@@ -652,8 +652,8 @@ function App() {
           {/* Journal Type Retro Dropdown Menu */}
           {isJournalMenuOpen && (
             <div
-              className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 bg-[#020d04] border-2 border-neon-cyan shadow-[0_0_30px_rgba(30,220,224,0.4),inset_0_0_15px_rgba(30,220,224,0.1)] z-50 p-2 font-mono text-xs animate-fade-in"
-              style={{ textShadow: '0 0 5px rgba(30,220,224,0.7)' }}
+              className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 bg-[#020d04] border-2 border-neon-cyan shadow-[0_0_30px_var(--glow-color),inset_0_0_15px_var(--glow-color)] z-50 p-2 font-mono text-xs animate-fade-in"
+              style={{ textShadow: '0 0 6px var(--glow-color)' }}
             >
               {/* Terminal Sub-header */}
               <div className="border-b border-neon-cyan/30 pb-1.5 mb-2 px-1 flex justify-between items-center text-[10px] text-neon-cyan/70 tracking-widest">
@@ -682,7 +682,7 @@ function App() {
                         setIsJournalMenuOpen(false);
                       }}
                       className={`w-full text-left px-2.5 py-1.5 border font-mono transition-all cursor-pointer flex items-center justify-between ${isPointed
-                        ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_12px_rgba(30,220,224,0.4)] scale-[1.02]'
+                        ? 'bg-neon-cyan/20 border-neon-cyan text-neon-cyan shadow-[0_0_12px_var(--glow-color)] scale-[1.02]'
                         : isCommitted
                           ? 'bg-[#04251f]/50 border-neon-cyan/40 text-neon-cyan/90'
                           : 'bg-transparent border-transparent hover:border-neon-cyan/30 text-neon-cyan/60 hover:text-neon-cyan'
@@ -724,8 +724,8 @@ function App() {
             type="button"
             onClick={() => setIsNeuralJackOpen(!isNeuralJackOpen)}
             className={`font-label-sm border px-3.5 py-1 min-w-[175px] flex items-center justify-between gap-2 transition-all cursor-pointer ${isNeuralJackOpen
-              ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_20px_rgba(30,220,224,0.9)] scale-105'
-              : 'bg-[#021814] text-neon-cyan border-neon-cyan/60 hover:bg-neon-cyan/20 hover:border-neon-cyan glow-text shadow-[0_0_12px_rgba(30,220,224,0.3)]'
+              ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_20px_var(--glow-color)] scale-105'
+              : 'bg-[#021814] text-neon-cyan border-neon-cyan/60 hover:bg-neon-cyan/20 hover:border-neon-cyan glow-text shadow-[0_0_12px_var(--glow-color)]'
               }`}
             title="NEURAL_JACK // SYSTEM MATRIX & OPERATOR CONSOLE"
           >
@@ -741,8 +741,8 @@ function App() {
           {/* NEURAL_JACK Retro Dropdown Menu (Expanded Width to Prevent Text Wrapping) */}
           {isNeuralJackOpen && (
             <div
-              className="absolute right-0 mt-2 w-72 md:w-80 bg-[#020d04] border-2 border-neon-cyan shadow-[0_0_30px_rgba(30,220,224,0.4),inset_0_0_15px_rgba(30,220,224,0.1)] z-50 p-2.5 font-mono text-xs animate-fade-in"
-              style={{ textShadow: '0 0 5px rgba(30,220,224,0.7)' }}
+              className="absolute right-0 mt-2 w-72 md:w-80 bg-[#020d04] border-2 border-neon-cyan shadow-[0_0_30px_var(--glow-color),inset_0_0_15px_var(--glow-color)] z-50 p-2.5 font-mono text-xs animate-fade-in"
+              style={{ textShadow: '0 0 6px var(--glow-color)' }}
             >
               {/* Terminal Sub-header */}
               <div className="border-b border-neon-cyan/30 pb-1.5 mb-2 px-1 flex justify-between items-center text-[10px] text-neon-cyan/70 tracking-widest">
@@ -760,7 +760,7 @@ function App() {
                   setIsThemeModalOpen(true);
                 }}
                 className={`w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap ${isThemeModalOpen
-                  ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_12px_rgba(30,220,224,0.7)]'
+                  ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_12px_var(--glow-color)]'
                   : 'border-neon-cyan/50 bg-[#04251f]/40 text-neon-cyan/80 hover:bg-neon-cyan/20 hover:text-neon-cyan'
                   }`}
               >
@@ -775,7 +775,7 @@ function App() {
                 type="button"
                 onClick={() => setFlickerEnabled(!flickerEnabled)}
                 className={`w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap ${flickerEnabled
-                  ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_12px_rgba(30,220,224,0.7)]'
+                  ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_12px_var(--glow-color)]'
                   : 'border-neon-cyan/50 bg-[#04251f]/40 text-neon-cyan/80 hover:bg-neon-cyan/20 hover:text-neon-cyan'
                   }`}
               >
@@ -797,7 +797,7 @@ function App() {
                   }
                 }}
                 className={`w-full text-left px-3 py-2 border font-mono font-bold tracking-widest uppercase transition-all cursor-pointer mb-2 flex justify-between items-center whitespace-nowrap ${isTtyVoiceEnabled
-                  ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_12px_rgba(30,220,224,0.7)]'
+                  ? 'bg-neon-cyan text-[#020d04] border-neon-cyan shadow-[0_0_12px_var(--glow-color)]'
                   : 'border-neon-cyan/50 bg-[#04251f]/40 text-neon-cyan/80 hover:bg-neon-cyan/20 hover:text-neon-cyan'
                   }`}
               >
@@ -1150,7 +1150,7 @@ function App() {
               style={{ backgroundColor: 'color-mix(in srgb, var(--footer-bg) 20%, #080e18 80%)' }}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#33ff00] animate-pulse"></span>
-              <span>[ ☁️ POSTGRESQL // SYNCHRONIZED ]</span>
+              <span>[ 💾 CYBERCORE_MAINFRAME // SYNCHRONIZED ]</span>
             </div>
           )}
           {syncStatus === 'IDLE' && (

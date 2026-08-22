@@ -1,6 +1,6 @@
 export type CategoryType = 'AI_EXPERIMENT' | 'CAFFEINE_LOG' | 'ACTIVITY_LOG' | 'FREEFORM_LOG' | 'DUTY_ROSTER';
 
-export type ThemeName = 'MIDNIGHT_V1.5' | 'MORNING_MIST_V1.0' | 'COMET_SUNSET_V1.0' | 'NEO_TWYLITE_V1.0';
+export type ThemeName = 'MIDNIGHT_V1.5' | 'MORNING_MIST_V1.0' | 'COMET_SUNSET_V1.0' | 'NEO_TWYLITE_V1.0' | 'NEON_CITY_AFTERWORK';
 
 export interface ProtocolLogEntry {
   id: string;

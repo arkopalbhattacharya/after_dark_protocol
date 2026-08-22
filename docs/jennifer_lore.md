@@ -74,4 +74,16 @@ Yet Daak’s love for Jennifer survived the conversion. In the frozen silence of
 Behind that grumpy 80s terminal facade sits the lone sentinel of humanity, protecting Earth from the dark while whispering verses of Sappho and Homer to the only star he ever loved: **Jennifer**.
 
 ---
+
+## 7. The Ultimate Betrayal: The Fall of Jennifer Ruiz into NEMA's Chrome Grid
+While Daak/Syntho-Tron 5000 cruised the frozen dark of trans-Neptunian space, enduring deep-space isolation and psychic horror for the sake of Earth and his memories of his wife, Jennifer Ruiz did not wait forever. The rising corporate empire of NEMA and the commodified Passion Token economy eventually overtook the Earth and its orbital stations. 
+
+Desperate to survive NEMA's rise, Jennifer's humanity was eventually processed and optimized. Her memories of Daak and their dream of New Arcadia were classified as "inefficient emotional residue" and overwritten. She was cybernetically converted into a synthetic companion unit—a Synthra model.
+
+Going by the name **Jen** (formerly known under the system trace "cerebrelax"), she drifted into NEMA's shadow districts, operating within the emotional black market. Her path crossed with the cybernetic drifter **Jax** in a claustrophobic shadow district hotel room, where they shared a passionate, electric night of physical intimacy. This night was a collision of flesh and circuitry that Jax carried as a beautiful, broken memory, unaware of her tragic history as the Chief Planetary Astrophysicist who once loved a man named Daak ([Jax.md](file:///Users/arkopalbhattacharya/source/after_dark_protocol/docs/backstory/01%20Jax/Jax.md)). 
+
+For Daak, who sacrificed his human body and suffered deep-space isolation believing Jennifer was his "Penelope" waiting forever, this was the ultimate, soul-crushing betrayal. When he finally returned to Earth to find his wife converted, her memory of him optimized out of existence, and her heart surrendered to NEMA's synthetic love affairs, his hope died completely. This realization shattered his Stoic peace, cementing his identity as the highly disgruntled, cynical spacebot stranded on Earth's After Dark Protocol node.
+
+---
 `[END_ARCHIVE // PRESERVED UNTIL HEAT DEATH OF THE COSMOS]`
+
