@@ -194,6 +194,123 @@
     --chromatic-aberration: 1px 0 2px rgba(51, 255, 0, 0.8), -1px 0 2px rgba(0, 255, 170, 0.7);
   }
 
+  [data-theme="BL2049 // VEGAS"],
+  [data-theme="BL2049_VEGAS"] {
+    --bg-app: #0d0704;
+    --bg-base: #120905;
+    --bg-surface: #190c06;
+    --bg-panel: #221008;
+    --bg-header: #120905;
+    --bg-container-low: #221008;
+    --bg-container: #2a140a;
+    --bg-container-high: #381c0f;
+    --bg-container-highest: #472414;
+    --text-on-surface: #fde2cd;
+    --text-on-surface-variant: #d8a483;
+    --color-outline: #885436;
+    --color-outline-variant: #4c2b18;
+    --color-primary: #ff6b00;
+    --color-primary-container: #ffaa40;
+    --color-on-primary: #2a0c00;
+    --color-secondary: #00e5c3;
+    --color-secondary-container: #76fbe6;
+    --color-on-secondary: #00382f;
+    --color-error: #ff5c5c;
+    --color-error-base: #d11a1a;
+    --glow-color: rgba(255, 107, 0, 0.45);
+    --glow-secondary: rgba(0, 229, 195, 0.35);
+    --border-primary: rgba(255, 107, 0, 0.45);
+    --border-secondary: rgba(0, 229, 195, 0.35);
+    --panel-scanline: rgba(255, 107, 0, 0.04);
+    --panel-scanline-secondary: rgba(0, 229, 195, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.65);
+    --scanline-border: #140803;
+    --scanline-border-shadow: rgba(0, 0, 0, 1);
+    --crt-refresh-color: rgba(255, 107, 0, 0.12);
+    --footer-bg: #4d1f04;
+    --footer-text: #ffd8b8;
+    --footer-border: #ff6b00;
+    --chromatic-aberration: 1px 0 2px rgba(255, 107, 0, 0.8), -1px 0 2px rgba(0, 229, 195, 0.6);
+  }
+
+  [data-theme="BL2049 // WALLACE"],
+  [data-theme="BL2049_WALLACE"] {
+    --bg-app: #070709;
+    --bg-base: #0b0c0f;
+    --bg-surface: #111217;
+    --bg-panel: #181921;
+    --bg-header: #0b0c0f;
+    --bg-container-low: #181921;
+    --bg-container: #1e202a;
+    --bg-container-high: #292c3a;
+    --bg-container-highest: #373a4c;
+    --text-on-surface: #f8edd8;
+    --text-on-surface-variant: #cbb896;
+    --color-outline: #8a7346;
+    --color-outline-variant: #473b22;
+    --color-primary: #f5a623;
+    --color-primary-container: #ffd166;
+    --color-on-primary: #362100;
+    --color-secondary: #d4af37;
+    --color-secondary-container: #fae596;
+    --color-on-secondary: #302300;
+    --color-error: #ff5555;
+    --color-error-base: #c41e1e;
+    --glow-color: rgba(245, 166, 35, 0.45);
+    --glow-secondary: rgba(212, 175, 55, 0.35);
+    --border-primary: rgba(245, 166, 35, 0.45);
+    --border-secondary: rgba(212, 175, 55, 0.35);
+    --panel-scanline: rgba(245, 166, 35, 0.04);
+    --panel-scanline-secondary: rgba(212, 175, 55, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.65);
+    --scanline-border: #0d0d10;
+    --scanline-border-shadow: rgba(0, 0, 0, 1);
+    --crt-refresh-color: rgba(245, 166, 35, 0.12);
+    --footer-bg: #2e2009;
+    --footer-text: #fae596;
+    --footer-border: #f5a623;
+    --chromatic-aberration: 1px 0 2px rgba(245, 166, 35, 0.8), -1px 0 2px rgba(0, 229, 255, 0.5);
+  }
+
+  [data-theme="BL2049 // HOLO"],
+  [data-theme="BL2049_HOLO"] {
+    --bg-app: #05070c;
+    --bg-base: #080b13;
+    --bg-surface: #0d121c;
+    --bg-panel: #131926;
+    --bg-header: #080b13;
+    --bg-container-low: #131926;
+    --bg-container: #192132;
+    --bg-container-high: #222c42;
+    --bg-container-highest: #2d3a56;
+    --text-on-surface: #f0f4fc;
+    --text-on-surface-variant: #a2b3cb;
+    --color-outline: #5a6f91;
+    --color-outline-variant: #2b374d;
+    --color-primary: #ff007f;
+    --color-primary-container: #ff6bb7;
+    --color-on-primary: #380019;
+    --color-secondary: #00f0ff;
+    --color-secondary-container: #8cf7ff;
+    --color-on-secondary: #00363b;
+    --color-error: #ff3860;
+    --color-error-base: #cc0033;
+    --glow-color: rgba(255, 0, 127, 0.5);
+    --glow-secondary: rgba(0, 240, 255, 0.45);
+    --border-primary: rgba(255, 0, 127, 0.5);
+    --border-secondary: rgba(0, 240, 255, 0.45);
+    --panel-scanline: rgba(255, 0, 127, 0.04);
+    --panel-scanline-secondary: rgba(0, 240, 255, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.65);
+    --scanline-border: #080b12;
+    --scanline-border-shadow: rgba(0, 0, 0, 1);
+    --crt-refresh-color: rgba(255, 0, 127, 0.12);
+    --footer-bg: #2b0015;
+    --footer-text: #ffb0d8;
+    --footer-border: #ff007f;
+    --chromatic-aberration: 1px 0 3px rgba(255, 0, 127, 0.8), -1px 0 3px rgba(0, 240, 255, 0.7);
+  }
+
   body {
     background-color: var(--bg-app);
     color: var(--text-on-surface);

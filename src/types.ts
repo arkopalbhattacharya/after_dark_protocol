@@ -36,7 +36,15 @@ export type CategoryType =
   | 'COMMS_LINK'
   | 'MICRO_TRIUMPHS';
 
-export type ThemeName = 'MIDNIGHT_V1.5' | 'COMET_SUNSET_V1.0' | 'NEO_TWYLITE_V1.0' | 'NEON_CITY_AFTERWORK' | 'MAINFRAME_NEURO_8086';
+export type ThemeName =
+  | 'MIDNIGHT_V1.5'
+  | 'COMET_SUNSET_V1.0'
+  | 'NEO_TWYLITE_V1.0'
+  | 'NEON_CITY_AFTERWORK'
+  | 'MAINFRAME_NEURO_8086'
+  | 'BL2049 // VEGAS'
+  | 'BL2049 // WALLACE'
+  | 'BL2049 // HOLO';
 
 export interface ProtocolLogEntry {
   id: string;

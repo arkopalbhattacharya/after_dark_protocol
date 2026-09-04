@@ -118,3 +118,9 @@ JSON
 - **Primary Frame (Split/Collapsible):**
   - **Input Terminal (Top or Left Tray):** Interactive dynamic form adapting to selected category type with clear visual validation bounds.
   - **Data Feed Stream (Main Area):** Monospace HUD cards with structured metadata tags, status pills, and JSON payload inspect toggles.
+
+---
+
+## 8. Parked & Future Feature Specifications
+
+- **DOC-FEAT-WA-001:** `[THE_SOCIAL_JETWORKS]` WhatsApp Orbital Wire Dispatcher (Spec: [`docs/features/whatsapp_social_jetworks_dispatch.md`](./docs/features/whatsapp_social_jetworks_dispatch.md)).

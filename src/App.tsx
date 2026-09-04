@@ -100,7 +100,19 @@ function App() {
   const activeJournalTypes = activeJournalTypesList(enabledCategories);
   const [theme, setTheme] = useState<ThemeName>(() => {
     const saved = localStorage.getItem('after_dark_theme') as ThemeName;
-    if (saved && ['MIDNIGHT_V1.5', 'COMET_SUNSET_V1.0', 'NEO_TWYLITE_V1.0', 'NEON_CITY_AFTERWORK', 'MAINFRAME_NEURO_8086'].includes(saved)) {
+    if (
+      saved &&
+      [
+        'MIDNIGHT_V1.5',
+        'COMET_SUNSET_V1.0',
+        'NEO_TWYLITE_V1.0',
+        'NEON_CITY_AFTERWORK',
+        'MAINFRAME_NEURO_8086',
+        'BL2049 // VEGAS',
+        'BL2049 // WALLACE',
+        'BL2049 // HOLO'
+      ].includes(saved)
+    ) {
       return saved;
     }
     return 'MIDNIGHT_V1.5';
@@ -1310,11 +1322,20 @@ function App() {
 
             {/* Primary Data Entry Terminal (Spans 2 cols, 2 rows) */}
             <div className="terminal-panel terminal-panel-active md:col-span-2 md:row-span-2 flex flex-col">
-              <div className="terminal-header font-label-sm text-label-sm text-neon-cyan flex justify-between items-center">
-                <span>[SYS_CMD_IN] // ROOT</span>
-                <span className="font-mono font-bold tracking-wider text-neon-cyan">
-                  SCHEMA: {getCategoryMeta(activeCategory).badge}
-                </span>
+              <div className="terminal-header font-label-sm text-label-sm text-neon-cyan flex justify-between items-center select-none bg-surface-container-high/40 px-3 py-1.5 border-b border-neon-cyan/30">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="material-symbols-outlined text-[15px] text-neon-cyan animate-pulse">
+                    terminal
+                  </span>
+                  <span className="font-mono font-black tracking-wider text-neon-cyan truncate text-xs md:text-sm">
+                    [SYS_CMD_IN // ROOT]
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="font-mono font-bold tracking-wider text-neon-cyan/90 text-[10.5px] md:text-xs bg-neon-cyan/10 border border-neon-cyan/40 px-2 py-0.5">
+                    SCHEMA: {getCategoryMeta(activeCategory).badge}
+                  </span>
+                </div>
               </div>
               <div className="flex-1 p-panel-padding flex flex-col overflow-y-auto">
                 {editingLogId && (
@@ -1375,9 +1396,20 @@ function App() {
                     : 'h-[65%] flex-[65]'
                 }`}
               >
-                <div className="terminal-header font-label-sm text-label-sm text-amber-warn/70">
-                  <span>REC_LOGS</span>
-                  <span>DB_SYNC: OK</span>
+                <div className="terminal-header font-label-sm text-label-sm text-amber-warn/80 flex justify-between items-center select-none bg-surface-container-high/40 px-3 py-1.5 border-b border-amber-warn/30">
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="material-symbols-outlined text-[15px] text-amber-warn animate-pulse">
+                      receipt_long
+                    </span>
+                    <span className="font-mono font-black tracking-wider text-amber-warn truncate text-xs md:text-sm">
+                      [REC_LOGS]
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="font-mono font-bold tracking-wider text-amber-warn/90 text-[10.5px] md:text-xs bg-amber-warn/10 border border-amber-warn/40 px-2 py-0.5">
+                      DB_SYNC: OK
+                    </span>
+                  </div>
                 </div>
                 <div className="flex border-b border-amber-warn/30 text-[9px] font-label-sm text-amber-warn/50 overflow-x-auto">
                   <button
@@ -1576,9 +1608,20 @@ function App() {
 
             {/* System Stats (Spans 1 col, 1 row) */}
             <div className="terminal-panel lg:col-span-1 flex flex-col">
-              <div className="terminal-header font-label-sm text-label-sm text-outline">
-                <span>TELEMETRY_PILLS</span>
-                <span>SYS: ACTIVE</span>
+              <div className="terminal-header font-label-sm text-label-sm text-neon-cyan flex justify-between items-center select-none bg-surface-container-high/40 px-3 py-1.5 border-b border-neon-cyan/30">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="material-symbols-outlined text-[15px] text-neon-cyan animate-pulse">
+                    monitoring
+                  </span>
+                  <span className="font-mono font-black tracking-wider text-neon-cyan truncate text-xs md:text-sm">
+                    [TELEMETRY_PILLS]
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="font-mono font-bold tracking-wider text-neon-cyan/90 text-[10.5px] md:text-xs bg-neon-cyan/10 border border-neon-cyan/40 px-2 py-0.5">
+                    SYS: ACTIVE
+                  </span>
+                </div>
               </div>
               <div className="flex-1 p-panel-padding flex flex-col justify-center gap-4">
                 <div>
@@ -1611,9 +1654,20 @@ function App() {
 
             {/* Quick Actions (Spans 1 col, 1 row) */}
             <div className="terminal-panel lg:col-span-1 flex flex-col">
-              <div className="terminal-header font-label-sm text-label-sm text-outline">
-                <span>CMD_LINKS</span>
-                <span>EXEC</span>
+              <div className="terminal-header font-label-sm text-label-sm text-neon-cyan flex justify-between items-center select-none bg-surface-container-high/40 px-3 py-1.5 border-b border-neon-cyan/30">
+                <div className="flex items-center gap-2 truncate">
+                  <span className="material-symbols-outlined text-[15px] text-neon-cyan animate-pulse">
+                    bolt
+                  </span>
+                  <span className="font-mono font-black tracking-wider text-neon-cyan truncate text-xs md:text-sm">
+                    [CMD_LINKS]
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="font-mono font-bold tracking-wider text-neon-cyan/90 text-[10.5px] md:text-xs bg-neon-cyan/10 border border-neon-cyan/40 px-2 py-0.5">
+                    EXEC
+                  </span>
+                </div>
               </div>
               <div className="flex-1 p-panel-padding grid grid-cols-2 gap-2">
                 <button onClick={handleExportJSON} className="border border-neon-cyan/30 text-neon-cyan font-label-sm hover:bg-neon-cyan/10 transition-colors flex flex-col items-center justify-center gap-1 p-2">

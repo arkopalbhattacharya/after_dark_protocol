@@ -82,6 +82,45 @@ const THEME_OPTIONS: ThemeOption[] = [
       { name: 'Panic', color: '#ff0033' },
       { name: 'CRT Void', color: '#010a03' }
     ]
+  },
+  {
+    id: 'BL2049 // VEGAS',
+    key: '6',
+    name: 'BL2049 // VEGAS',
+    codename: 'OFFICER_K // IRRADIATED_VEGAS_DUST',
+    description: 'Irradiated Las Vegas ruins drenched in cadmium orange smog, radioactive amber haze, and teal spinner HUD filaments.',
+    swatches: [
+      { name: 'Orange', color: '#ff6b00' },
+      { name: 'Amber', color: '#ffaa40' },
+      { name: 'Teal', color: '#00e5c3' },
+      { name: 'Void', color: '#0d0704' }
+    ]
+  },
+  {
+    id: 'BL2049 // WALLACE',
+    key: '7',
+    name: 'BL2049 // WALLACE',
+    codename: 'WALLACE_CORP // CAUSTIC_OBSIDIAN',
+    description: 'Monolithic basalt obsidian architecture illuminated by golden honey water caustics, polished brass, and memory orb cyan.',
+    swatches: [
+      { name: 'Gold', color: '#f5a623' },
+      { name: 'Tungsten', color: '#ffd166' },
+      { name: 'Brass', color: '#8a7346' },
+      { name: 'Basalt', color: '#070709' }
+    ]
+  },
+  {
+    id: 'BL2049 // HOLO',
+    key: '8',
+    name: 'BL2049 // HOLO',
+    codename: 'JOI_HOLOGRAPHIC // RAIN_MEGACITY',
+    description: 'Rain-drenched brutalist LA concrete slate with towering holographic Joi magenta, neon rain cyan, and street warning yellow.',
+    swatches: [
+      { name: 'Magenta', color: '#ff007f' },
+      { name: 'Cyan', color: '#00f0ff' },
+      { name: 'Yellow', color: '#ffe600' },
+      { name: 'Slate', color: '#05070c' }
+    ]
   }
 ];
 
@@ -107,6 +146,12 @@ export function ThemeModal({
         onSelectTheme('NEON_CITY_AFTERWORK');
       } else if (e.key === '5') {
         onSelectTheme('MAINFRAME_NEURO_8086');
+      } else if (e.key === '6') {
+        onSelectTheme('BL2049 // VEGAS');
+      } else if (e.key === '7') {
+        onSelectTheme('BL2049 // WALLACE');
+      } else if (e.key === '8') {
+        onSelectTheme('BL2049 // HOLO');
       }
     };
 
@@ -148,7 +193,7 @@ export function ThemeModal({
           {/* ASCII Banner */}
           <div className="text-[11px] leading-tight text-[#33ff00] opacity-90 border-b border-[#33ff00]/40 pb-2.5">
             <div className="font-bold tracking-wider">╔═══════════════════════════════════════════════════════════════╗</div>
-            <div className="font-bold tracking-wider">║  &gt;&gt; SYSTEM COLOR MATRIX // SELECT ACTIVE PROTOCOL [1-5]       ║</div>
+            <div className="font-bold tracking-wider">║  &gt;&gt; SYSTEM COLOR MATRIX // SELECT ACTIVE PROTOCOL [1-8]       ║</div>
             <div className="font-bold tracking-wider">╚═══════════════════════════════════════════════════════════════╝</div>
             <div className="mt-2 text-[10px] text-[#33ff00]/70 flex justify-between">
               <span>DRIVER: PROTOCOL_STITCH_RENDERER_v4.2</span>
@@ -242,7 +287,7 @@ export function ThemeModal({
           <div className="border border-[#33ff00]/50 p-2.5 bg-[#041a07] flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <span className="font-bold text-[#33ff00]">&gt; PROMPT:</span>
-              <span className="text-[#33ff00]/90">PRESS [1-5] OR CLICK PROFILE TO EXECUTE MATRIX</span>
+              <span className="text-[#33ff00]/90">PRESS [1-8] OR CLICK PROFILE TO EXECUTE MATRIX</span>
               <span className="inline-block w-2 h-3.5 bg-[#33ff00] animate-pulse"></span>
             </div>
             <button
