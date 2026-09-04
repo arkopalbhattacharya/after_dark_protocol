@@ -13,5 +13,18 @@
     "Centered",
     "Recharged",
     "Euphoric"
-  ]
+  ],
+  "dutyStatuses": [
+    "PENDING",
+    "IN_PROGRESS",
+    "COMPLETED",
+    "STANDBY"
+  ],
+  "dutyPriorities": [
+    "LOW",
+    "MEDIUM",
+    "HIGH",
+    "CRITICAL"
+  ],
+  "overridePin": "001234"
 }
