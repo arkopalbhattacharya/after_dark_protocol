@@ -26,27 +26,14 @@ const THEME_OPTIONS: ThemeOption[] = [
     description: 'High-contrast nocturnal terminal with neon cyan filaments and obsidian void.',
     swatches: [
       { name: 'Cyan', color: '#1edce0' },
-      { name: 'Amber', color: '#fdaf00' },
+      { name: 'Teal', color: '#008080' },
       { name: 'Void', color: '#0a0e14' },
       { name: 'Panel', color: '#12171f' }
     ]
   },
   {
-    id: 'MORNING_MIST_V1.0',
-    key: '2',
-    name: 'MORNING_MIST_V1.0',
-    codename: 'OBSIDIAN_MORNING // SOLAR_LAB',
-    description: 'Daylight laboratory aesthetic with solar white surfaces, deep teal, and amber alerts.',
-    swatches: [
-      { name: 'Teal', color: '#006970' },
-      { name: 'Amber', color: '#feb700' },
-      { name: 'Solar', color: '#ffffff' },
-      { name: 'Slate', color: '#dfe3e7' }
-    ]
-  },
-  {
     id: 'COMET_SUNSET_V1.0',
-    key: '3',
+    key: '2',
     name: 'COMET_SUNSET_V1.0',
     codename: 'OBSIDIAN_SUNSET // GOLDEN_HOUR',
     description: 'Sweltering retro-vaporwave copper haze with golden amber and burnt orange emitters.',
@@ -59,7 +46,7 @@ const THEME_OPTIONS: ThemeOption[] = [
   },
   {
     id: 'NEO_TWYLITE_V1.0',
-    key: '4',
+    key: '3',
     name: 'NEO_TWYLITE_V1.0',
     codename: 'OBSIDIAN_TWILIGHT // ELECTRIC_VOID',
     description: 'Electric neon-magenta and cyan rays radiating against a deep indigo twilight matrix.',
@@ -68,6 +55,71 @@ const THEME_OPTIONS: ThemeOption[] = [
       { name: 'Cyan', color: '#00eefc' },
       { name: 'Void', color: '#150629' },
       { name: 'Indigo', color: '#231437' }
+    ]
+  },
+  {
+    id: 'NEON_CITY_AFTERWORK',
+    key: '4',
+    name: 'NEON_CITY_AFTERWORK',
+    codename: 'NEON_CITY // AFTER_HOURS',
+    description: 'Electric bluish-purple neon emitters, neon yellow protocol typography, and neon teal status telemetry over deep twilight.',
+    swatches: [
+      { name: 'Blurple', color: '#8247ff' },
+      { name: 'Yellow', color: '#fcee0a' },
+      { name: 'Teal', color: '#008080' },
+      { name: 'Void', color: '#150629' }
+    ]
+  },
+  {
+    id: 'MAINFRAME_NEURO_8086',
+    key: '5',
+    name: 'MAINFRAME_NEURO_8086',
+    codename: 'IBM_8086 // VT220_PHOSPHOR_MATRIX',
+    description: 'Pure 1980s monochrome phosphor-green mainframe aesthetic with high-yield green luminescent CRT vectors and crimson panic emergency interlocks.',
+    swatches: [
+      { name: 'Phosphor', color: '#33ff00' },
+      { name: 'Mint', color: '#00ffaa' },
+      { name: 'Panic', color: '#ff0033' },
+      { name: 'CRT Void', color: '#010a03' }
+    ]
+  },
+  {
+    id: 'BL2049 // VEGAS',
+    key: '6',
+    name: 'BL2049 // VEGAS',
+    codename: 'OFFICER_K // IRRADIATED_VEGAS_DUST',
+    description: 'Irradiated Las Vegas ruins drenched in cadmium orange smog, radioactive amber haze, and teal spinner HUD filaments.',
+    swatches: [
+      { name: 'Orange', color: '#ff6b00' },
+      { name: 'Amber', color: '#ffaa40' },
+      { name: 'Teal', color: '#00e5c3' },
+      { name: 'Void', color: '#0d0704' }
+    ]
+  },
+  {
+    id: 'BL2049 // WALLACE',
+    key: '7',
+    name: 'BL2049 // WALLACE',
+    codename: 'WALLACE_CORP // CAUSTIC_OBSIDIAN',
+    description: 'Monolithic basalt obsidian architecture illuminated by golden honey water caustics, polished brass, and memory orb cyan.',
+    swatches: [
+      { name: 'Gold', color: '#f5a623' },
+      { name: 'Tungsten', color: '#ffd166' },
+      { name: 'Brass', color: '#8a7346' },
+      { name: 'Basalt', color: '#070709' }
+    ]
+  },
+  {
+    id: 'BL2049 // HOLO',
+    key: '8',
+    name: 'BL2049 // HOLO',
+    codename: 'JOI_HOLOGRAPHIC // RAIN_MEGACITY',
+    description: 'Rain-drenched brutalist LA concrete slate with towering holographic Joi magenta, neon rain cyan, and street warning yellow.',
+    swatches: [
+      { name: 'Magenta', color: '#ff007f' },
+      { name: 'Cyan', color: '#00f0ff' },
+      { name: 'Yellow', color: '#ffe600' },
+      { name: 'Slate', color: '#05070c' }
     ]
   }
 ];
@@ -87,11 +139,19 @@ export function ThemeModal({
       } else if (e.key === '1') {
         onSelectTheme('MIDNIGHT_V1.5');
       } else if (e.key === '2') {
-        onSelectTheme('MORNING_MIST_V1.0');
-      } else if (e.key === '3') {
         onSelectTheme('COMET_SUNSET_V1.0');
-      } else if (e.key === '4') {
+      } else if (e.key === '3') {
         onSelectTheme('NEO_TWYLITE_V1.0');
+      } else if (e.key === '4') {
+        onSelectTheme('NEON_CITY_AFTERWORK');
+      } else if (e.key === '5') {
+        onSelectTheme('MAINFRAME_NEURO_8086');
+      } else if (e.key === '6') {
+        onSelectTheme('BL2049 // VEGAS');
+      } else if (e.key === '7') {
+        onSelectTheme('BL2049 // WALLACE');
+      } else if (e.key === '8') {
+        onSelectTheme('BL2049 // HOLO');
       }
     };
 
@@ -133,7 +193,7 @@ export function ThemeModal({
           {/* ASCII Banner */}
           <div className="text-[11px] leading-tight text-[#33ff00] opacity-90 border-b border-[#33ff00]/40 pb-2.5">
             <div className="font-bold tracking-wider">╔═══════════════════════════════════════════════════════════════╗</div>
-            <div className="font-bold tracking-wider">║  &gt;&gt; SYSTEM COLOR MATRIX // SELECT ACTIVE PROTOCOL [1-4]       ║</div>
+            <div className="font-bold tracking-wider">║  &gt;&gt; SYSTEM COLOR MATRIX // SELECT ACTIVE PROTOCOL [1-8]       ║</div>
             <div className="font-bold tracking-wider">╚═══════════════════════════════════════════════════════════════╝</div>
             <div className="mt-2 text-[10px] text-[#33ff00]/70 flex justify-between">
               <span>DRIVER: PROTOCOL_STITCH_RENDERER_v4.2</span>
@@ -141,10 +201,12 @@ export function ThemeModal({
             </div>
           </div>
 
+
           {/* Theme List Grid */}
           <div className="grid grid-cols-1 gap-3">
             {THEME_OPTIONS.map((theme) => {
               const isActive = currentTheme === theme.id;
+
               return (
                 <div
                   key={theme.id}
@@ -160,7 +222,9 @@ export function ThemeModal({
                       <span className="px-1.5 py-0.5 border border-[#33ff00] bg-[#031405] text-[#33ff00] text-xs">
                         [{theme.key}]
                       </span>
-                      <span className="tracking-wide group-hover:underline">{theme.name}</span>
+                      <span className="tracking-wide group-hover:underline">
+                        {theme.name}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -179,7 +243,7 @@ export function ThemeModal({
                           isActive
                             ? 'border-[#33ff00] bg-transparent text-[#33ff00]'
                             : 'border-[#33ff00]/50 text-[#33ff00] group-hover:bg-[#33ff00] group-hover:text-[#031405]'
-                        } transition-colors`}
+                        } transition-colors cursor-pointer`}
                       >
                         {isActive ? 'CURRENT' : '[ APPLY ]'}
                       </button>
@@ -187,8 +251,12 @@ export function ThemeModal({
                   </div>
 
                   <div className="text-[11px] text-[#33ff00]/80">
-                    <span className="text-[#33ff00] font-semibold">{theme.codename}</span>
-                    <p className="text-[10px] text-[#33ff00]/60 mt-0.5">{theme.description}</p>
+                    <span className="text-[#33ff00] font-semibold">
+                      {theme.codename}
+                    </span>
+                    <p className="text-[10px] text-[#33ff00]/60 mt-0.5">
+                      {theme.description}
+                    </p>
                   </div>
 
                   {/* Swatches Preview */}
@@ -219,7 +287,7 @@ export function ThemeModal({
           <div className="border border-[#33ff00]/50 p-2.5 bg-[#041a07] flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <span className="font-bold text-[#33ff00]">&gt; PROMPT:</span>
-              <span className="text-[#33ff00]/90">PRESS [1-4] OR CLICK PROFILE TO EXECUTE MATRIX</span>
+              <span className="text-[#33ff00]/90">PRESS [1-8] OR CLICK PROFILE TO EXECUTE MATRIX</span>
               <span className="inline-block w-2 h-3.5 bg-[#33ff00] animate-pulse"></span>
             </div>
             <button

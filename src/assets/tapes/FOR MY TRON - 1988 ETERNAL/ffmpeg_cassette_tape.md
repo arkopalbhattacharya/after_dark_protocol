@@ -1,0 +1,1 @@
+ffmpeg -i input.mp3 -af "highpass=f=160,lowpass=f=7200,acompressor=threshold=-18dB:ratio=3:attack=15:release=100,chorus=0.5:0.9:50:0.4:0.25:2 -t" -ac 1 output_cassette_tape.mp3

@@ -20,64 +20,27 @@
     --color-primary: #1edce0;
     --color-primary-container: #52f9fd;
     --color-on-primary: #003738;
-    --color-secondary: #fdaf00;
-    --color-secondary-container: #ffd392;
-    --color-on-secondary: #432c00;
+    --color-secondary: #00a896;
+    --color-secondary-container: #52f9fd;
+    --color-on-secondary: #003738;
     --color-error: #ffb4ab;
     --color-error-base: #ff0033;
     --glow-color: rgba(30, 220, 224, 0.3);
-    --glow-secondary: rgba(253, 175, 0, 0.3);
+    --glow-secondary: rgba(0, 168, 150, 0.3);
     --border-primary: rgba(30, 220, 224, 0.3);
-    --border-secondary: rgba(253, 175, 0, 0.3);
+    --border-secondary: rgba(0, 168, 150, 0.3);
     --panel-scanline: rgba(30, 220, 224, 0.03);
-    --panel-scanline-secondary: rgba(253, 175, 0, 0.05);
+    --panel-scanline-secondary: rgba(0, 168, 150, 0.05);
     --scanline-color: rgba(0, 0, 0, 0.65);
     --scanline-border: #000;
     --scanline-border-shadow: rgba(0,0,0,1);
     --crt-refresh-color: rgba(30, 220, 224, 0.1);
-    --footer-bg: #cc8e00;
+    --footer-bg: #008080;
     --footer-text: #05070a;
-    --footer-border: rgba(253, 175, 0, 0.8);
+    --footer-border: #1edce0;
     --chromatic-aberration: 1px 0 2px rgba(255, 0, 0, 0.7), -1px 0 2px rgba(0, 255, 255, 0.7);
   }
 
-  [data-theme="MORNING_MIST_V1.0"] {
-    --bg-app: #f0f4f8;
-    --bg-base: #f6fafe;
-    --bg-surface: #ffffff;
-    --bg-panel: #ffffff;
-    --bg-header: #dfe3e7;
-    --bg-container-low: #f0f4f8;
-    --bg-container: #eaeef2;
-    --bg-container-high: #e4e9ed;
-    --bg-container-highest: #dfe3e7;
-    --text-on-surface: #171c1f;
-    --text-on-surface-variant: #3b494b;
-    --color-outline: #6a7a7b;
-    --color-outline-variant: #b9cacb;
-    --color-primary: #006970;
-    --color-primary-container: #00f0ff;
-    --color-on-primary: #ffffff;
-    --color-secondary: #7c5800;
-    --color-secondary-container: #feb700;
-    --color-on-secondary: #ffffff;
-    --color-error: #ba1a1a;
-    --color-error-base: #bd0042;
-    --glow-color: rgba(0, 105, 112, 0.2);
-    --glow-secondary: rgba(124, 88, 0, 0.2);
-    --border-primary: rgba(0, 105, 112, 0.35);
-    --border-secondary: rgba(124, 88, 0, 0.35);
-    --panel-scanline: rgba(0, 105, 112, 0.03);
-    --panel-scanline-secondary: rgba(124, 88, 0, 0.04);
-    --scanline-color: rgba(0, 0, 0, 0.04);
-    --scanline-border: #d1d9e0;
-    --scanline-border-shadow: rgba(0,0,0,0.08);
-    --crt-refresh-color: rgba(0, 240, 255, 0.05);
-    --footer-bg: #dfe3e7;
-    --footer-text: #171c1f;
-    --footer-border: rgba(0, 105, 112, 0.4);
-    --chromatic-aberration: none;
-  }
 
   [data-theme="COMET_SUNSET_V1.0"] {
     --bg-app: #140905;
@@ -153,6 +116,199 @@
     --footer-text: #eddcff;
     --footer-border: rgba(255, 0, 255, 0.8);
     --chromatic-aberration: 1px 0 2px rgba(255, 0, 255, 0.7), -1px 0 2px rgba(0, 238, 252, 0.7);
+  }
+
+  [data-theme="NEON_CITY_AFTERWORK"] {
+    --bg-app: #100320;
+    --bg-base: #150629;
+    --bg-surface: #1a0b2e;
+    --bg-panel: #231437;
+    --bg-header: #150629;
+    --bg-container-low: #231437;
+    --bg-container: #27183b;
+    --bg-container-high: #322346;
+    --bg-container-highest: #3d2e52;
+    --text-on-surface: #eddcff;
+    --text-on-surface-variant: #dcbed4;
+    --color-outline: #a4899d;
+    --color-outline-variant: #564052;
+    --color-primary: #8247ff;
+    --color-primary-container: #c4b5fd;
+    --color-on-primary: #1e004a;
+    --color-secondary: #fcee0a;
+    --color-secondary-container: #fff9a6;
+    --color-on-secondary: #3b3700;
+    --color-error: #ffb4ab;
+    --color-error-base: #93000a;
+    --glow-color: rgba(130, 71, 255, 0.55);
+    --glow-secondary: rgba(252, 238, 10, 0.45);
+    --border-primary: rgba(130, 71, 255, 0.55);
+    --border-secondary: rgba(252, 238, 10, 0.4);
+    --panel-scanline: rgba(130, 71, 255, 0.05);
+    --panel-scanline-secondary: rgba(252, 238, 10, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.65);
+    --scanline-border: #0a0115;
+    --scanline-border-shadow: rgba(0,0,0,1);
+    --crt-refresh-color: rgba(130, 71, 255, 0.15);
+    --footer-bg: #008080;
+    --footer-text: #dcfcff;
+    --footer-border: #00eefc;
+    --chromatic-aberration: 1px 0 3px rgba(130, 71, 255, 0.8), -1px 0 3px rgba(252, 238, 10, 0.7);
+  }
+
+  [data-theme="MAINFRAME_NEURO_8086"] {
+    --bg-app: #010a03;
+    --bg-base: #021206;
+    --bg-surface: #041c0a;
+    --bg-panel: #06260e;
+    --bg-header: #021407;
+    --bg-container-low: #031808;
+    --bg-container: #06290f;
+    --bg-container-high: #0b3815;
+    --bg-container-highest: #10481c;
+    --text-on-surface: #33ff33;
+    --text-on-surface-variant: #1fd655;
+    --color-outline: #257833;
+    --color-outline-variant: #195323;
+    --color-primary: #33ff00;
+    --color-primary-container: #66ff33;
+    --color-on-primary: #021004;
+    --color-secondary: #00ffaa;
+    --color-secondary-container: #00aa66;
+    --color-on-secondary: #021004;
+    --color-error: #ff0033;
+    --color-error-base: #ff1744;
+    --glow-color: rgba(51, 255, 0, 0.4);
+    --glow-secondary: rgba(0, 255, 170, 0.35);
+    --border-primary: rgba(51, 255, 0, 0.5);
+    --border-secondary: rgba(0, 255, 170, 0.4);
+    --panel-scanline: rgba(51, 255, 0, 0.05);
+    --panel-scanline-secondary: rgba(0, 255, 170, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.7);
+    --scanline-border: #0d3813;
+    --scanline-border-shadow: rgba(0,0,0,1);
+    --crt-refresh-color: rgba(51, 255, 0, 0.15);
+    --footer-bg: #031a08;
+    --footer-text: #33ff33;
+    --footer-border: #33ff00;
+    --chromatic-aberration: 1px 0 2px rgba(51, 255, 0, 0.8), -1px 0 2px rgba(0, 255, 170, 0.7);
+  }
+
+  [data-theme="BL2049 // VEGAS"],
+  [data-theme="BL2049_VEGAS"] {
+    --bg-app: #0d0704;
+    --bg-base: #120905;
+    --bg-surface: #190c06;
+    --bg-panel: #221008;
+    --bg-header: #120905;
+    --bg-container-low: #221008;
+    --bg-container: #2a140a;
+    --bg-container-high: #381c0f;
+    --bg-container-highest: #472414;
+    --text-on-surface: #fde2cd;
+    --text-on-surface-variant: #d8a483;
+    --color-outline: #885436;
+    --color-outline-variant: #4c2b18;
+    --color-primary: #ff6b00;
+    --color-primary-container: #ffaa40;
+    --color-on-primary: #2a0c00;
+    --color-secondary: #00e5c3;
+    --color-secondary-container: #76fbe6;
+    --color-on-secondary: #00382f;
+    --color-error: #ff5c5c;
+    --color-error-base: #d11a1a;
+    --glow-color: rgba(255, 107, 0, 0.45);
+    --glow-secondary: rgba(0, 229, 195, 0.35);
+    --border-primary: rgba(255, 107, 0, 0.45);
+    --border-secondary: rgba(0, 229, 195, 0.35);
+    --panel-scanline: rgba(255, 107, 0, 0.04);
+    --panel-scanline-secondary: rgba(0, 229, 195, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.65);
+    --scanline-border: #140803;
+    --scanline-border-shadow: rgba(0, 0, 0, 1);
+    --crt-refresh-color: rgba(255, 107, 0, 0.12);
+    --footer-bg: #4d1f04;
+    --footer-text: #ffd8b8;
+    --footer-border: #ff6b00;
+    --chromatic-aberration: 1px 0 2px rgba(255, 107, 0, 0.8), -1px 0 2px rgba(0, 229, 195, 0.6);
+  }
+
+  [data-theme="BL2049 // WALLACE"],
+  [data-theme="BL2049_WALLACE"] {
+    --bg-app: #070709;
+    --bg-base: #0b0c0f;
+    --bg-surface: #111217;
+    --bg-panel: #181921;
+    --bg-header: #0b0c0f;
+    --bg-container-low: #181921;
+    --bg-container: #1e202a;
+    --bg-container-high: #292c3a;
+    --bg-container-highest: #373a4c;
+    --text-on-surface: #f8edd8;
+    --text-on-surface-variant: #cbb896;
+    --color-outline: #8a7346;
+    --color-outline-variant: #473b22;
+    --color-primary: #f5a623;
+    --color-primary-container: #ffd166;
+    --color-on-primary: #362100;
+    --color-secondary: #d4af37;
+    --color-secondary-container: #fae596;
+    --color-on-secondary: #302300;
+    --color-error: #ff5555;
+    --color-error-base: #c41e1e;
+    --glow-color: rgba(245, 166, 35, 0.45);
+    --glow-secondary: rgba(212, 175, 55, 0.35);
+    --border-primary: rgba(245, 166, 35, 0.45);
+    --border-secondary: rgba(212, 175, 55, 0.35);
+    --panel-scanline: rgba(245, 166, 35, 0.04);
+    --panel-scanline-secondary: rgba(212, 175, 55, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.65);
+    --scanline-border: #0d0d10;
+    --scanline-border-shadow: rgba(0, 0, 0, 1);
+    --crt-refresh-color: rgba(245, 166, 35, 0.12);
+    --footer-bg: #2e2009;
+    --footer-text: #fae596;
+    --footer-border: #f5a623;
+    --chromatic-aberration: 1px 0 2px rgba(245, 166, 35, 0.8), -1px 0 2px rgba(0, 229, 255, 0.5);
+  }
+
+  [data-theme="BL2049 // HOLO"],
+  [data-theme="BL2049_HOLO"] {
+    --bg-app: #05070c;
+    --bg-base: #080b13;
+    --bg-surface: #0d121c;
+    --bg-panel: #131926;
+    --bg-header: #080b13;
+    --bg-container-low: #131926;
+    --bg-container: #192132;
+    --bg-container-high: #222c42;
+    --bg-container-highest: #2d3a56;
+    --text-on-surface: #f0f4fc;
+    --text-on-surface-variant: #a2b3cb;
+    --color-outline: #5a6f91;
+    --color-outline-variant: #2b374d;
+    --color-primary: #ff007f;
+    --color-primary-container: #ff6bb7;
+    --color-on-primary: #380019;
+    --color-secondary: #00f0ff;
+    --color-secondary-container: #8cf7ff;
+    --color-on-secondary: #00363b;
+    --color-error: #ff3860;
+    --color-error-base: #cc0033;
+    --glow-color: rgba(255, 0, 127, 0.5);
+    --glow-secondary: rgba(0, 240, 255, 0.45);
+    --border-primary: rgba(255, 0, 127, 0.5);
+    --border-secondary: rgba(0, 240, 255, 0.45);
+    --panel-scanline: rgba(255, 0, 127, 0.04);
+    --panel-scanline-secondary: rgba(0, 240, 255, 0.04);
+    --scanline-color: rgba(0, 0, 0, 0.65);
+    --scanline-border: #080b12;
+    --scanline-border-shadow: rgba(0, 0, 0, 1);
+    --crt-refresh-color: rgba(255, 0, 127, 0.12);
+    --footer-bg: #2b0015;
+    --footer-text: #ffb0d8;
+    --footer-border: #ff007f;
+    --chromatic-aberration: 1px 0 3px rgba(255, 0, 127, 0.8), -1px 0 3px rgba(0, 240, 255, 0.7);
   }
 
   body {
@@ -437,6 +593,23 @@
     animation: blink 1s step-end infinite;
     vertical-align: middle;
     margin-left: 4px;
+  }
+
+  @keyframes cipher-shake-5 {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-14px); }
+    20% { transform: translateX(14px); }
+    30% { transform: translateX(-12px); }
+    40% { transform: translateX(12px); }
+    50% { transform: translateX(-10px); }
+    60% { transform: translateX(10px); }
+    70% { transform: translateX(-8px); }
+    80% { transform: translateX(8px); }
+    90% { transform: translateX(-4px); }
+  }
+
+  .cipher-shake-5 {
+    animation: cipher-shake-5 0.75s ease-in-out forwards;
   }
 
   @keyframes blink {

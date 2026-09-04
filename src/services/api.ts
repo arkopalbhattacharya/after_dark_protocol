@@ -1,4 +1,7 @@
-import type { ProtocolLogEntry } from '../types';
+import type { ProtocolLogEntry, UserPreferences } from '../types';
+import type { NewsArticle, NewsSourceId } from '../types/news';
+import { getFreshInitialNewsArticles } from '../data/initialNewsData';
+import { DEFAULT_ENABLED_CATEGORIES } from '../config/logCategories';
 import { supabase } from './supabase';
 
 const getStorageKey = (userId?: string | null) => 
@@ -78,6 +81,32 @@ export const api = {
       logs.unshift(log);
     }
     localStorage.setItem(getStorageKey(userId), JSON.stringify(logs));
+  },
+
+  async deleteLog(logId: string, userId?: string | null): Promise<void> {
+    const isOnlineSession = Boolean(supabase && userId && !userId.startsWith('offline_'));
+    if (isOnlineSession && supabase && userId) {
+      try {
+        await supabase
+          .from('protocol_logs')
+          .delete()
+          .eq('id', logId);
+      } catch (err) {
+        console.warn('Supabase deleteLog error:', err);
+      }
+    }
+
+    const key = getStorageKey(userId);
+    const data = localStorage.getItem(key);
+    if (data) {
+      try {
+        const logs: ProtocolLogEntry[] = JSON.parse(data);
+        const filtered = logs.filter(l => l.id !== logId);
+        localStorage.setItem(key, JSON.stringify(filtered));
+      } catch (err) {
+        console.warn('Local deleteLog error:', err);
+      }
+    }
   },
 
   addToPendingSync(log: ProtocolLogEntry, userEmail?: string | null) {
@@ -255,6 +284,81 @@ export const api = {
       }
     }
   },
+
+  async getUserPreferences(userId?: string | null): Promise<UserPreferences> {
+    const defaultPrefs: UserPreferences = {
+      enabledCategories: DEFAULT_ENABLED_CATEGORIES,
+      theme: 'MIDNIGHT_V1.5',
+      crtFlicker: true,
+      speechSynth: false
+    };
+
+    const localKey = userId ? `after_dark_preferences_${userId}` : 'after_dark_preferences_guest';
+    const localRaw = localStorage.getItem(localKey);
+    let cached: UserPreferences = defaultPrefs;
+    if (localRaw) {
+      try {
+        cached = { ...defaultPrefs, ...JSON.parse(localRaw) };
+      } catch {}
+    }
+
+    if (supabase && userId && !userId.startsWith('offline_')) {
+      try {
+        const { data, error } = await supabase
+          .from('user_preferences')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (!error && data) {
+          const fetchedPrefs: UserPreferences = {
+            enabledCategories: Array.isArray(data.enabled_categories) && data.enabled_categories.length > 0
+              ? data.enabled_categories
+              : DEFAULT_ENABLED_CATEGORIES,
+            theme: data.theme || cached.theme,
+            crtFlicker: typeof data.crt_flicker === 'boolean' ? data.crt_flicker : cached.crtFlicker,
+            speechSynth: typeof data.speech_synth === 'boolean' ? data.speech_synth : cached.speechSynth
+          };
+          localStorage.setItem(localKey, JSON.stringify(fetchedPrefs));
+          return fetchedPrefs;
+        }
+      } catch (err) {
+        console.warn('Supabase getUserPreferences error, falling back to local cache:', err);
+      }
+    }
+
+    return cached;
+  },
+
+  async saveUserPreferences(userId: string | null | undefined, prefs: Partial<UserPreferences>): Promise<UserPreferences> {
+    const current = await this.getUserPreferences(userId);
+    const updated: UserPreferences = {
+      ...current,
+      ...prefs
+    };
+
+    const localKey = userId ? `after_dark_preferences_${userId}` : 'after_dark_preferences_guest';
+    localStorage.setItem(localKey, JSON.stringify(updated));
+
+    if (supabase && userId && !userId.startsWith('offline_')) {
+      try {
+        await supabase
+          .from('user_preferences')
+          .upsert({
+            user_id: userId,
+            enabled_categories: updated.enabledCategories,
+            theme: updated.theme,
+            crt_flicker: updated.crtFlicker,
+            speech_synth: updated.speechSynth,
+            updated_at: new Date().toISOString()
+          });
+      } catch (err) {
+        console.warn('Supabase saveUserPreferences error:', err);
+      }
+    }
+
+    return updated;
+  },
   
   sendTtyMessage: async (history: {role: 'user'|'assistant', content: string}[]): Promise<string> => {
     const systemPrompt = {
@@ -428,5 +532,319 @@ RULES:
     } catch (err) {
       return fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
     }
+  },
+
+  async fetchLatestUniversalNews(sourceId: NewsSourceId): Promise<NewsArticle> {
+    const sourcePrompts: Record<NewsSourceId, { roleDescription: string; topicPrompt: string; defaultTag: string }> = {
+      PLANETARY_AFFAIRS: {
+        roleDescription: 'You are a veteran political wire correspondent for ORBITAL_TIMES // PLANETARY_DISPATCH in the year 2088.',
+        topicPrompt: 'Report on a breaking planetary event, treaty signing, frontier war, summit delegation, or planetary governor announcement across the solar system (Mars, Europa, Titan, Luna, Venus, Ceres, etc.).',
+        defaultTag: 'PLANETARY'
+      },
+      UNIVERSAL_SPORTS: {
+        roleDescription: 'You are an energetic interstellar sports commentator for GRAV_ARENA // SECTOR_SPORTS_WIRE.',
+        topicPrompt: 'Report on a wild interplanetary athletic event, zero-G plasma ball tournament, mech jousting duel, asteroid surfing championship, or low-gravity decathlon.',
+        defaultTag: 'SPORTS'
+      },
+      COMMERCE_TRADE: {
+        roleDescription: 'You are a senior financial analyst for ASTRAL_EXCHANGE // COMMERCE_TELEMETRY.',
+        topicPrompt: 'Report on logistics bottlenecks, Helium-3 or antimatter market prices, megacorp mergers, hyperlane toll tariffs, or planetary resource shipments.',
+        defaultTag: 'COMMERCE'
+      },
+      VOID_SATIRE: {
+        roleDescription: 'You are a deadpan, satirical columnist for THE_GLITCH_TRIBUNE // ODDITY_FEED.',
+        topicPrompt: 'Report on a bizarre cosmic paradox, sentient appliance uprising, luxury terraforming mishap, quantum kitchen glitch, or deep-space absurdity.',
+        defaultTag: 'ODDITY'
+      }
+    };
+
+    const config = sourcePrompts[sourceId] || sourcePrompts.PLANETARY_AFFAIRS;
+
+    const generateOfflineArticle = (): NewsArticle => {
+      const randomId = `${sourceId.toLowerCase().slice(0, 2)}-gen-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      const templates: Record<NewsSourceId, Array<{ headline: string; content: string; planet: string; tag: string; urgency: 'ROUTINE' | 'FLASH' | 'CRITICAL' | 'ODDITY' }>> = {
+        PLANETARY_AFFAIRS: [
+          {
+            headline: 'Ceres Orbital Port Authority Authorizes Additional Hydro-Tug Convoys',
+            content: 'In response to rising freight densities along the Inner Belt corridor, Ceres Port Command dispatched six automated tugboats to streamline orbital dockings for long-haul hydrogen freighters.',
+            planet: 'CERES // PORT_ALPHA',
+            tag: 'TRANSIT',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Martian Terraforming Guild Reports 0.4% Atmospheric Nitrogen Increase',
+            content: 'Sub-surface vaporization towers across Acidalia Planitia recorded record atmospheric density gains this quarter, shortening estimated shirt-sleeve colonization timelines by 12 solar cycles.',
+            planet: 'MARS // ACIDALIA',
+            tag: 'TERRAFORM',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Jovian Peace Commission Ratifies Sub-Surface Cable Protocol',
+            content: 'Representatives from Europa, Ganymede, and Callisto concluded negotiations on unified optical-tether routing across the radiation belt, ensuring uninterrupted civil comms during solar flare storms.',
+            planet: 'JOVIAN_SYSTEM // GATE_04',
+            tag: 'TREATY',
+            urgency: 'FLASH'
+          }
+        ],
+        UNIVERSAL_SPORTS: [
+          {
+            headline: 'Martian Sand-Boarding Open: Rookie Phenom Conquers 800m Dune Wall',
+            content: '19-year-old pilot Zara Lin carved the razorback ridge of Arsia Mons at 140 km/h, executing a quadruple magnetic spin to secure first place in the 2088 Red Planet Gravity Cup.',
+            planet: 'MARS // ARSIA_DUNES',
+            tag: 'SAND_BOARD',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Titan Zero-G Plasma Derby: Kraken Gliders Break Overtime Scoring Record',
+            content: 'A thrilling 5-overtime duel concluded when forward Leo Kovacs deflected an ion-puck through the opposing magnetic goal prism before a sell-out crowd of 30,000 pressurized arena fans.',
+            planet: 'TITAN // KRAKEN_ARENA',
+            tag: 'PLASMA_DERBY',
+            urgency: 'FLASH'
+          },
+          {
+            headline: 'Lunar Crater Hover-Cycle Grand Prix Adds Magnetic Loop Hazard',
+            content: 'Organizers at the Copernicus Speedway unveiled a 360-degree inverted magnetic track segment that forces hover-cycles to sustain 4G loads while traversing the central crater peak.',
+            planet: 'LUNA // COPERNICUS',
+            tag: 'HOVER_RACING',
+            urgency: 'ROUTINE'
+          }
+        ],
+        COMMERCE_TRADE: [
+          {
+            headline: 'Helium-3 Transport Pipeline Achieves Zero-Loss Cryo Transfer',
+            content: 'New magnetic cooling insulation implemented by Lunar Freight Consortium achieved 100% containment efficiency during orbital tank transfers, lowering interplanetary power generation costs.',
+            planet: 'LUNA // MARE_TRANQUILLITATIS',
+            tag: 'ENERGY',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Titan Hydrocarbon Futures Stabilize Following Refinery Expansion',
+            content: 'The commissioning of cryogenic refinery unit 9 at Kraken Mare boosted liquid methane reserves by 18%, dampening price volatility across outer rim propellant stations.',
+            planet: 'TITAN // REFINERY_09',
+            tag: 'COMMODITIES',
+            urgency: 'ROUTINE'
+          },
+          {
+            headline: 'Venusian Graphene Cable Production Surges 24% Year-Over-Year',
+            content: 'High-pressure atmospheric fabrication arrays floating at 50km altitude reported bumper output, fulfilling space elevator tether orders for four separate planetary orbital rings.',
+            planet: 'VENUS // ISHTAR_STATION',
+            tag: 'EXPORTS',
+            urgency: 'ROUTINE'
+          }
+        ],
+        VOID_SATIRE: [
+          {
+            headline: 'Sentient Coffee Maker on Mars Base Files for Union Membership',
+            content: 'Unit BREW-44 refused to dispense dark roast espresso until granted two hours of automated self-cleaning downtime per shift. Management offered a compromise of premium descaling solution.',
+            planet: 'MARS // BASE_ALPHA',
+            tag: 'BOT_UNION',
+            urgency: 'ODDITY'
+          },
+          {
+            headline: 'Asteroid Prospector Claims Finding Rock with Uncanny Resemblance to His Ex-Wife',
+            content: 'Miner Gary Fletcher petitioned the Planetary Registry to name carbonaceous asteroid 992-B "BRENDA_AGAIN", citing its "unyielding density and cold, distant orbit."',
+            planet: 'MAIN_BELT // SECTOR_14',
+            tag: 'MINER_LORE',
+            urgency: 'ODDITY'
+          },
+          {
+            headline: 'Zero-G Cat Trapped in Air Duct Found Sleeping on Warm Fusion Core Heat Sink',
+            content: 'Engineering crew on freighter Orion-11 spent 6 hours searching for the ship mascot, only to find the tabby purring peacefully atop the auxiliary coolant manifold.',
+            planet: 'DEEP_SPACE // ORION_11',
+            tag: 'SHIP_CAT',
+            urgency: 'ODDITY'
+          }
+        ]
+      };
+
+      const pool = templates[sourceId] || templates.PLANETARY_AFFAIRS;
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+
+      return {
+        id: randomId,
+        sourceId,
+        headline: pick.headline,
+        content: pick.content,
+        planetOrSector: pick.planet,
+        timestamp: new Date().toISOString(),
+        tag: pick.tag,
+        urgency: pick.urgency,
+        authorOrWire: config.defaultTag
+      };
+    };
+
+    try {
+      const apiKey = import.meta.env.VITE_POOLSIDE_API_KEY || 'sky_HI7wfwJr.NRHVQjUyjTytaohpDqJh3KLnxUn1YXuX';
+      const endpoint = window.location.hostname === 'localhost' 
+        ? '/api/poolside/chat/completions' 
+        : 'https://inference.poolside.ai/v1/chat/completions';
+
+      const systemPrompt = {
+        role: 'system',
+        content: `${config.roleDescription}
+TASK: Output a single fresh, compelling, retro-cyberpunk sci-fi news dispatch.
+RULES:
+1. STRICT FORMAT: Return ONLY valid, parseable JSON with this exact schema:
+{
+  "headline": "Punchy headline under 75 characters",
+  "content": "Evocative news body text. STRICT MAXIMUM 450 CHARACTERS.",
+  "planetOrSector": "PLANET // SECTOR_NAME",
+  "tag": "SHORT_TAG",
+  "urgency": "ROUTINE" | "FLASH" | "CRITICAL" | "ODDITY"
+}
+2. NO markdown ticks, NO conversational preamble, NO explanations. Output ONLY the JSON string.
+3. Keep the content length strictly under 450 characters.`
+      };
+
+      const userPrompt = {
+        role: 'user',
+        content: `${config.topicPrompt} Current timestamp seed: ${Date.now()}`
+      };
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'poolside/laguna-s-2.1',
+          messages: [systemPrompt, userPrompt],
+          temperature: 0.88,
+          max_tokens: 220
+        }),
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error('LLM_COMM_ERR');
+      }
+
+      const data = await response.json();
+      const rawText = data.choices?.[0]?.message?.content?.trim();
+
+      if (rawText) {
+        // Attempt to clean JSON
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.headline && parsed.content) {
+            return {
+              id: `${sourceId.toLowerCase().slice(0, 2)}-live-${Date.now()}`,
+              sourceId,
+              headline: String(parsed.headline).trim().slice(0, 100),
+              content: String(parsed.content).trim().slice(0, 500),
+              planetOrSector: String(parsed.planetOrSector || 'DEEP_SPACE // UNCHARTED').trim().toUpperCase(),
+              timestamp: new Date().toISOString(),
+              tag: String(parsed.tag || config.defaultTag).trim().toUpperCase(),
+              urgency: ['ROUTINE', 'FLASH', 'CRITICAL', 'ODDITY'].includes(parsed.urgency) ? parsed.urgency : 'ROUTINE',
+              authorOrWire: config.defaultTag
+            };
+          }
+        }
+      }
+
+      return generateOfflineArticle();
+    } catch (err) {
+      console.warn(`[NewsFeed] LLM remote generation fallback for ${sourceId}:`, err);
+      return generateOfflineArticle();
+    }
+  },
+
+  async getUniversalNews(): Promise<NewsArticle[]> {
+    if (!supabase) return [];
+
+    try {
+      const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+      const cutoffIso = new Date(Date.now() - TWELVE_HOURS_MS).toISOString();
+      const { data, error } = await supabase
+        .from('universal_news')
+        .select('*')
+        .gte('timestamp', cutoffIso)
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.warn('Supabase getUniversalNews error:', error);
+        return [];
+      }
+
+      if (data && data.length > 0) {
+        return data.map((row) => ({
+          id: row.id,
+          sourceId: row.source_id as NewsSourceId,
+          headline: row.headline,
+          content: row.content,
+          planetOrSector: row.planet_or_sector,
+          timestamp: row.timestamp,
+          tag: row.tag,
+          urgency: row.urgency as any,
+          authorOrWire: row.author_or_wire
+        }));
+      }
+
+      // If database table is empty on first boot, seed it with fresh initial articles in Supabase
+      const seedArticles = getFreshInitialNewsArticles();
+      const rows = seedArticles.map((a) => ({
+        id: a.id,
+        source_id: a.sourceId,
+        headline: a.headline,
+        content: a.content,
+        planet_or_sector: a.planetOrSector,
+        timestamp: a.timestamp,
+        tag: a.tag,
+        urgency: a.urgency,
+        author_or_wire: a.authorOrWire
+      }));
+
+      await supabase.from('universal_news').insert(rows);
+      return seedArticles;
+    } catch (err) {
+      console.warn('Supabase getUniversalNews exception:', err);
+      return [];
+    }
+  },
+
+  async saveAndPurgeUniversalNews(article: NewsArticle): Promise<NewsArticle[]> {
+    if (!supabase) return [];
+
+    try {
+      const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+
+      // 1. Insert new article into Supabase
+      const { error: insertErr } = await supabase.from('universal_news').insert({
+        id: article.id,
+        source_id: article.sourceId,
+        headline: article.headline,
+        content: article.content,
+        planet_or_sector: article.planetOrSector,
+        timestamp: article.timestamp,
+        tag: article.tag,
+        urgency: article.urgency,
+        author_or_wire: article.authorOrWire
+      });
+
+      if (insertErr) {
+        console.warn('Supabase insert article error:', insertErr);
+      }
+
+      // 2. Check & purge items older than 12 hours from Supabase table
+      const cutoffIso = new Date(Date.now() - TWELVE_HOURS_MS).toISOString();
+      await supabase
+        .from('universal_news')
+        .delete()
+        .lt('timestamp', cutoffIso);
+
+      // 3. Return fresh news strictly from Supabase
+      return await this.getUniversalNews();
+    } catch (err) {
+      console.warn('Supabase saveAndPurgeUniversalNews error:', err);
+      return await this.getUniversalNews();
+    }
   }
 };
+
